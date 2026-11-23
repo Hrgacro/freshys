@@ -718,7 +718,7 @@ const T = {
     forDog: X("How much for your dog?", "Koliko smije tvoj pas?"),
     // a recipe that is a meal: the owner chooses how it is fed, and the amount is in litres, pieces or days, never "1/20 of the recipe"
     forDogM: X("How much for your dog?", "Koliko za tvog psa?"),
-    cookK: X("Cook ahead and freeze", "Kuhaj unaprijed i zamrzni"),
+    cookK: X("How many days are you cooking for?", "Za koliko dana kuhaš?"),
     cookO: [X("1 recipe", "1 recept"), X("7 days", "7 dana"), X("30 days", "30 dana"), X("Other", "Drugo")],
     cookAny: X("Type any number of days.", "Upiši bilo koji broj dana."),
     cookSteps: X("The amounts in the steps are for one recipe.", "Količine u koracima vrijede za jedan recept."),
@@ -741,7 +741,7 @@ const T = {
     vnOver: X("The days the vet gave have passed.", "Dani koje je rekao veterinar su prošli."),
     vnWhile: X("While the vet's recommendation lasts, the vet's amount is the one that counts.", "Dok traje preporuka veterinara, vrijedi količina koju je on rekao."),
     feedL: X("How will you feed it?", "Kako ga želiš hraniti?"),
-    feedO: [X("Whole meal", "Cijeli obrok"), X("Half and half", "Pola-pola"), X("With kibble", "Uz granule")],
+    feedO: [X("Only this food", "Samo ova hrana"), X("Half and half", "Pola-pola"), X("With kibble", "Uz granule")],
     feedD: [X("Only home-cooked food", "Samo domaća hrana"), X("Half home-cooked, half kibble", "Pola domaće hrane, pola granula"), X("A little home-cooked food on top of the kibble", "Malo domaće hrane na granule")],
     actS: [X("not very active", "malo se kreće"), X("normally active", "uobičajeno se kreće"), X("sport or work", "sport ili rad")],
     chg: X("Change", "Promijeni"),
@@ -1572,6 +1572,7 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
     // shopping list
     addList: X("Add to shopping list", "Dodaj na popis za kupnju"),
     onList: X("On the shopping list", "Na popisu za kupnju"),
+    updList: X("Update the shopping list", "Ažuriraj popis za kupnju"),
     list: X("Shopping list", "Popis za kupnju"),
     lLead: X("What to buy, and where. The list is saved only in this browser.", "Što kupiti i gdje. Popis se sprema samo u ovom pregledniku."),
     lFor: X("For", "Za"),
@@ -1677,6 +1678,21 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
     soonB: X("soon", "uskoro"),
     subNow: X("Because quality starts in the bowl.", "Jer kvaliteta počinje iz zdjele."),
     ctaCalc: X("How much to feed?", "Koliko hrane?"),
+    planCta: X("Plan for the week", "Plan za tjedan"),
+    planH: X("Plan for the week", "Plan za tjedan"),
+    planLead: X("Pick one dish, get the shopping list and cook once for the whole week.", "Odaberi jedno jelo, dobij popis za kupnju i skuhaj jednom za cijeli tjedan."),
+    planS1: X("Your dog", "Tvoj pas"),
+    planS2: X("Pick a dish", "Odaberi jelo"),
+    planS3: X("Shopping list", "Popis za kupnju"),
+    planS4: X("Cooking", "Kuhanje"),
+    planPup: X("The plan for the week is for adult dogs.", "Plan za tjedan je za odrasle pse."),
+    planFeedQ: X("The plan is for a dog that eats only home-cooked food, or half and half. Choose one:", "Plan je za psa koji jede samo domaću hranu ili pola-pola. Odaberi:"),
+    planPick: X("Pick a dish and the shopping list and cooking show up below.", "Odaberi jelo, pa se ispod pojave popis za kupnju i kuhanje."),
+    planMult: X(" The amounts below are already multiplied.", " Količine ispod su već pomnožene."),
+    planOpenL: X("Open the shopping list", "Otvori popis za kupnju"),
+    planWhen: X("Cook on one day of the week, for example on Sunday.", "Kuhaj jedan dan u tjednu, na primjer u nedjelju."),
+    planOpen: X("Open the recipe with the steps", "Otvori recept s koracima"),
+    planVet: X("These dishes haven't been checked as a complete diet: if your dog eats them every day, ask your vet about vitamins and minerals.", "Ova jela nisu provjerena kao cjelovita prehrana: ako ih pas jede svaki dan, pitaj veterinara za vitamine i minerale."),
     weekSubNow: X("Cook them at home. Each recipe says how much your dog can have.", "Skuhaj ih kod kuće. Uz svaki recept piše koliko smije tvoj pas."),
     twoHNow: X("Cook it at home. Soon, we can cook it for you.", "Skuhaj kod kuće. Uskoro možemo kuhati i mi."),
     twoSubNow: X("At home, these dishes are toppers. The ones from our kitchen will be complete meals.", "Kod kuće su ova jela dodatak hrani. Ona iz naše kuhinje bit će cijeli obroci."),
@@ -1712,7 +1728,7 @@ T.faqNow = T.faq.map(([q, a], i): [LS, LS] =>
 /* age: 0 puppy under 4 months, 1 puppy 4 months to adult, 2 adult. act: 0 not much / gains weight easily, 1 normal, 2 light work or sport */
 type Dog = { name: string; kg: number; age: number; neut: boolean; act: number; no: string[]; lose?: boolean }
 type Ord = { step: number; sel: Record<string, boolean>; plan: number; street: string; city: string; zip: string; day: number; done: boolean }
-type Page = { p: "home" | "recipes" | "recipe" | "order" | "build" | "list" | "dog" | "plus" | "acct" | "privacy"; id?: string }
+type Page = { p: "home" | "recipes" | "recipe" | "order" | "build" | "list" | "dog" | "plus" | "acct" | "privacy" | "plan"; id?: string }
 
 /* Dog profile ("Moj pas"). Kept only in this browser. Breeds: FCI nomenclature, Croatian names from HKS,
    weights only where the FCI breed standard gives them. Body shape: WSAVA body condition score in four groups. */
@@ -2958,7 +2974,7 @@ const ingText = (i: Ing, k: number, lang: Lang) => tok((k > 1 && i.n2 ? i.n2 : i
 /* ---- cooking ahead: a catalogue recipe made k times. Its ingredient lines are text, so only a leading amount in a real
    measure (g, kg, ml, l, spoons) is multiplied; any other line that has a number gets "k ×" in front, so nothing is ever
    half-multiplied (a tin with its weight in brackets, an egg, milligrams of calcium). ---- */
-const COOK_MAX = 365
+const COOK_MAX = 30
 const GLY: Record<string, number> = { "¼": 0.25, "½": 0.5, "¾": 0.75, "⅓": 1 / 3, "⅔": 2 / 3, "⅛": 0.125 }
 const QN = "(?:\\d+(?:[.,]\\d+)?\\s?[¼½¾⅓⅔⅛]?|[¼½¾⅓⅔⅛])"
 const SC_RE = new RegExp("^(" + QN + ")(?:\\s?[–-]\\s?(" + QN + "))?\\s?(kg|g|ml|l|tbsp|tsp|žlica|žlice|žličica|žličice)(?![a-zA-Zčćžšđ])")
@@ -3099,6 +3115,10 @@ const DAYC: Record<number, [string, string, string, number, number, string[], nu
     4948: ["Chicken & Brown Rice Dog Kibble", "Granule od piletine i smeđe riže", "nwNBGNcPK7aT7zlww4Y28Va3J4.jpg", 1541, 890, ["chicken", "eggs", "grains"], 75, 7, 1],
 }
 const DAY_HOME = [4941, 3091, 3628, 669, 2852, 813]
+/* the week's plan: five whole-day dishes without the oven (chicken, beef, turkey with liver, and two big batches: turkey and beef);
+   when the dog can't have one, the next from the list */
+const WPLAN_POOL = [3628, 813, 4941, 2852, 3091, 501, 4927, 2352, 1033, 2560, 2189, 1306, 669, 533, 284]
+const WPLAN_DAYS = 7
 /* Light dishes: similar whole-day dishes, best first (same meat, same vegetables, then the same kind of dish) */
 const DAY_SWAP: Record<string, number[]> = {
     "turkey-apple": [501, 533, 4941, 1033],
@@ -3283,6 +3303,7 @@ const parseHash = (h: string): Page | null => {
     if (s === "order") return { p: "order" }
     if (s === "build" || s === "slozi") return { p: "build" }
     if (s === "list" || s === "popis") return { p: "list" }
+    if (s === "plan" || s === "tjedan" || s === "plan-za-tjedan") return { p: "plan" }
     if (s === "dog" || s === "moj-pas" || s === "pets" || s === "ljubimci") return { p: "dog" }
     if (s === "plus") return { p: "plus" }
     if (s === "racun" || s === "account" || s === "prijava" || s === "login") return { p: "acct" }
@@ -3600,7 +3621,9 @@ const buyAmount = (b: BIng, g: number, lang: Lang) =>
     b.k === "jaja" ? (lang === "en" ? Math.ceil(g / EGG_G) + (Math.ceil(g / EGG_G) === 1 ? " egg" : " eggs") : Math.ceil(g / EGG_G) + " " + plHr(Math.ceil(g / EGG_G), ["jaje", "jaja", "jaja"])) : (lang === "en" ? "about " : "oko ") + nf(Math.ceil((g * b.waste) / 10) * 10, lang) + " g"
 
 /* shopping list kept in this browser only */
-type LItem = { id: string; t: "b"; keys: string[]; days: number; g: number[] } | { id: string; t: "r"; rid: string }
+type LItem = { id: string; t: "b"; keys: string[]; days: number; g: number[] } | { id: string; t: "r"; rid: string; m?: number }
+type LItemR = Extract<LItem, { t: "r" }>
+const LIST_M_MAX = 999
 type LState = { items: LItem[]; done: Record<string, boolean> }
 const LIST_KEY = "fz-list"
 const readList = (): LState => {
@@ -3610,7 +3633,7 @@ const readList = (): LState => {
             const ok = (it: any) =>
                 it &&
                 typeof it.id === "string" &&
-                ((it.t === "r" && typeof it.rid === "string") ||
+                ((it.t === "r" && typeof it.rid === "string" && (it.m === undefined || (Number.isInteger(it.m) && it.m >= 1 && it.m <= LIST_M_MAX))) ||
                     (it.t === "b" && Array.isArray(it.keys) && it.keys.length > 0 && it.keys.every((k: string) => !!BI[k]) && Array.isArray(it.g) && it.g.length === it.keys.length && Number.isInteger(it.days) && it.days >= 1 && it.days <= B_MAX))
             return { items: v.items.filter(ok), done: v.done && typeof v.done === "object" ? v.done : {} }
         }
@@ -3947,6 +3970,9 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-feed{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
 .fz-feed>span{font-size:14px;font-weight:600;color:var(--ink2)}
 .fz-cook{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.fz-cookd{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.fz-cookd .v{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.fz-cook .fz-cookr{margin:14px 0 8px}
 .fz-cook .k2,.fz-vn .k2{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px}
 .fz-cook-p{margin-top:14px}
 .fz-cook-p p{font-size:15px;line-height:1.45;color:var(--ink3);margin-top:8px}
@@ -3976,6 +4002,10 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-box .mini span{min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
 .fz-box .fz-seg{margin-top:10px}
 .fz-box .fz-seg button{padding:7px 12px;font-size:14px}
+.fz-feed{container-type:inline-size}
+.fz-feed .fz-seg{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
+.fz-feed .fz-seg button,.fz-box .fz-feed .fz-seg button{justify-content:center;text-align:center;line-height:1.25;padding:9px 8px}
+@container (max-width:419px){.fz-feed .fz-seg{grid-template-columns:1fr}.fz-feed .fz-seg button,.fz-box .fz-feed .fz-seg button{justify-content:flex-start;text-align:left;padding:10px 14px;font-size:15px}}
 .fz-box .ln{display:flex;align-items:center;gap:10px;font-size:15px;padding:9px 0;border-bottom:1px solid var(--line)}
 .fz-box .ln:last-child{border-bottom:0;padding-bottom:0}
 .fz-box .fine{font-size:13px;color:var(--ink2);margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
@@ -3988,6 +4018,32 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-ded .fz-seg button[aria-pressed="true"]{background:var(--g0);color:var(--g);box-shadow:none}
 .fz-ded .fz-hint{margin:-6px 0 12px}
 .fz-feedr{display:grid;gap:8px}
+.fz-wk{display:grid;gap:18px;max-width:760px;margin:0 auto 72px}
+.fz-pstep{position:relative;border-radius:28px;padding:26px 26px 28px;background:var(--card);box-shadow:var(--sh)}
+.fz-pstep>h2{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:var(--ink);margin:0 0 18px}
+.fz-pstep>h2 .n{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--g);color:#fff;font-size:15px;font-weight:700}
+.fz-pstep .fz-pf-ban{margin:0 0 18px}
+.fz-wk-q{margin:2px 0 10px}
+.fz-ppick{display:grid;gap:8px}
+.fz-ppk.fz-dayr{padding:10px 12px;border-top:0;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .2s,background-color .2s}
+.fz-ppk.fz-dayr[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--g);background:#F6FAF6}
+.fz-ppk>i{flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px #B9B2A4;transition:box-shadow .2s}
+.fz-ppk[aria-checked="true"]>i{box-shadow:inset 0 0 0 7px var(--g)}
+.fz-wk-p{font-size:16px;line-height:1.5;color:var(--ink3);margin:0 0 10px}
+.fz-wk-p b{color:var(--ink);font-weight:700}
+.fz-wk-p.w{color:var(--orInk)}
+.fz-wk-hint{text-align:center;margin:0}
+.fz-wk-half{margin:14px 0 0;font-size:15px}
+.fz-wk .fz-grp:last-of-type{border-bottom:0}
+.fz-pl{list-style:none;margin:8px 0 0;padding:0}
+.fz-pl li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15.5px;line-height:1.4;color:var(--ink)}
+.fz-pl li:first-child{border-top:0}
+.fz-pl .fz-em{flex:none;width:22px;height:22px}
+.fz-pl .dot{flex:none;width:6px;height:6px;border-radius:50%;background:#B9B2A4;margin:8px 8px 0}
+.fz-pl .nt{display:block;font-size:13.5px;margin-top:3px;line-height:1.35}
+.fz-pl .nt--w{color:var(--orInk)}
+.fz-wk .fz-btns .fz-btn{display:inline-flex;align-items:center;gap:8px}
+@media (max-width:560px){.fz-pstep{padding:22px 18px 24px;border-radius:24px}.fz-pstep>h2{font-size:19px}}
 .fz-feedr button{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .2s,background-color .2s}
 .fz-feedr button i{flex:none;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 2px #B9B2A4;transition:box-shadow .2s}
 .fz-feedr button[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--g);background:#F6FAF6}
@@ -5376,7 +5432,8 @@ export default function FreshysSite(props: Props) {
     const [cat, setCat] = useState("all")
     const [batch, setBatch] = useState(1)
     const [feed, setFeedS] = useState(0) // home-cooked food is 0 all of the day's food, 1 half, 2 ten per cent
-    const [cook, setCookS] = useState(0) // cooking ahead: 0 one recipe, otherwise for this many days
+    const [cook, setCookS] = useState(1) // cooking ahead for this many days (1–30)
+    const [planId, setPlanIdS] = useState<number | null>(null) // the dish picked in the week's plan
     const [cookOth, setCookOth] = useState(false)
     const [cookIn, setCookIn] = useState<string | null>(null) // the days field while it is being typed in
     const [bOther, setBOther] = useState(false) // own recipes: "More" than a double batch
@@ -5483,7 +5540,7 @@ export default function FreshysSite(props: Props) {
     }, [page.p, breeds])
     const isCat = page.p === "recipe" && !!page.id && page.id.startsWith("mdr-")
     useEffect(() => {
-        if (catalog || (page.p !== "recipes" && page.p !== "build" && page.p !== "list" && !isCat && !(page.p === "dog" && pv === "meal"))) return
+        if (catalog || (page.p !== "recipes" && page.p !== "build" && page.p !== "list" && page.p !== "plan" && !isCat && !(page.p === "dog" && pv === "meal"))) return
         let live = true
         setCatErr(false)
         loadCatalog()
@@ -5515,7 +5572,9 @@ export default function FreshysSite(props: Props) {
             const fd = window.localStorage.getItem("fz-feed")
             if (fd === "1" || fd === "2") setFeedS(+fd)
             const ck = parseInt(window.localStorage.getItem("fz-cook") || "0", 10)
-            if (ck >= 1 && ck <= COOK_MAX) setCookS(ck)
+            if (ck >= 1) setCookS(Math.min(COOK_MAX, ck))
+            const pl = parseInt(window.localStorage.getItem("fz-plan") || "0", 10)
+            if (DAYC[pl]) setPlanIdS(pl)
             const vr0 = JSON.parse(window.localStorage.getItem("fz-vetnote") || "null")
             if (vr0 && Number.isInteger(vr0.d) && vr0.d >= 1 && vr0.d <= 14 && typeof vr0.a === "string" && typeof vr0.t === "number") setVnS({ d: vr0.d, a: vr0.a.slice(0, 60), t: vr0.t })
         } catch (e) {}
@@ -5552,10 +5611,16 @@ export default function FreshysSite(props: Props) {
         if (!local && ps && feedPet && feedPet.mix !== v) commit({ ...ps, pets: ps.pets.map((x) => (x.id === feedPet.id ? { ...x, mix: v } : x)) })
     }
     const setCook = (n: number) => {
-        const v = Math.min(COOK_MAX, Math.max(0, Math.round(n)))
+        const v = Math.min(COOK_MAX, Math.max(1, Math.round(n)))
         setCookS(v)
         try {
             window.localStorage.setItem("fz-cook", String(v))
+        } catch (e) {}
+    }
+    const setPlanId = (id: number) => {
+        setPlanIdS(id)
+        try {
+            window.localStorage.setItem("fz-plan", String(id))
         } catch (e) {}
     }
     const setVn = (v: { d: number; a: string; t: number } | null) => {
@@ -5598,16 +5663,29 @@ export default function FreshysSite(props: Props) {
         writeList(s)
     }
     const lCount = lst.items.length
-    const onListR = (rid: string) => lst.items.some((it) => it.t === "r" && it.rid === rid)
-    const addR = (rid: string) => {
-        if (!onListR(rid)) saveList({ items: [...lst.items, { id: "r" + rid, t: "r", rid }], done: lst.done })
+    const listR = (rid: string) => lst.items.find((it): it is LItemR => it.t === "r" && it.rid === rid)
+    /* a recipe on the list keeps the multiplier it was added with (cooking ahead); a new multiplier replaces it and clears that recipe's ticks */
+    const addR = (rid: string, m = 1) => {
+        const cur = listR(rid)
+        const it: LItemR = m > 1 ? { id: "r" + rid, t: "r", rid, m } : { id: "r" + rid, t: "r", rid }
+        if (!cur) saveList({ items: [...lst.items, it], done: lst.done })
+        else if ((cur.m || 1) !== m) {
+            const pre = "r:" + rid + ":"
+            saveList({ items: lst.items.map((x) => (x === cur ? it : x)), done: Object.fromEntries(Object.entries(lst.done).filter(([k]) => !k.startsWith(pre))) })
+        }
     }
-    const listBtn = (rid: string) => {
-        const on = onListR(rid)
+    /* list state of a recipe for this multiplier: not on the list, on it with these amounts, or on it with other amounts */
+    const listSt = (rid: string, m = 1): "add" | "on" | "upd" => {
+        const cur = listR(rid)
+        return !cur ? "add" : (cur.m || 1) === m ? "on" : "upd"
+    }
+    const listBtn = (rid: string, m = 1) => {
+        const st = listSt(rid, m)
+        const on = st === "on"
         return (
-            <button type="button" className={"fz-ch pr fz-noprint " + (on ? "fz-ch--on" : "fz-ch--add")} onClick={() => (on ? go({ p: "list" }) : addR(rid))}>
+            <button type="button" className={"fz-ch pr fz-noprint " + (on ? "fz-ch--on" : "fz-ch--add")} onClick={() => (on ? go({ p: "list" }) : addR(rid, m))}>
                 <Ico d={on ? I.check : I.cart} s={16} w={on ? 2.6 : 2} />
-                {L(on ? T.onList : T.addList)}
+                {L(on ? T.onList : st === "upd" ? T.updList : T.addList)}
             </button>
         )
     }
@@ -11820,8 +11898,8 @@ export default function FreshysSite(props: Props) {
                             </span>
                         )}
                     </button>
-                    <button type="button" className="fz-btn fz-btn--sm fz-btn--p" onClick={() => (SHOP ? orderPouch() : go({ p: "recipes" }))}>
-                        {L(SHOP ? T.orderBtn : T.recipes)}
+                    <button type="button" className="fz-btn fz-btn--sm fz-btn--p" aria-current={!SHOP && page.p === "plan" ? "page" : undefined} onClick={() => (SHOP ? orderPouch() : go({ p: "plan" }))}>
+                        {L(SHOP ? T.orderBtn : T.planCta)}
                     </button>
                     <button type="button" className="fz-burger" aria-expanded={menu} aria-label={L(menu ? T.close : T.menu)} onClick={() => setMenu(!menu)}>
                         <Ico d={menu ? I.x : I.menu} s={22} />
@@ -11850,8 +11928,8 @@ export default function FreshysSite(props: Props) {
                         <button type="button" onClick={() => go({ p: "acct" })} aria-current={page.p === "acct" ? "page" : undefined}>
                             {L(acct ? TA.myAcct : TA.login)}
                         </button>
-                        <button type="button" className="fz-btn fz-btn--p" onClick={() => (SHOP ? orderPouch() : go({ p: "recipes" }))}>
-                            {L(SHOP ? T.cta1 : T.cta2)}
+                        <button type="button" className="fz-btn fz-btn--p" onClick={() => (SHOP ? orderPouch() : go({ p: "plan" }))}>
+                            {L(SHOP ? T.cta1 : T.planCta)}
                         </button>
                     </div>
                 </div>
@@ -11992,6 +12070,68 @@ export default function FreshysSite(props: Props) {
         </>
     )
 
+    /* shared by the home scale and the week's plan: the weight, the profile banner and how the dog is fed */
+    const kgBox = (id: string) => (
+        <>
+            <label className="fz-lbl" htmlFor={id}>
+                {L(T.weight)}
+            </label>
+            <div className="fz-kgrow">
+                <button type="button" className="fz-step" aria-label={L(T.less)} disabled={dog.kg <= KG_MIN} onClick={() => setKg(dog.kg - 0.5)}>
+                    −
+                </button>
+                <div className="fz-kg">
+                    {kgTxt}
+                    <small>kg</small>
+                </div>
+                <button type="button" className="fz-step" aria-label={L(T.more)} disabled={dog.kg >= kgMax} onClick={() => setKg(dog.kg + 0.5)}>
+                    +
+                </button>
+            </div>
+            {weightSlider(id)}
+        </>
+    )
+    const pfBan = !isCanvas && (
+                        <div className="fz-pf-ban">
+                            {feedPet ? (
+                                <>
+                                    <span>
+                                        {L(T.pfFor)}: <b>{pfNm(feedPet) || L(T.pfYourDog)}</b> · {wFmt(feedPet.kg)}
+                                        {pfOff ? " · " + L(T.pfManual) : ""}
+                                    </span>
+                                    {pfOff && (
+                                        <button type="button" className="fz-link" onClick={() => setDog(dogOf(feedPet, new Date()))}>
+                                            {L(T.pfBackTo)}
+                                        </button>
+                                    )}
+                                    <button type="button" className="fz-link" onClick={() => go({ p: "dog" })}>
+                                        {L(T.pfEdit)}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <span>{L(T.pfMake)}</span>
+                                    <button type="button" className="fz-btn fz-btn--g fz-btn--sm" onClick={() => go({ p: "dog" })}>
+                                        {L(T.pfMakeB)}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )
+    const feedR = (n: number) => (
+        <div className="fz-feedr" role="radiogroup" aria-label={L(T.feedL)}>
+            {T.feedO.slice(0, n).map((o, i) => (
+                <button key={i} type="button" role="radio" aria-checked={feed === i} onClick={() => setFeed(i)}>
+                    <i aria-hidden="true" />
+                    <span>
+                        <b>{L(o)}</b>
+                        <small>{L(T.feedD[i])}</small>
+                    </span>
+                </button>
+            ))}
+        </div>
+    )
+
     /* ---------- home ---------- */
 
     /* this week: four dishes for the whole day (salmon, beef, turkey, chicken) and two treats */
@@ -12020,11 +12160,11 @@ export default function FreshysSite(props: Props) {
                             </div>
                         ) : (
                             <div className="fz-ctas">
-                                <button type="button" className="fz-btn fz-btn--p" onClick={() => go({ p: "recipes" })}>
-                                    {L(T.cta2)}
+                                <button type="button" className="fz-btn fz-btn--p" onClick={() => go({ p: "plan" })}>
+                                    {L(T.planCta)}
                                 </button>
-                                <button type="button" className="fz-btn fz-btn--g" onClick={() => goSec("calc")}>
-                                    {L(T.ctaCalc)}
+                                <button type="button" className="fz-btn fz-btn--g" onClick={() => go({ p: "recipes" })}>
+                                    {L(T.cta2)}
                                 </button>
                             </div>
                         )}
@@ -12052,67 +12192,16 @@ export default function FreshysSite(props: Props) {
                 <div className="fz-wrap">
                     <h2 className="fz-h2">{L(T.calcH)}</h2>
                     <p className="fz-lead">{L(T.calcSub)}</p>
-                    {!isCanvas && (
-                        <div className="fz-pf-ban">
-                            {feedPet ? (
-                                <>
-                                    <span>
-                                        {L(T.pfFor)}: <b>{pfNm(feedPet) || L(T.pfYourDog)}</b> · {wFmt(feedPet.kg)}
-                                        {pfOff ? " · " + L(T.pfManual) : ""}
-                                    </span>
-                                    {pfOff && (
-                                        <button type="button" className="fz-link" onClick={() => setDog(dogOf(feedPet, new Date()))}>
-                                            {L(T.pfBackTo)}
-                                        </button>
-                                    )}
-                                    <button type="button" className="fz-link" onClick={() => go({ p: "dog" })}>
-                                        {L(T.pfEdit)}
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <span>{L(T.pfMake)}</span>
-                                    <button type="button" className="fz-btn fz-btn--g fz-btn--sm" onClick={() => go({ p: "dog" })}>
-                                        {L(T.pfMakeB)}
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    )}
+                    {pfBan}
                     <div className="fz-calc">
                         <div className="fz-cin">
-                            <label className="fz-lbl" htmlFor="fz-kg1">
-                                {L(T.weight)}
-                            </label>
-                            <div className="fz-kgrow">
-                                <button type="button" className="fz-step" aria-label={L(T.less)} disabled={dog.kg <= KG_MIN} onClick={() => setKg(dog.kg - 0.5)}>
-                                    −
-                                </button>
-                                <div className="fz-kg">
-                                    {kgTxt}
-                                    <small>kg</small>
-                                </div>
-                                <button type="button" className="fz-step" aria-label={L(T.more)} disabled={dog.kg >= kgMax} onClick={() => setKg(dog.kg + 0.5)}>
-                                    +
-                                </button>
-                            </div>
-                            {weightSlider("fz-kg1")}
+                            {kgBox("fz-kg1")}
                             {dogLine}
                             {!pup && (
                                 <>
                                     <div className="fz-gap2" />
                                     <span className="fz-lbl">{L(T.feedL)}</span>
-                                    <div className="fz-feedr" role="radiogroup" aria-label={L(T.feedL)}>
-                                        {T.feedO.map((o, i) => (
-                                            <button key={i} type="button" role="radio" aria-checked={feed === i} onClick={() => setFeed(i)}>
-                                                <i aria-hidden="true" />
-                                                <span>
-                                                    <b>{L(o)}</b>
-                                                    <small>{L(T.feedD[i])}</small>
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
+                                    {feedR(3)}
                                 </>
                             )}
                         </div>
@@ -12919,16 +13008,26 @@ export default function FreshysSite(props: Props) {
             <small>{unit}</small>
         </div>
     )
+    /* the day's amount as shown (same rounding as gTxt / volTxt), halved for two meals a day */
+    const twiceTxt = (x: number, wt: boolean) => {
+        const shown = wt
+            ? x >= 10000 ? Math.round(x / 1000) * 1000 : x >= 1000 || (x >= 300 && Math.round(x / 50) * 50 >= 1000) ? Math.round(x / 100) * 100 : x >= 300 ? Math.round(x / 50) * 50 : Math.max(5, Math.round(x / (x >= 100 ? 10 : 5)) * (x >= 100 ? 10 : 5))
+            : x >= 1000 ? Math.round(x / 100) * 100 : x >= 300 ? Math.round(x / 50) * 50 : Math.max(10, Math.round(x / 10) * 10)
+        const h = Math.max(5, Math.round(shown / 2 / 5) * 5)
+        const t = h >= 1000 ? nf(h / 1000, lang, h % 100 ? 2 : 1) + (wt ? " kg" : " l") : nf(h, lang) + (wt ? " g" : " ml")
+        return lang === "en" ? `If your dog eats twice a day, that's about ${t} a meal.` : `Ako jede dvaput dnevno, to je oko ${t} po obroku.`
+    }
     /* by volume: ml a day and how long the batch lasts (total = batch volume in ml, 0 if unknown) */
     const mealVol = (ml: number, total: number, sh: number, dAlt = 0, wt = false) => {
         const [v, u] = wt ? gTxt(ml) : volTxt(ml)
         const dd = total ? total / ml : dAlt
-        const l = dd && !cookOn ? lastsTxt(dd) : ""
+        const l = dd ? lastsTxt(dd) : ""
         return (
             <>
                 {bigAbout(v, u + " " + L(T.aDay))}
+                {sh === 1 && <p className="t">{twiceTxt(ml, wt)}</p>}
                 {l && <p className="t">{l}</p>}
-                {!cookOn && dd > 0 && dd < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(1 / dd) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(1 / dd) + " recepta."}</p>}
+                {dd > 0 && dd < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(1 / dd) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(1 / dd) + " recepta."}</p>}
                 {mealTail(sh)}
             </>
         )
@@ -12951,7 +13050,7 @@ export default function FreshysSite(props: Props) {
                 ) : (
                     bigAbout(fracTxt(f), L(f > 1.12 ? T.recsDay : T.recDay))
                 )}
-                {cookOn ? null : d > 4.5 ? (
+                {d > 4.5 ? (
                     <p className="t">{lang === "en" ? `Split it into ${Math.round(d)} equal parts and give one a day. Freeze what you won't use in time.` : `Podijeli ga na ${Math.round(d)} ${partsHr(Math.round(d))} i daj jedan dnevno. Što nećeš potrošiti na vrijeme, zamrzni.`}</p>
                 ) : (
                     lastsTxt(d) && <p className="t">{lastsTxt(d)}</p>
@@ -12966,8 +13065,8 @@ export default function FreshysSite(props: Props) {
         return (
             <>
                 {bigAbout(<Num v={n} lang={lang} />, word(n) + " " + L(T.aDay))}
-                {!cookOn && yMax > 0 && yMax / n >= 0.9 && <p className="t">{lastsTxt(yMax / n)}</p>}
-                {!cookOn && yMax > 0 && yMax / n < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(n / yMax) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(n / yMax) + " recepta."}</p>}
+                {yMax > 0 && yMax / n >= 0.9 && <p className="t">{lastsTxt(yMax / n)}</p>}
+                {yMax > 0 && yMax / n < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(n / yMax) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(n / yMax) + " recepta."}</p>}
                 {mealTail(sh)}
             </>
         )
@@ -13052,104 +13151,106 @@ export default function FreshysSite(props: Props) {
     /* ---- cooking ahead ---- */
     const daysT = (n: number) => (lang === "en" ? n + (n === 1 ? " day" : " days") : n + " " + plHr(n, ["dan", "dana", "dana"]))
     const cookOthOn = cookOth || (cook > 0 && cook !== 7 && cook !== 30)
-    const cookPlan = (info: CookI | null, frTxt: string, fzTxt: string) => {
-        if (!info || !cookOn || !(info.d1 > 0)) return null
+    const cookPlan = (info: CookI | null, frTxt: string, fzTxt: string, nDays?: number) => {
+        const n = nDays || cook
+        if (!info || !(n > 0) || !(info.d1 > 0)) return null
         const ds = (frTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fLo = ds[0] || 3
         const fHi = ds[ds.length - 1] || 3
-        const n = cook
         const mult = Math.max(1, Math.ceil(n / info.d1 - 0.1))
         const days = Math.max(n, info.ml || info.n ? Math.floor(mult * info.d1 + 0.1) : Math.round(mult * info.d1))
         return { n, mult, days, fLo, fHi }
     }
-    const cookBox = (info: CookI | null, frTxt: string, fzTxt: string) => {
-        if (!info) return null
-        const p = cookPlan(info, frTxt, fzTxt)
+    /* days, half days below three: "dan i pol", "4 dana" */
+    const daysAbout = (d: number) => {
+        const h = d < 3 ? Math.max(0.5, Math.round(d * 2) / 2) : Math.round(d)
+        if (lang === "en") return h === 0.5 ? "half a day" : h === 1.5 ? "a day and a half" : h === 2.5 ? "two and a half days" : h + (h === 1 ? " day" : " days")
+        return h === 0.5 ? "pola dana" : h === 1.5 ? "dan i pol" : h === 2.5 ? "dva i pol dana" : h + " " + plHr(h, ["dan", "dana", "dana"])
+    }
+    /* what cooking ahead gives, as text: the plan line, how much and for how long, fridge and freezer, weighing, a big batch */
+    type CookTx = { head: string; got: string; keep: string; weigh: string; tail: string; tailW: boolean }
+    const cookTx = (info: CookI, p: { n: number; mult: number; days: number; fLo: number; fHi: number }, frTxt: string, fzTxt: string): CookTx => {
         const en = lang === "en"
         const fr = frTxt || daysT(3)
         const vt = (ml: number) => (info.wt ? gTxt(ml) : volTxt(ml)).join(" ")
         // days the recipe keeps in the freezer, from its own storage line (months × 30)
         const fzM = (fzTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fzMax = fzM.length ? fzM[fzM.length - 1] * 30 : 0
-        let head = "",
-            got = "",
-            keep = ""
-        if (p) {
-            head = p.mult === 1 ? (en ? `One recipe is enough for ${daysT(p.n)}.` : `Za ${daysT(p.n)} dovoljan je jedan recept.`) : en ? `For ${daysT(p.n)}, make ${p.mult} times the recipe.` : `Za ${daysT(p.n)} skuhaj ${p.mult} puta veći recept.`
-            if (info.ml && info.tot)
-                got = en
-                    ? `You get about ${vt(info.tot * p.mult)}: ${p.days} daily ${p.days === 1 ? "portion" : "portions"} of about ${vt(info.ml)}.`
-                    : `Dobiješ oko ${vt(info.tot * p.mult)}: ${p.days} ${plHr(p.days, ["dnevnu porciju", "dnevne porcije", "dnevnih porcija"])} po oko ${vt(info.ml)}.`
-            else if (info.n && info.pcs && info.word) {
-                const all = Math.round(info.pcs * p.mult)
-                got = en ? `You get about ${all} ${info.word(all)}: ${info.n} a day, for ${daysT(p.days)}.` : `Dobiješ oko ${all} ${info.word(all)}: ${info.n} na dan, za ${daysT(p.days)}.`
-            } else got = en ? `Split it all into ${p.days} equal daily ${p.days === 1 ? "portion" : "portions"}.` : `Sve podijeli na ${p.days} ${plHr(p.days, ["dnevnu porciju", "jednake dnevne porcije", "jednakih dnevnih porcija"])}.`
-            if (p.days <= p.fLo) keep = en ? `It can all go in the fridge (it keeps ${fr}).` : `Sve može u hladnjak (stoji ${fr}).`
-            else
-                keep = en
-                    ? `Put ${p.fLo} ${p.fLo === 1 ? "portion" : "portions"} in the fridge and freeze the rest${fzTxt ? ` (they keep ${fzTxt})` : ""}. Thaw each one in the fridge overnight.`
-                    : `${p.fLo} ${plHr(p.fLo, ["porciju", "porcije", "porcija"])} stavi u hladnjak, a ostale zamrzni${fzTxt ? ` (stoje ${fzTxt})` : ""}. Svaku odmrzni preko noći u hladnjaku.`
-        }
+        const head = p.mult === 1 ? (en ? `One recipe is enough for ${daysT(p.n)}.` : `Za ${daysT(p.n)} dovoljan je jedan recept.`) : en ? `For ${daysT(p.n)}, make ${p.mult} times the recipe.` : `Za ${daysT(p.n)} skuhaj ${p.mult} puta veći recept.`
+        let got = ""
+        if (info.ml && info.tot)
+            got = en
+                ? `You get about ${vt(info.tot * p.mult)}, enough for about ${daysAbout(p.mult * info.d1)} at about ${vt(info.ml)} a day.`
+                : `Dobiješ oko ${vt(info.tot * p.mult)}, dovoljno za oko ${daysAbout(p.mult * info.d1)} uz oko ${vt(info.ml)} dnevno.`
+        else if (info.n && info.pcs && info.word) {
+            const all = Math.round(info.pcs * p.mult)
+            got = en ? `You get about ${all} ${info.word(all)}: ${info.n} a day, for ${daysT(p.days)}.` : `Dobiješ oko ${all} ${info.word(all)}: ${info.n} na dan, za ${daysT(p.days)}.`
+        } else got = en ? `Split it all into ${p.days} equal daily ${p.days === 1 ? "portion" : "portions"}.` : `Sve podijeli na ${p.days} ${plHr(p.days, ["dnevnu porciju", "jednake dnevne porcije", "jednakih dnevnih porcija"])}.`
+        const keep =
+            p.days <= p.fLo
+                ? en
+                    ? `It can all go in the fridge (it keeps ${fr}).`
+                    : `Sve može u hladnjak (stoji ${fr}).`
+                : en
+                  ? `Put ${p.fLo} ${p.fLo === 1 ? "portion" : "portions"} in the fridge and freeze the rest${fzTxt ? ` (they keep ${fzTxt})` : ""}. Thaw each one in the fridge overnight.`
+                  : `${p.fLo} ${plHr(p.fLo, ["porciju", "porcije", "porcija"])} stavi u hladnjak, a ostale zamrzni${fzTxt ? ` (stoje ${fzTxt})` : ""}. Svaku odmrzni preko noći u hladnjaku.`
+        const weigh =
+            p.days > 1 && (info.wt || !info.n) && Math.abs(p.mult * info.d1 - p.days) < 0.15
+                ? en
+                    ? `To be exact, weigh the whole cooked dish and divide by ${p.days}.`
+                    : `Najtočnije: izvaži cijelo skuhano jelo i podijeli s ${p.days}.`
+                : ""
+        const tailW = fzMax > 0 && p.days > fzMax
+        const tail = tailW
+            ? en
+                ? `Frozen, it keeps ${fzTxt}. For ${daysT(p.n)}, cook it in ${Math.ceil(p.days / fzMax)} rounds, not all at once.`
+                : `Zamrznuto stoji ${fzTxt}. Za ${daysT(p.n)} kuhaj u ${Math.ceil(p.days / fzMax)} navrata, ne sve odjednom.`
+            : p.mult >= 4
+              ? en
+                  ? "That's a big batch: make it in more than one go."
+                  : "To je velika količina: radi je u više navrata."
+              : ""
+        return { head, got, keep, weigh, tail, tailW }
+    }
+    const cookBox = (info: CookI | null, frTxt: string, fzTxt: string) => {
+        if (!info) return null
+        const p = cookPlan(info, frTxt, fzTxt)
+        const tx = p ? cookTx(info, p, frTxt, fzTxt) : null
+        const en = lang === "en"
         return (
             <div className="fz-cook">
                 <div className="k2">{L(T.cookK)}</div>
-                {seg(
-                    T.cookO,
-                    cookOthOn ? 3 : cook === 7 ? 1 : cook === 30 ? 2 : 0,
-                    (i) => {
-                        if (i < 3) setCook([0, 7, 30][i])
-                        else if (!cook) setCook(14)
-                        setCookIn(null)
-                        setCookOth(i === 3)
-                    },
-                    T.cookK
-                )}
-                {cookOthOn && (
-                    <div className="fz-dstep" role="group" aria-label={L(T.bDaysN)}>
-                        <button type="button" className="fz-step" aria-label={L(T.less)} disabled={cook <= 1} onClick={() => { setCookIn(null); setCook(Math.max(1, cook - 1)) }}>
-                            −
-                        </button>
-                        <label className="v">
-                            <input
-                                className="fz-inp fz-dn"
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                autoComplete="off"
-                                aria-label={L(T.bDaysN)}
-                                value={cookIn ?? String(cook)}
-                                onChange={(e) => {
-                                    const v = e.target.value.replace(/\D/g, "").slice(0, 3)
-                                    const n = parseInt(v, 10)
-                                    setCookIn(n > COOK_MAX ? String(COOK_MAX) : v)
-                                    if (n >= 1) setCook(n)
-                                }}
-                                onBlur={() => setCookIn(null)}
-                            />
-                            <span>{lang === "en" ? (cook === 1 ? "day" : "days") : plHr(cook, ["dan", "dana", "dana"])}</span>
-                        </label>
-                        <button type="button" className="fz-step" aria-label={L(T.more)} disabled={cook >= COOK_MAX} onClick={() => { setCookIn(null); setCook(cook + 1) }}>
-                            +
-                        </button>
-                    </div>
-                )}
-                {cookOthOn && <p className="fz-hint fz-noprint" style={{ marginTop: 8 }}>{L(T.cookAny)}</p>}
-                {p && (
+                <div className="fz-cookd" role="group" aria-label={L(T.bDaysN)}>
+                    <button type="button" className="fz-step" aria-label={L(T.less)} disabled={cook <= 1} onClick={() => setCook(cook - 1)}>
+                        −
+                    </button>
+                    <b className="v">{daysT(cook)}</b>
+                    <button type="button" className="fz-step" aria-label={L(T.more)} disabled={cook >= COOK_MAX} onClick={() => setCook(cook + 1)}>
+                        +
+                    </button>
+                </div>
+                <input
+                    className="fz-range fz-cookr"
+                    type="range"
+                    min={1}
+                    max={COOK_MAX}
+                    step={1}
+                    value={cook}
+                    aria-label={L(T.bDaysN)}
+                    aria-valuetext={daysT(cook)}
+                    style={{ ["--p" as any]: ((cook - 1) / (COOK_MAX - 1)) * 100 + "%" } as React.CSSProperties}
+                    onChange={(e) => setCook(+e.target.value)}
+                />
+                {p && tx && (
                     <div className="fz-cook-p" aria-live="polite">
                         <p>
-                            <b>{head}</b>
+                            <b>{tx.head}</b>
                             {p.mult > 1 ? (en ? " The ingredients below are already multiplied." : " Sastojci ispod su već pomnoženi.") : ""}
                         </p>
-                        <p>{got}</p>
-                        <p>{keep}</p>
-                        {p.days > 1 && (info.wt || !info.n) && (
-                            <p>{en ? `To be exact, weigh the whole cooked dish and divide by ${p.days}.` : `Najtočnije: izvaži cijelo skuhano jelo i podijeli s ${p.days}.`}</p>
-                        )}
-                        {fzMax > 0 && p.days > fzMax ? (
-                            <p className="w">{en ? `Frozen, it keeps ${fzTxt}. For ${daysT(p.n)}, cook it in ${Math.ceil(p.days / fzMax)} rounds, not all at once.` : `Zamrznuto stoji ${fzTxt}. Za ${daysT(p.n)} kuhaj u ${Math.ceil(p.days / fzMax)} navrata, ne sve odjednom.`}</p>
-                        ) : (
-                            p.mult >= 4 && <p>{en ? "That's a big batch: make it in more than one go." : "To je velika količina: radi je u više navrata."}</p>
-                        )}
+                        <p>{tx.got}</p>
+                        <p>{tx.keep}</p>
+                        {tx.weigh && <p>{tx.weigh}</p>}
+                        {tx.tail && <p className={tx.tailW ? "w" : undefined}>{tx.tail}</p>}
                     </div>
                 )}
             </div>
@@ -13302,7 +13403,7 @@ export default function FreshysSite(props: Props) {
                         {kindTag(rec)}
                         {rec.tex && rec.tex !== "frozen" && <span className="fz-tag fz-tag--x">{L(T.tex[rec.tex])}</span>}
                         {methodChip(RMETA[rec.id])}
-                        {listBtn(rec.id)}
+                        {listBtn(rec.id, bk)}
                         <button type="button" className="fz-ch pr2 fz-noprint" onClick={() => typeof window !== "undefined" && window.print()}>
                             <Ico d={I.print} s={16} />
                             {L(T.print)}
@@ -13482,6 +13583,13 @@ export default function FreshysSite(props: Props) {
             : kc.p === "ml"
               ? nf(Math.round(kc.a), lang) + " ml ≈ " + nf(Math.round(kc.k), lang) + " kcal"
               : L(T.wholeR) + " ≈ " + nf(Math.round(kc.k / kc.a), lang) + " kcal"
+    /* a catalogue recipe's fridge and freezer lines ("3–4 dana", "2 mjeseca") */
+    const cStore = (r: CRec): [string, string] => {
+        const up = (v: string) => parseInt(v.split("–").pop() || v, 10) || 0
+        const fr = r.st.fridge ? (lang === "en" ? r.st.fridge + " days" : r.st.fridge + " " + plHr(up(r.st.fridge), ["dan", "dana", "dana"])) : ""
+        const fz = r.st.freezer ? (lang === "en" ? r.st.freezer + (up(r.st.freezer) === 1 ? " month" : " months") : r.st.freezer + " " + plHr(up(r.st.freezer), ["mjesec", "mjeseca", "mjeseci"])) : ""
+        return [fr, fz]
+    }
     const cCook = (r: CRec): CookI | null => {
         const kc = r.kc
         const sh = shareOf(cMealOk(r))
@@ -13656,9 +13764,7 @@ export default function FreshysSite(props: Props) {
             const enTxt = lang === "en" || origEn
             const ings = enTxt ? r.i : r.ih
             const warnAt = (i: number) => (r.w ? Object.keys(r.w).filter((k) => r.w![k].includes(i)) : [])
-            const up = (v: string) => parseInt(v.split("–").pop() || v, 10) || 0
-            const cFr = r.st.fridge ? (lang === "en" ? r.st.fridge + " days" : r.st.fridge + " " + plHr(up(r.st.fridge), ["dan", "dana", "dana"])) : ""
-            const cFz = r.st.freezer ? (lang === "en" ? r.st.freezer + (up(r.st.freezer) === 1 ? " month" : " months") : r.st.freezer + " " + plHr(up(r.st.freezer), ["mjesec", "mjeseca", "mjeseci"])) : ""
+            const [cFr, cFz] = cStore(r)
             const cInfo = cCook(r)
             const cPl = cookPlan(cInfo, cFr, cFz)
             const km = cPl ? cPl.mult : 1
@@ -13687,7 +13793,7 @@ export default function FreshysSite(props: Props) {
                                 )}
                                 {cKind(r)}
                                 {methodChip(cMeta.get(r.id))}
-                                {listBtn(cId(r))}
+                                {listBtn(cId(r), km)}
                                 <button type="button" className="fz-ch pr2 fz-noprint" onClick={() => typeof window !== "undefined" && window.print()}>
                                     <Ico d={I.print} s={16} />
                                     {L(T.print)}
@@ -14087,12 +14193,13 @@ export default function FreshysSite(props: Props) {
     }
     lst.items.forEach((it) => {
         if (it.t !== "r") return
+        const m = it.m || 1
         const cur = RECIPES.find((r) => r.id === it.rid)
         if (cur) {
             cur.ing.forEach((ing, i) => {
                 const en = plain(ing.n.en)
                 const sec = lineSec(en)
-                if (sec) lLines.push({ id: "r:" + it.rid + ":" + i, sec, em: iconOf(en), t: (ing.q != null ? qty(ing, 1, lang) + " " : "") + ingText(ing, 1, lang) + (ing.opt ? " (" + L(T.optional) + ")" : ""), sub: L(cur.t) })
+                if (sec) lLines.push({ id: "r:" + it.rid + ":" + i, sec, em: iconOf(en), t: (ing.q != null ? qty(ing, m, lang) + " " : "") + ingText(ing, m, lang) + (ing.opt ? " (" + L(T.optional) + ")" : ""), sub: L(cur.t) })
             })
             return
         }
@@ -14103,7 +14210,8 @@ export default function FreshysSite(props: Props) {
         }
         c.i.forEach((en, i) => {
             const sec = lineSec(en)
-            if (sec) lLines.push({ id: "r:" + it.rid + ":" + i, sec, em: iconOf(en), t: lang === "en" || !c.ih[i] ? en : c.ih[i], sub: cTitle(c) })
+            const enL = lang === "en" || !c.ih[i]
+            if (sec) lLines.push({ id: "r:" + it.rid + ":" + i, sec, em: iconOf(en), t: scaleLine(enL ? en : c.ih[i], m, enL ? "en" : "hr"), sub: cTitle(c) })
         })
     })
     const tick = (id: string) => saveList({ items: lst.items, done: { ...lst.done, [id]: !lst.done[id] } })
@@ -14173,6 +14281,191 @@ export default function FreshysSite(props: Props) {
         setClr(false)
         saveList({ items: [], done: {} })
     }
+
+    /* ---------- plan for the week: the dog, one whole-day dish, its shopping list and one cooking session for 7 days ---------- */
+    const planIds = WPLAN_POOL.filter(dayOk).slice(0, 5)
+    const planOn = !pup && feed < 2
+    const planSel = planOn && planId && planIds.includes(planId) ? planId : null
+    const planR = planSel && catalog ? catalog.find((r) => r.id === planSel) : undefined
+    const planInfo = planR ? cCook(planR) : null
+    const planSt: [string, string] = planR ? cStore(planR) : ["", ""]
+    const planP = planR ? cookPlan(planInfo, planSt[0], planSt[1], WPLAN_DAYS) : null
+    const planTx = planInfo && planP ? cookTx(planInfo, planP, planSt[0], planSt[1]) : null
+    const planRid = planR ? cId(planR) : ""
+    const planLs = planP ? listSt(planRid, planP.mult) : "add"
+    const planPick = (id: number) => {
+        const d = DAYC[id]
+        const kpg = kpgOf(d[3], d[4])
+        const sh = shareOf(true)
+        return (
+            <button key={id} type="button" role="radio" aria-checked={planSel === id} className="fz-dayr fz-ppk" onClick={() => setPlanId(id)}>
+                <img src={cImg({ img: d[2] }, 256)} alt="" loading="lazy" decoding="async" />
+                <span>
+                    <b>{lang === "hr" ? d[1] : d[0]}</b>
+                    <small>
+                        {dayGTxt(kpg, sh)} · {daysShort(d[4] / dayG(kpg, sh))}
+                    </small>
+                </span>
+                <i aria-hidden="true" />
+            </button>
+        )
+    }
+    const planShop = (r: CRec, m: number) =>
+        L_SECS.map((sc) => {
+            const ls = r.i.map((en, i) => ({ en, i })).filter((x) => lineSec(x.en) === sc)
+            if (!ls.length) return null
+            return (
+                <div className="fz-grp" key={sc}>
+                    <div className="fz-grp-h">
+                        <span className="fz-k">{L(T.lSecs[sc])}</span>
+                        <span className="w">
+                            {L(T.lWhereL)} <b>{L(T.lWhere[sc])}</b>
+                        </span>
+                    </div>
+                    <ul className="fz-pl">
+                        {ls.map((x) => {
+                            const enL = lang === "en" || !r.ih[x.i]
+                            const em = iconOf(x.en)
+                            const ws = r.w ? Object.keys(r.w).filter((k) => r.w![k].includes(x.i)) : []
+                            return (
+                                <li key={x.i}>
+                                    {em ? <Em n={em} /> : <span className="dot" aria-hidden="true" />}
+                                    <span lang={enL ? "en" : "hr"}>
+                                        {scaleLine(enL ? x.en : r.ih[x.i], m, enL ? "en" : "hr")}
+                                        {ws.map((k) => (
+                                            <span key={k} className="nt nt--w" lang={lang}>
+                                                ⚠ {L(T.warnC[k])}
+                                            </span>
+                                        ))}
+                                    </span>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
+            )
+        })
+    const planPage = (
+        <div className="fz-page" key="plan">
+            <section className="fz-ph fz-ruled">
+                <div className="fz-wrap">
+                    <h1 className="fz-h1">{L(T.planH)}</h1>
+                    <p className="fz-lead">{L(T.planLead)}</p>
+                </div>
+            </section>
+            <div className="fz-wrap">
+                <div className="fz-wk">
+                    <section className="fz-pstep" aria-labelledby="fz-ps1">
+                        <h2 id="fz-ps1">
+                            <span className="n">1</span>
+                            {L(T.planS1)}
+                        </h2>
+                        {pfBan}
+                        {kgBox("fz-kg9")}
+                        {dogLine}
+                        {pup ? (
+                            <p className="fz-hint fz-hint--w">
+                                {L(T.planPup)} {L(T.puppy)}
+                            </p>
+                        ) : (
+                            <>
+                                <div className="fz-gap2" />
+                                <span className="fz-lbl">{L(T.feedL)}</span>
+                                {feed === 2 && <p className="fz-hint fz-wk-q">{L(T.planFeedQ)}</p>}
+                                {feedR(2)}
+                            </>
+                        )}
+                    </section>
+                    {planOn && (
+                        <section className="fz-pstep" aria-labelledby="fz-ps2">
+                            <h2 id="fz-ps2">
+                                <span className="n">2</span>
+                                {L(T.planS2)}
+                            </h2>
+                            <div className="fz-ppick" role="radiogroup" aria-labelledby="fz-ps2">
+                                {planIds.map((id) => planPick(id))}
+                            </div>
+                            {shareOf(true) < 1 && <p className="fz-wk-p fz-wk-half">{L(T.halfRest)}</p>}
+                            <p className="fz-mnote">
+                                {L(T.planVet)} (
+                                <a className="fz-link" href={HOME_URL} target="_blank" rel="noopener noreferrer">
+                                    {L(T.mealWhy)}
+                                </a>
+                                )
+                            </p>
+                            <button
+                                type="button"
+                                className="fz-link fz-dall"
+                                onClick={() => {
+                                    setCat("daily")
+                                    go({ p: "recipes" })
+                                }}
+                            >
+                                {L(T.dayAll)} <Ico d={I.right} s={15} w={2.4} />
+                            </button>
+                        </section>
+                    )}
+                    {planOn && !planSel && <p className="fz-hint fz-wk-hint">{L(T.planPick)}</p>}
+                    {planSel && !planR && (
+                        <section className="fz-pstep">
+                            <p className="fz-wk-p">{catErr ? L(T.catErr) : L(T.loadingR)}</p>
+                            {catErr && (
+                                <button type="button" className="fz-btn fz-btn--g fz-btn--sm" onClick={() => setCatTry(catTry + 1)}>
+                                    {L(T.retry)}
+                                </button>
+                            )}
+                        </section>
+                    )}
+                    {planR && planP && planTx && (
+                        <>
+                            <section className="fz-pstep" aria-labelledby="fz-ps3">
+                                <h2 id="fz-ps3">
+                                    <span className="n">3</span>
+                                    {L(T.planS3)}
+                                </h2>
+                                <p className="fz-wk-p">
+                                    <b>{planTx.head}</b>
+                                    {planP.mult > 1 ? L(T.planMult) : ""}
+                                </p>
+                                {planShop(planR, planP.mult)}
+                                <div className="fz-btns">
+                                    <button type="button" className={"fz-btn " + (planLs === "on" ? "fz-btn--g" : "fz-btn--p")} onClick={() => (planLs === "on" ? go({ p: "list" }) : addR(planRid, planP.mult))}>
+                                        <Ico d={planLs === "on" ? I.check : I.cart} s={18} w={planLs === "on" ? 2.6 : 2} />
+                                        {L(planLs === "on" ? T.planOpenL : planLs === "upd" ? T.updList : T.addList)}
+                                    </button>
+                                </div>
+                            </section>
+                            <section className="fz-pstep" aria-labelledby="fz-ps4">
+                                <h2 id="fz-ps4">
+                                    <span className="n">4</span>
+                                    {L(T.planS4)}
+                                </h2>
+                                <p className="fz-wk-p">
+                                    <b>{L(T.planWhen)}</b>
+                                </p>
+                                <p className="fz-wk-p">{planTx.got}</p>
+                                <p className="fz-wk-p">{planTx.keep}</p>
+                                {planTx.weigh && <p className="fz-wk-p">{planTx.weigh}</p>}
+                                {planTx.tail && <p className={"fz-wk-p" + (planTx.tailW ? " w" : "")}>{planTx.tail}</p>}
+                                <div className="fz-btns">
+                                    <button
+                                        type="button"
+                                        className="fz-btn fz-btn--g"
+                                        onClick={() => {
+                                            setCook(WPLAN_DAYS)
+                                            go({ p: "recipe", id: planRid })
+                                        }}
+                                    >
+                                        {L(T.planOpen)}
+                                    </button>
+                                </div>
+                            </section>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
     const listPage = (
         <div className="fz-page" key="list">
             <section className="fz-ph fz-ruled">
@@ -14238,7 +14531,7 @@ export default function FreshysSite(props: Props) {
                                                         ) : (
                                                             nm
                                                         )}
-                                                        <small>{L(T.lRecipe)}</small>
+                                                        <small>{(it.m || 1) > 1 ? (lang === "en" ? it.m + " times the recipe" : it.m + " puta veći recept") : L(T.lRecipe)}</small>
                                                     </span>
                                                     <button type="button" className="x" aria-label={L(T.lRemove) + ": " + nm} onClick={() => removeItem(it.id)}>
                                                         <Ico d={I.x} s={16} w={2.4} />
@@ -14775,7 +15068,7 @@ export default function FreshysSite(props: Props) {
                     </div>
                 )}
                 {nav}
-                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? acctPage : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
+                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "plan" ? planPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? acctPage : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
                 {footer}
             </div>
         </div>
