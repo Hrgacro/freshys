@@ -2326,7 +2326,9 @@ const fbSignIn = async (em: string, pw: string) => {
     const u = await fbLookup(a)
     return { ...a, ver: u.ver, nm: u.nm, em: u.em }
 }
-const fbSendVerify = (a: Acct, lang: string) => fbPost("sendOobCode", { requestType: "VERIFY_EMAIL", idToken: a.tok }, lang)
+/* after the link in the e-mail, Firebase's own page offers a way back to the site */
+const FB_BACK = "https://www.freshysfoods.com/#/racun"
+const fbSendVerify = (a: Acct, lang: string) => fbPost("sendOobCode", { requestType: "VERIFY_EMAIL", idToken: a.tok, continueUrl: FB_BACK }, lang)
 const fbSignUp = async (nm: string, em: string, pw: string, lang: string) => {
     const j = await fbPost("signUp", { email: em, password: pw, returnSecureToken: true })
     let a = acctOf(j, false, "")
@@ -7073,7 +7075,7 @@ export default function FreshysSite(props: Props) {
         if (!emOk(em)) return auSet({ err: L(TA.eEmail) })
         auSet({ busy: true })
         try {
-            await fbPost("sendOobCode", { requestType: "PASSWORD_RESET", email: em }, lang)
+            await fbPost("sendOobCode", { requestType: "PASSWORD_RESET", email: em, continueUrl: FB_BACK }, lang)
             setAu((x) => ({ ...x, busy: false, m: "sent", pw: "" }))
         } catch (e) {
             setAu((x) => ({ ...x, busy: false, err: auErr(e) }))
