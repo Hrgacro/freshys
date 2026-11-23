@@ -676,9 +676,9 @@ const T = {
     faqH: X("Questions people ask", "Pitanja koja ljudi postavljaju"),
     faqSub: X("We read over a hundred comments under dog food recipes. These questions kept coming back.", "Pročitali smo više od stotinu komentara ispod recepata za pse. Ova pitanja su se stalno vraćala."),
     faq: [
-        [X("How much should my dog eat?", "Koliko bi moj pas trebao jesti?"), X("The scale above gives grams of food a day and how many calories can go to treats and toppers. It is an estimate, so check with your vet.", "Vaga gore daje grame hrane dnevno i koliko kalorija smije otići na poslastice i dodatke. To je procjena, pa provjeri s veterinarom.")],
+        [X("How much should my dog eat?", "Koliko bi moj pas trebao jesti?"), X("The scale above shows how many grams of each dish your dog needs a day. It is an estimate, so check with your vet.", "Vaga gore pokazuje koliko grama kojeg jela tvom psu treba dnevno. To je procjena, pa provjeri s veterinarom.")],
         [X("How much does one recipe make?", "Koliko hrane daje jedan recept?"), X("Every recipe says how much it makes, and how many days that lasts for your dog.", "Uz svaki recept piše koliko hrane daje i za koliko dana je dovoljno tvom psu.")],
-        [X("Is peanut butter safe for dogs?", "Je li maslac od kikirikija siguran za pse?"), X("Only without xylitol, which is poisonous to dogs. It is sometimes called birch sugar, so read the label. Every recipe with peanut butter warns you.", "Samo bez ksilitola, koji je psima otrovan. Ponekad piše kao brezin šećer, pa pročitaj sastav. Svaki recept s maslacem od kikirikija na to upozorava.")],
+        [X("Is peanut butter safe for dogs?", "Je li maslac od kikirikija siguran za pse?"), X("Only without xylitol, which is poisonous to dogs. On the label it can also be listed as E967 or birch sugar, so read the ingredients. Every recipe with peanut butter warns you.", "Samo bez ksilitola, koji je psima otrovan. Na sastavu može pisati i kao E967 ili brezov šećer, pa pročitaj sastav. Svaki recept s maslacem od kikirikija na to upozorava.")],
         [X("Can I use shop-bought broth?", "Smijem li koristiti kupovnu juhu?"), X("Yes, if the label has no onion or garlic. Many low-salt broths still contain them.", "Da, ako u sastavu nema luka ni češnjaka. Mnoge juhe s malo soli ih ipak sadrže.")],
         [X("My dog can't eat eggs or grains. What now?", "Moj pas ne smije jaja ili žitarice. Što sad?"), X("On the recipes page, choose “Dog can't have” and tap what your dog can't eat. When you order, tick the same.", "Na stranici s receptima odaberi „Pas ne smije” i dodirni što pas ne smije jesti. Kod narudžbe označi isto.")],
         [X("Can I print a recipe?", "Mogu li isprintati recept?"), X("Yes. Every recipe has a Print button.", "Da. Svaki recept ima gumb Ispiši.")],
@@ -1496,7 +1496,7 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
     warnC: {
         garlic: X("Garlic can harm dogs: it can damage their red blood cells. Leave it out.", "Češnjak može naštetiti psu: može oštetiti crvene krvne stanice. Izostavi ga."),
         vanilla: X("Vanilla extract usually contains alcohol, which isn't safe for dogs. Leave it out or use an alcohol-free one.", "Ekstrakt vanilije obično sadrži alkohol, koji nije siguran za pse. Izostavi ga ili uzmi onaj bez alkohola."),
-        xylitol: X("Use peanut butter without xylitol. It's poisonous to dogs and is sometimes listed as birch sugar.", "Uzmi maslac od kikirikija bez ksilitola. Psima je otrovan, a ponekad piše kao brezin šećer."),
+        xylitol: X("Use peanut butter without xylitol. It's poisonous to dogs and can also be listed as E967 or birch sugar.", "Uzmi maslac od kikirikija bez ksilitola. Psima je otrovan, a na sastavu može pisati i kao E967 ili brezov šećer."),
         salt: X("Dogs don't need added salt. Leave it out.", "Psu ne treba dodana sol. Izostavi je."),
         bacon: X("Bacon is salty and fatty. Leave it out, or use a little plain cooked lean meat.", "Slanina je slana i masna. Izostavi je ili stavi malo kuhanog nemasnog mesa bez začina."),
     } as Record<string, LS>,
