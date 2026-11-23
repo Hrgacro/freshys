@@ -23,4 +23,4 @@ python3 build.py ../src/FreshysSite.tsx ../data/catalog.json ../site
 
 ## Domena
 
-Vercel → projekt → Settings → Domains: `freshysfoods.com` (glavna) i `www.freshysfoods.com` (preusmjerenje na glavnu). DNS zapise koje Vercel pokaže upisati kod GoDaddyja.
+Vercel → projekt → Settings → Domains: `www.freshysfoods.com` (glavna) i `freshysfoods.com` (preusmjerenje 308 na www). DNS zapise koje Vercel pokaže upisati kod GoDaddyja.
