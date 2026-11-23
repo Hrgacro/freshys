@@ -1500,6 +1500,8 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
         salt: X("Dogs don't need added salt. Leave it out.", "Psu ne treba dodana sol. Izostavi je."),
         bacon: X("Bacon is salty and fatty. Leave it out, or use a little plain cooked lean meat.", "Slanina je slana i masna. Izostavi je ili stavi malo kuhanog nemasnog mesa bez začina."),
     } as Record<string, LS>,
+    suppH: X("This is a supplement, not a meal or a treat.", "Ovo je dodatak, a ne obrok ni poslastica."),
+    suppP: X("Ask your vet how much to give, and whether your dog should have it at all.", "Koliko ga davati i treba li ga tvoj pas uopće, pitaj veterinara."),
     noKc: X("This recipe doesn't give calories per portion, so we can't work out how much your dog can have.", "Ovaj recept ne navodi kalorije po porciji, pa ne možemo izračunati koliko smije tvoj pas."),
     budget: X("All treats and toppers together: up to", "Sve poslastice i dodaci zajedno: do"),
     ofRecipe: X("of the recipe", "recepta"),
@@ -3061,6 +3063,9 @@ const BROTH_URL = "https://www.chewy.com/education/dog/food-and-nutrition/bone-b
    in a UC Davis study of 200 home-prepared dog food recipes, 95% lacked at least one essential nutrient (Stockman et al. 2013,
    JAVMA), so the whole-meal view always says so and points to the vet for the supplement. */
 const DAY_KCAL_G = 1.095
+/* Pastes with turmeric and ginger (Golden Paste, Carrot, Ginger & Turmeric Paste) are supplements, not food: the 10 % calorie limit
+   would give 40–140 g of paste a day, which is no portion of a supplement, and how much to give is the vet's call (we never give doses). */
+const SUPP = new Set([2425, 2698])
 const HOME_URL = "https://www.ucdavis.edu/news/homemade-dog-food-recipes-can-be-risky-business-study-finds"
 /* Smallest and largest volume in a yield such as "About 1.9–2.15 l" (ml), or null when the yield isn't a volume. */
 const volRange = (s: string): [number, number] | null => {
@@ -3088,10 +3093,9 @@ const recLight = (r: Rec) => r.kind === "topper" && !r.kc.pc && kpgR(r) > 0 && !
    (copied from the recipe list, cat-v3): id -> [English title, Croatian title, photo, kcal of the whole recipe, cooked weight in g, allergens,
    minutes, number of ingredients, 1 when it goes in the oven] */
 const DAYC: Record<number, [string, string, string, number, number, string[], number, number, number]> = {
-    284: ["Chicken, Brown Rice & Egg Fried Rice", "Pržena riža s piletinom i jajetom", "09EMgjNzAIK8z7OMfr04jRpqLc.webp", 532, 350, ["chicken", "eggs", "grains"], 20, 5, 0],
+    284: ["Chicken, Brown Rice & Egg Fried Rice", "Pržena riža s piletinom i jajetom", "09EMgjNzAIK8z7OMfr04jRpqLc.webp", 586, 370, ["chicken", "eggs", "grains"], 20, 5, 0],
     501: ["Turkey, Pumpkin & Brown Rice Meal", "Puretina s bundevom i smeđom rižom", "fE2nIXfHuMp3ESBiucoHxPjRhzU.webp", 1242, 930, ["turkey", "grains"], 40, 7, 0],
     533: ["Turkey & Green Bean Bowl", "Zdjela puretine i mahuna", "AhRPW2pp0xM9EGMedhUhDPHPHlc.webp", 704, 430, ["turkey"], 30, 2, 0],
-    589: ["Turkey & Sweet Potato Kibble", "Granule od puretine i batata", "vi20A9ZxzMlaWnH6RQoNmQPwUW0.webp", 2367, 1720, ["turkey", "eggs", "grains"], 60, 10, 1],
     669: ["Salmon, Brown Rice & Veggie Meal", "Losos sa smeđom rižom i povrćem", "c4pkTFseyvqtZ5iZcqcjNe9jo.webp", 779, 420, ["fish", "grains"], 30, 5, 0],
     813: ["Beef, Pumpkin & Green Bean Bowl", "Zdjela govedine, bundeve i mahuna", "osAtgUArURNEff25FtGG0WHSQ7M.webp", 1926, 1220, ["beef"], 25, 6, 0],
     1033: ["Turkey, Sweet Potato & Pea Mash", "Pire od puretine, batata i graška", "2jeluUZ40M83wKwrHSNe48ZFM.webp", 1035, 660, ["turkey"], 30, 4, 0],
@@ -3102,17 +3106,15 @@ const DAYC: Record<number, [string, string, string, number, number, string[], nu
     2189: ["Beef, Spinach, and Sweet Potato Stew", "Varivo od govedine, špinata i batata", "dw99xAo8YrljJ9JUcDbwChq1Q.webp", 1099, 1000, ["beef"], 35, 6, 0],
     2352: ["Beef, Carrot & Brown Rice Meal", "Govedina s mrkvom i smeđom rižom", "drjCoYQHW6VFLPfyjtcCkMmb1Wc.webp", 1410, 1190, ["beef", "grains"], 30, 7, 0],
     2560: ["Beef, Apple, and Veggie Bowl", "Zdjela govedine, jabuke i povrća", "H6xZ8jD9fOAAw3jgELexNLagIXw.webp", 1027, 830, ["beef"], 20, 6, 0],
-    2653: ["Tuna, Rice & Veggies", "Tuna s rižom i povrćem", "nOKiyHTrlAmHsv9rr6VMCZLtA.webp", 468, 330, ["chicken", "fish", "grains"], 30, 7, 0],
     2836: ["Batch-Prep Meal with Poultry, Beef & Fish", "Velika tura hrane od peradi, govedine i ribe", "FXcWrt0PtDjTmSApJau5rHC9lM.webp", 23164, 16150, ["chicken", "turkey", "fish", "eggs"], 90, 33, 1],
     2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5938, 4070, ["turkey"], 40, 9, 0],
-    3091: ["Hearty Beef & Veggie Meal", "Izdašna govedina s povrćem", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 9897, 6330, ["beef", "grains"], 60, 8, 0],
+    3091: ["Hearty Beef & Veggie Meal", "Izdašna govedina s povrćem", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 10370, 6980, ["beef", "grains"], 60, 8, 0],
     3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1136, 850, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
     3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 1040, ["beef", "eggs", "grains"], 30, 6, 0],
     3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1889, 1340, ["chicken", "grains"], 50, 5, 0],
     3815: ["Turkey, Sweet Potato & Quinoa Meal Prep", "Puretina, batat i kvinoja za cijeli tjedan", "T8XGqa1Mm09DPI3juTa4ZpdDOMU.jpg", 5311, 4460, ["chicken", "turkey", "fish"], 50, 9, 0],
     4927: ["Chicken & Green Beans", "Piletina s mahunama", "YeByN39ky4UUpWa56MHsAxejk.jpg", 1438, 1170, ["chicken", "eggs", "grains"], 50, 7, 0],
     4941: ["Turkey, Rice & Liver Meal", "Puretina s rižom, jetrom i ljuskama jaja", "rnloYrEXSNaMW7058rINCRFcY0.jpg", 2375, 1540, ["turkey", "beef", "fish", "eggs", "grains"], 60, 8, 0],
-    4948: ["Chicken & Brown Rice Dog Kibble", "Granule od piletine i smeđe riže", "nwNBGNcPK7aT7zlww4Y28Va3J4.jpg", 1541, 890, ["chicken", "eggs", "grains"], 75, 7, 1],
 }
 const DAY_HOME = [4941, 3091, 3628, 669, 2852, 813]
 /* the week's plan: five whole-day dishes without the oven (chicken, beef, turkey with liver, and two big batches: turkey and beef);
@@ -3122,28 +3124,27 @@ const WPLAN_DAYS = 7
 /* Light dishes: similar whole-day dishes, best first (same meat, same vegetables, then the same kind of dish) */
 const DAY_SWAP: Record<string, number[]> = {
     "turkey-apple": [501, 533, 4941, 1033],
-    "salmon-sweet-potato": [1306, 669, 2836, 2653],
+    "salmon-sweet-potato": [1306, 669, 2836],
     "beef-sweet-potato": [2189, 2352, 1639, 813],
-    "turkey-spinach": [1033, 2181, 589, 3815],
-    "chicken-oat": [284, 3628, 4927, 4948],
+    "turkey-spinach": [1033, 2181, 3815],
+    "chicken-oat": [284, 3628, 4927],
     3859: [813, 2852, 501, 3102],
-    3805: [1033, 3815, 589, 533],
+    3805: [1033, 3815, 533],
     3385: [2560, 3535, 669, 1639],
     3045: [1219, 284, 3628, 4927],
-    2997: [3628, 284, 4927, 4948],
+    2997: [3628, 284, 4927],
     2672: [2852, 501, 3102, 533],
-    2635: [4948, 1219, 284, 3628],
-    2304: [284, 3628, 4948, 4927],
-    1682: [3628, 284, 4948, 4927],
+    2635: [1219, 284, 3628],
     1567: [2189, 1639, 813, 3091],
     1435: [1639, 813, 2189, 3091],
     1351: [1639, 813, 3091, 2836],
-    1086: [284, 3628, 4927, 4948],
+    1086: [284, 3628, 4927],
     925: [813, 1639, 3091, 2836],
-    877: [284, 3628, 4948, 4927],
-    860: [284, 3628, 4927, 4948],
+    877: [284, 3628, 4927],
+    860: [284, 3628, 4927],
     490: [1219, 284, 3628, 4927],
-    384: [284, 4948, 3628, 4927],
+    384: [284, 3628, 4927],
+    2653: [669, 1306, 2836],
 }
 /* Recipes a day in words people use: ¼, ⅓, ½, ⅔, ¾, then 1, 1½, 2… */
 const FRACS: [number, string][] = [[0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, "1"]]
@@ -3175,7 +3176,7 @@ const fl5 = (v: number) => Math.floor(v / 5) * 5
 
 /* All other recipes from mydogrecipe.com (used with permission), amounts converted to metric.
    Loaded only when the recipes page or one of these recipes is opened. */
-const CAT_URL = "https://framerusercontent.com/assets/li30tz6rh7FObymHae7A50akUZA.json"
+const CAT_URL = "https://framerusercontent.com/assets/V9jCFumOsZneUWPTQxBVhvsa60Q.json"
 const IMG_BASE = "https://framerusercontent.com/images/"
 type CKc = { p: "ml" | "pc" | "batch"; a: number; k: number; w?: string; we?: [string, string]; s?: "u" }
 type CRec = {
@@ -13606,6 +13607,15 @@ export default function FreshysSite(props: Props) {
         return vol ? { d1: 1 / f, ml: f * vol, tot: vol } : { d1: 1 / f }
     }
     const cPortion = (r: CRec) => {
+        if (SUPP.has(r.id))
+            return (
+                <>
+                    <p className="t" style={{ fontWeight: 600, color: "var(--ink)" }}>
+                        {L(T.suppH)}
+                    </p>
+                    <p className="t">{L(T.suppP)}</p>
+                </>
+            )
         const kc = r.kc
         const budget = day10
         const tail = share10(r.k === "t")
@@ -13815,8 +13825,8 @@ export default function FreshysSite(props: Props) {
                                         </div>
                                         {cLight(r) && swapBox(String(r.id), kpgC(r))}
                                         {cookBox(cInfo, cFr, cFz)}
-                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(day10 / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(day10 / (r.kc.k / r.kc.a)))) : 1))}
-                                        {r.kc && howBox(shareOf(cMealOk(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), r.k === "t", kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r))}
+                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc || SUPP.has(r.id) ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(day10 / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(day10 / (r.kc.k / r.kc.a)))) : 1))}
+                                        {r.kc && howBox(shareOf(cMealOk(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), r.k === "t", kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r), SUPP.has(r.id))}
                                     </div>
                                     {st.length > 0 && (
                                         <div className="fz-box">
