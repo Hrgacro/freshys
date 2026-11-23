@@ -3107,7 +3107,7 @@ const DAYC: Record<number, [string, string, string, number, number, string[], nu
     2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5938, 4070, ["turkey"], 40, 9, 0],
     3091: ["Hearty Beef & Veggie Meal", "Izdašna govedina s povrćem", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 9897, 6330, ["beef", "grains"], 60, 8, 0],
     3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1136, 850, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
-    3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 600, ["beef", "eggs", "grains"], 30, 6, 0],
+    3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 1040, ["beef", "eggs", "grains"], 30, 6, 0],
     3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1889, 1340, ["chicken", "grains"], 50, 5, 0],
     3815: ["Turkey, Sweet Potato & Quinoa Meal Prep", "Puretina, batat i kvinoja za cijeli tjedan", "T8XGqa1Mm09DPI3juTa4ZpdDOMU.jpg", 5311, 4460, ["chicken", "turkey", "fish"], 50, 9, 0],
     4927: ["Chicken & Green Beans", "Piletina s mahunama", "YeByN39ky4UUpWa56MHsAxejk.jpg", 1438, 1170, ["chicken", "eggs", "grains"], 50, 7, 0],
@@ -3175,7 +3175,7 @@ const fl5 = (v: number) => Math.floor(v / 5) * 5
 
 /* All other recipes from mydogrecipe.com (used with permission), amounts converted to metric.
    Loaded only when the recipes page or one of these recipes is opened. */
-const CAT_URL = "https://framerusercontent.com/assets/3zTMkYm7q6fT9o8W1ijS52nfcj0.json"
+const CAT_URL = "https://framerusercontent.com/assets/li30tz6rh7FObymHae7A50akUZA.json"
 const IMG_BASE = "https://framerusercontent.com/images/"
 type CKc = { p: "ml" | "pc" | "batch"; a: number; k: number; w?: string; we?: [string, string]; s?: "u" }
 type CRec = {
@@ -12835,10 +12835,6 @@ export default function FreshysSite(props: Props) {
         lang === "en"
             ? `The batch lasts ${parts} days. Make a smaller batch, or split it into portions and freeze them.`
             : `Recept je dovoljan za ${parts} ${plHr(parts, ["dan", "dana", "dana"])}. Skuhaj manju količinu ili ga podijeli u porcije i zamrzni.`
-    const tbspTxt = (ml: number) => {
-        const sp = Math.round(ml / 15)
-        return sp >= 1 ? (lang === "en" ? `About ${sp} tbsp.` : `Oko ${sp} ${plHr(sp, ["žlica", "žlice", "žlica"])}.`) : lang === "en" ? "Less than 1 tbsp." : "Manje od 1 žlice."
-    }
     const partsHr = (n: number) => plHr(n, ["jednak dio", "jednaka dijela", "jednakih dijelova"])
     /* Pieces a day in a form people use. n: pieces allowed (rounded down), perPc: kcal per piece,
        yMax: pieces in the batch (the larger number of a range, so a part is never over the limit; 0 if unknown). */
@@ -12915,7 +12911,6 @@ export default function FreshysSite(props: Props) {
                     <small>{u + " " + L(T.aDay)}</small>
                 </div>
                 {sub}
-                {g <= 120 && <p className="t">{tbspTxt(g)}</p>}
                 {parts === 1 && <p className="t">{lang === "en" ? "The whole batch fits in one day." : "Cijeli recept stane u jedan dan."}</p>}
                 {parts > 12 && <p className="t">{longTxt(parts)}</p>}
                 {parts > 1 && parts <= 12 && (
@@ -12938,7 +12933,6 @@ export default function FreshysSite(props: Props) {
                     <small>{L(T.mlDay)}</small>
                 </div>
                 {sub}
-                {ml <= 120 && <p className="t">{tbspTxt(ml)}</p>}
                 {parts === 1 && <p className="t">{lang === "en" ? "The whole batch fits in one day." : "Cijeli recept stane u jedan dan."}</p>}
                 {parts > 12 && <p className="t">{longTxt(parts)}</p>}
                 {parts > 1 && parts <= 12 && (
