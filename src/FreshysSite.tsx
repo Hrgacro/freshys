@@ -590,7 +590,7 @@ const T = {
     cta2: X("Find a recipe", "Pronađi recept"),
     heroNote: X("the reason we cook", "zbog njih kuhamo"),
     calcH: X("How much does your dog need a day?", "Koliko tvom psu treba dnevno?"),
-    calcSub: X("Enter your dog's weight and the food you give. You get calories and grams a day, and you can open the calculation to check it.", "Upiši težinu psa i hranu koju mu daješ. Dobit ćeš kalorije i grame dnevno, a račun možeš otvoriti i provjeriti."),
+    calcSub: X("Enter your dog's weight. We'll show how much your dog needs a day and how many days one batch lasts.", "Upiši koliko teži tvoj pas. Pokazat ćemo koliko mu treba dnevno i za koliko dana je dovoljan jedan recept."),
     weight: X("Weight", "Težina"),
     active: X("How active?", "Koliko se kreće?"),
     acts: [X("Not much", "Malo"), X("Normal", "Uobičajeno"), X("Sport or work", "Sport ili rad")],
@@ -722,7 +722,7 @@ const T = {
     cookO: [X("1 recipe", "1 recept"), X("7 days", "7 dana"), X("30 days", "30 dana"), X("Other", "Drugo")],
     cookAny: X("Type any number of days.", "Upiši bilo koji broj dana."),
     cookSteps: X("The amounts in the steps are for one recipe.", "Količine u koracima vrijede za jedan recept."),
-    dailyHint: X("Food for the whole day. Cook for a week, split it into daily portions and freeze them. On a recipe, pick how many days you're cooking for and the amounts are worked out for your dog.", "Hrana za cijeli dan. Skuhaj za tjedan, podijeli na dnevne porcije i zamrzni. Na receptu odaberi za koliko dana kuhaš i količine se izračunaju za tvog psa."),
+    dailyHint: X("Dishes filling enough for the whole day. Dishes with fewer calories, such as soups, are under Toppers: a dog would have to eat more of them for the whole day. Cook for a week, split it into daily portions and freeze them. On a recipe, pick how many days you're cooking for and the amounts are worked out for your dog.", "Jela dovoljno izdašna za cijeli dan. Jela s manje kalorija, poput juha, su u Dodacima: od njih bi pas za cijeli dan morao pojesti više. Skuhaj za tjedan, podijeli na dnevne porcije i zamrzni. Na receptu odaberi za koliko dana kuhaš i količine se izračunaju za tvog psa."),
     batch3: [X("Normal", "Obična"), X("Double", "Dvostruka"), X("More", "Više")],
     batchN: X("How many times the recipe", "Koliko puta recept"),
     vnK: X("Because of an upset stomach?", "Zbog želuca?"),
@@ -740,11 +740,22 @@ const T = {
     vnFine: X("Your own note of what the vet said. It isn't a prescription or a report.", "Tvoja bilješka onoga što je rekao veterinar. Nije recept ni nalaz."),
     vnOver: X("The days the vet gave have passed.", "Dani koje je rekao veterinar su prošli."),
     vnWhile: X("While the vet's recommendation lasts, the vet's amount is the one that counts.", "Dok traje preporuka veterinara, vrijedi količina koju je on rekao."),
-    feedL: X("How much home-cooked?", "Koliko domaće hrane?"),
-    feedO: [X("All", "Sve"), X("Half", "Pola"), X("10%", "10 %")],
+    feedL: X("How will you feed it?", "Kako ga želiš hraniti?"),
+    feedO: [X("Whole meal", "Cijeli obrok"), X("Half and half", "Pola-pola"), X("With kibble", "Uz granule")],
+    feedD: [X("Only home-cooked food", "Samo domaća hrana"), X("Half home-cooked, half kibble", "Pola domaće hrane, pola granula"), X("A little home-cooked food on top of the kibble", "Malo domaće hrane na granule")],
+    actS: [X("not very active", "malo se kreće"), X("normally active", "uobičajeno se kreće"), X("sport or work", "sport ili rad")],
+    chg: X("Change", "Promijeni"),
+    howK: X("How we worked it out", "Kako smo izračunali"),
+    vetDay: X("This recipe hasn't been checked as a complete diet: if your dog eats it every day, ask your vet about vitamins and minerals.", "Recept nije provjeren kao cjelovita prehrana: ako ga pas jede svaki dan, pitaj veterinara za vitamine i minerale."),
+    onTop: X("On top of the food your dog usually eats.", "Uz hranu koju inače jede."),
+    dayL: X("Dishes for the whole day", "Jela za cijeli dan"),
+    dayAll: X("All whole-day dishes", "Sva jela za cijeli dan"),
+    dayPup: X("For a puppy: the amount on top of puppy food.", "Za štene: količina uz hranu za štence."),
+    kibQ: X("Feeding kibble only? Work it out from the pack", "Hraniš samo granulama? Izračunaj s pakiranja"),
+    kcMid: X("We work with the middle:", "Računamo sa sredinom:"),
     halfRest: X("The other half is the usual food: give half as much of it as usual.", "Druga polovica je uobičajena hrana: daj je upola manje nego inače."),
     pfMixK: X("Home-cooked food", "Domaća hrana"),
-    pfMixH: X("All of the food, half of it, or 10% on top of the food you buy. Recipes and Make a meal work out the amounts from this.", "Sva hrana, pola, ili 10 % uz hranu koju kupuješ. Recepti i Složi obrok po tome računaju količine."),
+    pfMixH: X("Only home-cooked food, half and half, or a little home-cooked food on top of the kibble. Recipes and Make a meal work out the amounts from this.", "Samo domaća hrana, pola-pola ili malo domaće hrane na granule. Recepti i Složi obrok po tome računaju količine."),
     about: X("about", "oko"),
     recDay: X("of the recipe a day", "recepta dnevno"),
     recsDay: X("recipes a day", "recepta dnevno"),
@@ -2732,11 +2743,13 @@ const volOf = (s: string) => {
     return m[3] === "l" || m[3] === "kg" ? v * 1000 : v
 }
 const BROTH_URL = "https://www.chewy.com/education/dog/food-and-nutrition/bone-broth-for-dogs"
-/* Whole meal or on top of the usual food. A recipe can be the whole day's food when it is a meal and not a broth or a very light
-   soup (below MEAL_KCAL_ML a big dog would need several litres a day). None of the recipes is formulated as a complete diet:
+/* Whole meal or on top of the usual food. A dish can be the whole day's food when 100 g of it gives at least 110 kcal (rounded),
+   as fresh dog food sold for the whole day does (about 111–136 kcal per 100 g). Lighter stews and soups would mean well over
+   a kilo a day for a 20 kg dog, so they go on top of the usual food and point to a similar whole-day dish. Pieces (patties,
+   loaves) whose cooked weight isn't known yet aren't whole-day dishes. None of the recipes is formulated as a complete diet:
    in a UC Davis study of 200 home-prepared dog food recipes, 95% lacked at least one essential nutrient (Stockman et al. 2013,
    JAVMA), so the whole-meal view always says so and points to the vet for the supplement. */
-const MEAL_KCAL_ML = 0.6
+const DAY_KCAL_G = 1.095
 const HOME_URL = "https://www.ucdavis.edu/news/homemade-dog-food-recipes-can-be-risky-business-study-finds"
 /* Smallest and largest volume in a yield such as "About 1.9–2.15 l" (ml), or null when the yield isn't a volume. */
 const volRange = (s: string): [number, number] | null => {
@@ -2751,10 +2764,72 @@ const midNum = (s: string) => {
     const m = s.replace(/[{}]/g, "").replace(/(\d),(\d)/g, "$1.$2").match(/(\d+(?:\.\d+)?)(?:\s*[–-]\s*(\d+(?:\.\d+)?))?/)
     return m ? (parseFloat(m[1]) + parseFloat(m[2] || m[1])) / 2 : 0
 }
-const cMealOk = (r: CRec) => r.k === "m" && !!r.kc && !/\bbroth\b/i.test(r.t) && (r.kc.p !== "ml" || r.kc.k / r.kc.a >= MEAL_KCAL_ML)
-const kpgC = (r: CRec) => (r.fw && r.tk ? r.tk / r.fw : 0)
-const kpgR = (r: Rec) => (r.fw && r.tk ? r.tk / r.fw : 0)
-const recMealOk = (r: Rec) => (r.kind === "topper" || r.kind === "bland") && !r.kc.pc && (r.kc.g || 0) >= MEAL_KCAL_ML
+/* kcal per gram of the cooked dish, rounded to whole kcal per 100 g: the number the page shows ("100 g ≈ 154 kcal") is the one every amount uses */
+const kpgOf = (tk: number, fw: number) => Math.round((tk / fw) * 100) / 100
+const kpgC = (r: CRec) => (r.fw && r.tk ? kpgOf(r.tk, r.fw) : 0)
+const kpgR = (r: Rec) => (r.fw && r.tk ? kpgOf(r.tk, r.fw) : 0)
+const cMealOk = (r: CRec) => r.k === "m" && !!r.kc && !/\bbroth\b/i.test(r.t) && r.kc.p !== "pc" && kpgC(r) >= DAY_KCAL_G
+const recMealOk = (r: Rec) => (r.kind === "topper" || r.kind === "bland") && !r.kc.pc && (kpgR(r) || r.kc.g || 0) >= DAY_KCAL_G
+/* a light dish that people might cook as the whole day's food: kcal per gram known, but under the whole-day line */
+const cLight = (r: CRec) => r.k === "m" && !!r.kc && !/\bbroth\b/i.test(r.t) && r.kc.p !== "pc" && kpgC(r) > 0 && !cMealOk(r)
+const recLight = (r: Rec) => r.kind === "topper" && !r.kc.pc && kpgR(r) > 0 && !recMealOk(r)
+/* Whole-day dishes from the recipe list that the scale on the home page shows and light dishes point to
+   (copied from the recipe list, cat-v3): id -> [English title, Croatian title, photo, kcal of the whole recipe, cooked weight in g, allergens,
+   minutes, number of ingredients, 1 when it goes in the oven] */
+const DAYC: Record<number, [string, string, string, number, number, string[], number, number, number]> = {
+    284: ["Chicken, Brown Rice & Egg Fried Rice", "Pržena riža s piletinom i jajetom", "09EMgjNzAIK8z7OMfr04jRpqLc.webp", 532, 350, ["chicken", "eggs", "grains"], 20, 5, 0],
+    501: ["Turkey, Pumpkin & Brown Rice Meal", "Puretina s bundevom i smeđom rižom", "fE2nIXfHuMp3ESBiucoHxPjRhzU.webp", 1242, 930, ["turkey", "grains"], 40, 7, 0],
+    533: ["Turkey & Green Bean Bowl", "Zdjela puretine i mahuna", "AhRPW2pp0xM9EGMedhUhDPHPHlc.webp", 704, 430, ["turkey"], 30, 2, 0],
+    589: ["Turkey & Sweet Potato Kibble", "Granule od puretine i batata", "vi20A9ZxzMlaWnH6RQoNmQPwUW0.webp", 2367, 1720, ["turkey", "eggs", "grains"], 60, 10, 1],
+    669: ["Salmon, Brown Rice & Veggie Meal", "Losos sa smeđom rižom i povrćem", "c4pkTFseyvqtZ5iZcqcjNe9jo.webp", 779, 420, ["fish", "grains"], 30, 5, 0],
+    813: ["Beef, Pumpkin & Green Bean Bowl", "Zdjela govedine, bundeve i mahuna", "osAtgUArURNEff25FtGG0WHSQ7M.webp", 1926, 1220, ["beef"], 25, 6, 0],
+    1033: ["Turkey, Sweet Potato & Pea Mash", "Pire od puretine, batata i graška", "2jeluUZ40M83wKwrHSNe48ZFM.webp", 1035, 660, ["turkey"], 30, 4, 0],
+    1219: ["Sweet Potato & Chicken Meatloaf", "Mesna štruca od batata i piletine", "lrCxZnbfl2MCHraAVk0C8Zs.webp", 1484, 920, ["chicken", "turkey", "eggs", "grains"], 65, 7, 1],
+    1306: ["Salmon & Sweet Potato Loaf", "Štruca od lososa i batata", "qvtIEfJ8TGtzCBSW2C1SO0NICM.png", 1347, 730, ["fish", "eggs", "grains"], 45, 7, 1],
+    1639: ["Beef, Rice & Green Bean Casserole", "Složenac od govedine, riže i mahuna", "yQBESSfvxCRwqtP5JLRccsqNqU4.webp", 1506, 860, ["beef", "grains"], 60, 6, 1],
+    2181: ["Turkey, Spinach, and Rice Loaf", "Štruca od puretine, špinata i riže", "iBf9RFqnaiEzSwPtuPEt38CKS9Y.webp", 1249, 820, ["turkey", "eggs", "grains", "dairy"], 65, 6, 1],
+    2189: ["Beef, Spinach, and Sweet Potato Stew", "Varivo od govedine, špinata i batata", "dw99xAo8YrljJ9JUcDbwChq1Q.webp", 1099, 1000, ["beef"], 35, 6, 0],
+    2352: ["Beef, Carrot & Brown Rice Meal", "Govedina s mrkvom i smeđom rižom", "drjCoYQHW6VFLPfyjtcCkMmb1Wc.webp", 1410, 1190, ["beef", "grains"], 30, 7, 0],
+    2560: ["Beef, Apple, and Veggie Bowl", "Zdjela govedine, jabuke i povrća", "H6xZ8jD9fOAAw3jgELexNLagIXw.webp", 1027, 830, ["beef"], 20, 6, 0],
+    2653: ["Tuna, Rice & Veggies", "Tuna s rižom i povrćem", "nOKiyHTrlAmHsv9rr6VMCZLtA.webp", 468, 330, ["chicken", "fish", "grains"], 30, 7, 0],
+    2836: ["Batch-Prep Meal with Poultry, Beef & Fish", "Velika tura hrane od peradi, govedine i ribe", "FXcWrt0PtDjTmSApJau5rHC9lM.webp", 23164, 16150, ["chicken", "turkey", "fish", "eggs"], 90, 33, 1],
+    2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5938, 4070, ["turkey"], 40, 9, 0],
+    3091: ["Hearty Beef & Veggie Meal", "Izdašna govedina s povrćem", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 9897, 6330, ["beef", "grains"], 60, 8, 0],
+    3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1136, 850, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
+    3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 600, ["beef", "eggs", "grains"], 30, 6, 0],
+    3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1889, 1340, ["chicken", "grains"], 50, 5, 0],
+    3815: ["Turkey, Sweet Potato & Quinoa Meal Prep", "Puretina, batat i kvinoja za cijeli tjedan", "T8XGqa1Mm09DPI3juTa4ZpdDOMU.jpg", 5311, 4460, ["chicken", "turkey", "fish"], 50, 9, 0],
+    4927: ["Chicken & Green Beans", "Piletina s mahunama", "YeByN39ky4UUpWa56MHsAxejk.jpg", 1438, 1170, ["chicken", "eggs", "grains"], 50, 7, 0],
+    4941: ["Turkey, Rice & Liver Meal", "Puretina s rižom, jetrom i ljuskama jaja", "rnloYrEXSNaMW7058rINCRFcY0.jpg", 2375, 1540, ["turkey", "beef", "fish", "eggs", "grains"], 60, 8, 0],
+    4948: ["Chicken & Brown Rice Dog Kibble", "Granule od piletine i smeđe riže", "nwNBGNcPK7aT7zlww4Y28Va3J4.jpg", 1541, 890, ["chicken", "eggs", "grains"], 75, 7, 1],
+}
+const DAY_HOME = [4941, 3091, 3628, 669, 2852, 813]
+/* Light dishes: similar whole-day dishes, best first (same meat, same vegetables, then the same kind of dish) */
+const DAY_SWAP: Record<string, number[]> = {
+    "turkey-apple": [501, 533, 4941, 1033],
+    "salmon-sweet-potato": [1306, 669, 2836, 2653],
+    "beef-sweet-potato": [2189, 2352, 1639, 813],
+    "turkey-spinach": [1033, 2181, 589, 3815],
+    "chicken-oat": [284, 3628, 4927, 4948],
+    3859: [813, 2852, 501, 3102],
+    3805: [1033, 3815, 589, 533],
+    3385: [2560, 3535, 669, 1639],
+    3045: [1219, 284, 3628, 4927],
+    2997: [3628, 284, 4927, 4948],
+    2672: [2852, 501, 3102, 533],
+    2635: [4948, 1219, 284, 3628],
+    2304: [284, 3628, 4948, 4927],
+    1682: [3628, 284, 4948, 4927],
+    1567: [2189, 1639, 813, 3091],
+    1435: [1639, 813, 2189, 3091],
+    1351: [1639, 813, 3091, 2836],
+    1086: [284, 3628, 4927, 4948],
+    925: [813, 1639, 3091, 2836],
+    877: [284, 3628, 4948, 4927],
+    860: [284, 3628, 4927, 4948],
+    490: [1219, 284, 3628, 4927],
+    384: [284, 4948, 3628, 4927],
+}
 /* Recipes a day in words people use: ¼, ⅓, ½, ⅔, ¾, then 1, 1½, 2… */
 const FRACS: [number, string][] = [[0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, "1"]]
 const fracTxt = (f: number) => {
@@ -2829,7 +2904,7 @@ const loadCatalog = () =>
             catLoad = null
             throw e
         }))
-const cImg = (r: CRec, w = 512) => IMG_BASE + r.img + "?scale-down-to=" + w
+const cImg = (r: { img: string }, w = 512) => IMG_BASE + r.img + "?scale-down-to=" + w
 const cId = (r: CRec) => "mdr-" + r.id
 const PC_HR: Record<string, [string, string, string]> = {
     treat: ["poslastica", "poslastice", "poslastica"],
@@ -3607,6 +3682,55 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-box .ln{display:flex;align-items:center;gap:10px;font-size:15px;padding:9px 0;border-bottom:1px solid var(--line)}
 .fz-box .ln:last-child{border-bottom:0;padding-bottom:0}
 .fz-box .fine{font-size:13px;color:var(--ink2);margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+/* amounts, the simple way */
+.fz-dsum{margin-top:8px}
+.fz-dsum .fz-link{margin-left:2px}
+.fz-ded{margin-top:12px;padding:14px 14px 4px;border-radius:16px;background:var(--bg2)}
+.fz-ded .fz-lbl{margin:0 0 8px}
+.fz-ded .fz-seg{background:#fff;margin-bottom:14px}
+.fz-ded .fz-seg button[aria-pressed="true"]{background:var(--g0);color:var(--g);box-shadow:none}
+.fz-ded .fz-hint{margin:-6px 0 12px}
+.fz-feedr{display:grid;gap:8px}
+.fz-feedr button{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .2s,background-color .2s}
+.fz-feedr button i{flex:none;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 2px #B9B2A4;transition:box-shadow .2s}
+.fz-feedr button[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--g);background:#F6FAF6}
+.fz-feedr button[aria-checked="true"] i{box-shadow:inset 0 0 0 6px var(--g)}
+.fz-feedr b{display:block;font-size:16px;font-weight:700;color:var(--ink)}
+.fz-feedr small{display:block;font-size:14px;color:var(--ink2);margin-top:1px}
+@media (hover:hover){.fz-feedr button:hover{background:#FAF8F3}}
+.fz-dlist{border-radius:22px;padding:18px 18px 12px;background:var(--g0)}
+.fz-dlist .k{font-size:14px;font-weight:600;color:var(--g);margin-bottom:6px}
+.fz-dlist .t{font-size:14px;color:var(--ink3);margin:0 0 6px}
+.fz-dayr{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 0;border-top:1px solid rgba(47,93,58,.14);color:var(--ink)}
+.fz-dlist .k + .fz-dayr,.fz-dlist .t + .fz-dayr{border-top:0}
+.fz-dayr img{width:58px;height:58px;flex:none;border-radius:14px;object-fit:cover;background:var(--bg2)}
+.fz-dayr>span{flex:1;min-width:0}
+.fz-dayr b{display:block;font-size:15.5px;font-weight:700;line-height:1.25}
+.fz-dayr small{display:block;font-size:14px;color:var(--ink2);margin-top:3px;line-height:1.35}
+.fz-dayr svg{flex:none;color:#A79F8F}
+@media (hover:hover){.fz-dayr:hover b{text-decoration:underline;text-underline-offset:2px}}
+.fz-dall{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:15px;font-weight:600;padding:6px 0}
+.fz-kib{border-radius:22px;background:var(--bg2);padding:0 18px}
+.fz-kib[open]{padding-bottom:18px}
+.fz-kib summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;font-size:15.5px;font-weight:600;color:var(--ink)}
+.fz-kib summary::-webkit-details-marker{display:none}
+.fz-kib summary svg{flex:none;color:var(--ink2);transition:transform .25s}
+.fz-kib[open] summary svg{transform:rotate(180deg)}
+.fz-kib .fz-seg{background:#fff}
+.fz-kibr{margin-top:16px}
+.fz-kibr .fz-tile{background:#fff}
+.fz-swap{margin-top:14px;padding:14px;border-radius:16px;background:var(--or0)}
+.fz-swap p{font-size:14.5px;line-height:1.45;color:#5A3208}
+.fz-swap .fz-dayr{margin-top:10px;padding:8px 10px;border:0;border-radius:14px;background:#fff}
+.fz-swap .fz-dayr img{width:52px;height:52px;border-radius:12px}
+.fz-calcd{margin-top:14px;border-top:1px solid var(--line)}
+.fz-calcd summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:14px 0 2px;font-size:14px;font-weight:600;color:var(--ink2)}
+.fz-calcd summary::-webkit-details-marker{display:none}
+.fz-calcd summary svg{transition:transform .25s}
+.fz-calcd[open] summary svg{transform:rotate(180deg)}
+.fz-calcd .t{font-size:14px;margin-top:8px}
+.fz-calcd .fz-share{margin-top:12px}
+.fz-sum{font-variant-numeric:tabular-nums;color:var(--ink)!important;font-weight:600}
 .fz-box--g .fz-btn{width:100%;margin-top:18px}
 .fz-box--g .pou{display:flex;align-items:center;gap:14px;margin-top:14px}
 .fz-qa{margin-top:56px;max-width:860px}
@@ -4977,6 +5101,7 @@ export default function FreshysSite(props: Props) {
     const [vzf, setVzf] = useState<{ d: string; why: string } | null>(null)
     const [ppv, setPpv] = useState(false)
     const [vpo, setVpo] = useState("")
+    const [dEd, setDEd] = useState(false) // the dog's age, neutering and activity, open under its one-line summary
     const prof: Pet | null = ps ? ps.pets.find((x) => x.id === ps.cur) || ps.pets[0] || null : null
     useEffect(() => {
         if (isCanvas || typeof window === "undefined") return
@@ -5099,6 +5224,7 @@ export default function FreshysSite(props: Props) {
     const go = (pg: Page) => {
         setPage(pg)
         setMenu(false)
+        setDEd(false)
         if (isCanvas || typeof window === "undefined") return
         try {
             window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search + toHash(pg))
@@ -10747,9 +10873,144 @@ export default function FreshysSite(props: Props) {
         </header>
     )
 
+    /* ---------- amounts, the simple way: the dog's weight, how it is fed, grams a day ---------- */
+
+    /* the day's energy in whole kcal, so every sum under "How we worked it out" can be checked with a calculator */
+    const kLoD = Math.round(kLo)
+    const kHiD = Math.round(kHi)
+    const kMid = Math.round((kLoD + kHiD) / 2)
+    const day10 = Math.round(kLoD * 0.1)
+    const pup = dog.age < 2
+    /* share of the day's calories that comes from the home-cooked recipe; puppies stay on 10 % */
+    const SHARES = [1, 0.5, 0.1]
+    const shareOf = (ok: boolean) => (ok && !pup ? SHARES[feed] : 0.1)
+    /* kcal a day from the home-cooked dish: the middle of the need (or half of it), or up to 10 % of the lower end */
+    const needDay = (sh: number) => (sh > 0.1 ? Math.round(kMid * sh) : day10)
+    const tMin = (m: number) => (m < 60 ? m + " min" : Math.floor(m / 60) + " h" + (m % 60 ? " " + (m % 60) + " min" : ""))
+    /* grams a day: 10 g steps up to 300 g, 50 g up to 1 kg, then kilograms with one decimal */
+    const gTxt = (g: number): [string, string] => {
+        const r = g >= 300 ? Math.round(g / 50) * 50 : Math.max(5, Math.round(g / (g >= 100 ? 10 : 5)) * (g >= 100 ? 10 : 5))
+        if (r >= 1000) {
+            const k = g >= 10000 ? Math.round(g / 1000) : Math.round(g / 100) / 10
+            return [nf(k, lang, k % 1 ? 1 : 0), "kg"]
+        }
+        return [nf(r, lang), "g"]
+    }
+    /* an "up to" amount: never rounded up (5 g steps, then kilograms rounded down to one decimal) */
+    const gTxtDn = (g: number): [string, string] => {
+        if (g >= 1000) {
+            const k = Math.floor(g / 100) / 10
+            return [nf(k, lang, k % 1 ? 1 : 0), "kg"]
+        }
+        return [nf(Math.max(5, fl5(g)), lang), "g"]
+    }
+    /* grams a day of a whole-day dish (kcal per gram): about the middle of the need for a whole or half meal, up to 10 % on top of other food */
+    const dayG = (kpg: number, sh: number) => (sh > 0.1 ? needDay(sh) / kpg : Math.max(5, fl5(day10 / kpg)))
+    const dayGTxt = (kpg: number, sh: number) => {
+        const [v, u] = sh > 0.1 ? gTxt(dayG(kpg, sh)) : gTxtDn(dayG(kpg, sh))
+        return (sh > 0.1 ? L(T.about) : L(T.upTo)) + " " + v + " " + u + " " + L(T.aDay)
+    }
+    /* how long one batch lasts, in a few words (d = days) */
+    const daysShort = (d: number) => {
+        if (d < 0.9) return lang === "en" ? fracTxt(1 / d) + " batches a day" : fracTxt(1 / d) + " recepta za dan"
+        const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
+        if (lang === "en") return "one batch lasts " + (h % 1 ? Math.floor(h) + "½" : h) + (h === 1 ? " day" : " days")
+        return "jedan recept za " + (h === 1.5 ? "dan i pol" : h % 1 ? Math.floor(h) + " i pol dana" : h + " " + plHr(h, ["dan", "dana", "dana"]))
+    }
+    /* a whole-day dish from the recipe list as one row: photo, name, grams a day and how long a batch lasts */
+    const dayRow = (id: number, sh: number, long = true) => {
+        const d = DAYC[id]
+        const kpg = kpgOf(d[3], d[4])
+        return (
+            <button key={id} type="button" className="fz-dayr" onClick={() => go({ p: "recipe", id: "mdr-" + id })}>
+                <img src={cImg({ img: d[2] }, 256)} alt="" loading="lazy" decoding="async" />
+                <span>
+                    <b>{lang === "hr" ? d[1] : d[0]}</b>
+                    <small>
+                        {dayGTxt(kpg, sh)}
+                        {long && sh > 0.1 ? " · " + daysShort(d[4] / dayG(kpg, sh)) : ""}
+                    </small>
+                </span>
+                <Ico d={I.right} s={16} w={2.4} />
+            </button>
+        )
+    }
+    const dayOk = (id: number) => !!DAYC[id] && !DAYC[id][5].some((a) => dog.no.includes(a))
+    /* a whole-day dish as a recipe card (same card as on the recipe list) */
+    const dcard = (id: number, i: number) => {
+        const d = DAYC[id]
+        const rm: RMeta = { has: new Set(), no: new Set(), oven: !!d[8], frozen: false, n: d[7], shop: true, min: d[6] || null }
+        const open = () => go({ p: "recipe", id: "mdr-" + id })
+        return (
+            <article key={"d" + id} className="fz-rc" style={{ ["--r" as any]: ROT[i % ROT.length] + "deg" } as React.CSSProperties}>
+                <button className="im" type="button" tabIndex={-1} aria-hidden="true" onClick={open}>
+                    <img src={cImg({ img: d[2] }, 512)} alt="" loading="lazy" decoding="async" />
+                </button>
+                <div className="b">
+                    <h3>
+                        <button type="button" onClick={open}>
+                            {lang === "hr" ? d[1] : d[0]}
+                        </button>
+                    </h3>
+                    <div className="m">
+                        {d[6] ? tMin(d[6]) + " · " : ""}
+                        {d[7]} {pl(lang, d[7], ["ingredient", "ingredients"], ["sastojak", "sastojka", "sastojaka"])}
+                    </div>
+                    <div className="row">
+                        <span className="tags">
+                            <span className="fz-tag fz-tag--t">{L(T.kMeal)}</span>
+                            {methodTag(rm)}
+                        </span>
+                        <span className="bb">
+                            <button type="button" className="fz-btn fz-btn--sm fz-btn--g" onClick={open}>
+                                {L(T.cook)}
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </article>
+        )
+    }
+    /* the dog in one line ("Adult · neutered · normally active · Change"), the rest opens on Change */
+    const dogSum = (() => {
+        const xs = [feedPet && !pfOff ? pfNm(feedPet) : "", L(T.ages[dog.age]), dog.age === 2 ? L(T.neutS[dog.neut ? 0 : 1]) : "", dog.age === 2 ? L(T.actS[dog.act]) : ""].filter(Boolean)
+        const t = xs.map((x, i) => (i && x !== xs[0] ? x.charAt(0).toLowerCase() + x.slice(1) : x)).join(" · ")
+        return t.charAt(0).toUpperCase() + t.slice(1)
+    })()
+    const dogEd = (
+        <div className="fz-ded">
+            <span className="fz-lbl">{L(T.age)}</span>
+            {seg(T.ages, dog.age, setAge, T.age)}
+            {dog.age < 2 ? (
+                <p className="fz-hint fz-hint--w">{L(T.puppy)}</p>
+            ) : (
+                <>
+                    <span className="fz-lbl">{L(T.neut)}</span>
+                    {seg(T.yesNo, dog.neut ? 0 : 1, (i) => setDog({ ...dog, neut: i === 0 }), T.neut)}
+                    <span className="fz-lbl">{L(T.active)}</span>
+                    {seg(T.acts, dog.act, (i) => setDog({ ...dog, act: i }), T.active)}
+                    <p className="fz-hint">{L(T.actHint[dog.act])}</p>
+                </>
+            )}
+        </div>
+    )
+    const dogLine = (
+        <>
+            <p className="fz-hint fz-dsum">
+                {dogSum}{" "}
+                <button type="button" className="fz-link" aria-expanded={dEd} onClick={() => setDEd(!dEd)}>
+                    {L(dEd ? T.close : T.chg)}
+                </button>
+            </p>
+            {dEd && dogEd}
+        </>
+    )
+
     /* ---------- home ---------- */
 
-    const weekIds = ["turkey-apple", "salmon-sweet-potato", "beef-sweet-potato", "turkey-spinach", "fruit-rings", "pb-banana"]
+    /* this week: four dishes for the whole day (salmon, beef, turkey, chicken) and two treats */
+    const weekDay = [1306, 813, 501, 1219]
+    const weekIds = ["fruit-rings", "pb-banana"]
     const home = (
         <div className="fz-page" key="home">
             <section className="fz-hero fz-ruled">
@@ -10850,85 +11111,112 @@ export default function FreshysSite(props: Props) {
                                 </button>
                             </div>
                             {weightSlider("fz-kg1")}
-                            <span className="fz-lbl">{L(T.age)}</span>
-                            {seg(T.ages, dog.age, setAge, T.age)}
-                            {dog.age < 2 ? (
-                                <p className="fz-hint fz-hint--w">{L(T.puppy)}</p>
-                            ) : (
+                            {dogLine}
+                            {!pup && (
                                 <>
                                     <div className="fz-gap2" />
-                                    <span className="fz-lbl">{L(T.neut)}</span>
-                                    {seg(T.yesNo, dog.neut ? 0 : 1, (i) => setDog({ ...dog, neut: i === 0 }), T.neut)}
-                                    <div className="fz-gap2" />
-                                    <span className="fz-lbl">{L(T.active)}</span>
-                                    {seg(T.acts, dog.act, (i) => setDog({ ...dog, act: i }), T.active)}
-                                    <p className="fz-hint">{L(T.actHint[dog.act])}</p>
+                                    <span className="fz-lbl">{L(T.feedL)}</span>
+                                    <div className="fz-feedr" role="radiogroup" aria-label={L(T.feedL)}>
+                                        {T.feedO.map((o, i) => (
+                                            <button key={i} type="button" role="radio" aria-checked={feed === i} onClick={() => setFeed(i)}>
+                                                <i aria-hidden="true" />
+                                                <span>
+                                                    <b>{L(o)}</b>
+                                                    <small>{L(T.feedD[i])}</small>
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </>
                             )}
-                            <div className="fz-gap2" />
-                            <label className="fz-lbl" htmlFor="fz-kc">
-                                {L(T.foodK)}
-                            </label>
-                            {seg(T.foods, foodI, (i) => setKcTxt(String(FOODS[i])), T.foodK)}
-                            <div className="fz-kcin">
-                                <input id="fz-kc" className="fz-inp" inputMode="decimal" value={kcTxt} maxLength={5} autoComplete="off" onChange={(e) => setKcTxt(e.target.value.replace(/[^\d.,]/g, ""))} />
-                                <span>{L(T.per100)}</span>
-                            </div>
-                            <p className={"fz-hint" + (kcOdd || !kcOk ? " fz-hint--w" : "")}>{kcOdd || (!kcOk && kcTxt) ? L(T.kcalBad) : L(T.foodHint)}</p>
                         </div>
                         <div className="fz-res" aria-live="polite">
-                            <div className="fz-tile">
-                                <div className="k">
-                                    {L(T.foodDay)}
-                                    {foodI >= 0 ? " · " + L(T.foods[foodI]).toLowerCase() : ""}
-                                </div>
-                                {kcOk ? (
-                                    <>
-                                        <div className="v">
-                                            <Num v={rG(gLo)} lang={lang} />
-                                            {gHi > gLo && (
-                                                <>
-                                                    –<Num v={rG(gHi)} lang={lang} />
-                                                </>
-                                            )}
-                                            <small>g</small>
-                                        </div>
-                                        <div className="d">
-                                            {L(T.meals2)} {nf(rG(gLo / 2), lang)}
-                                            {gHi > gLo ? "–" + nf(rG(gHi / 2), lang) : ""} g · {nf(kc100, lang, kc100 % 1 ? 1 : 0)} {L(T.per100)}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="v">–</div>
-                                        <div className="d">{L(T.foodDayNo)}</div>
-                                    </>
-                                )}
+                            <div className="fz-dlist">
+                                <div className="k">{L(T.dayL)}</div>
+                                {pup && <p className="t">{L(T.dayPup)}</p>}
+                                {DAY_HOME.filter(dayOk)
+                                    .slice(0, 3)
+                                    .map((id) => dayRow(id, shareOf(true)))}
+                                <button
+                                    type="button"
+                                    className="fz-link fz-dall"
+                                    onClick={() => {
+                                        setCat("daily")
+                                        go({ p: "recipes" })
+                                    }}
+                                >
+                                    {L(T.dayAll)} <Ico d={I.right} s={15} w={2.4} />
+                                </button>
                             </div>
-                            <div className="fz-tile fz-tile--s">
-                                <div className="k">{L(T.needK)}</div>
-                                <div className="v">
-                                    <Num v={rK(kLo)} lang={lang} />
-                                    {kHi > kLo && (
+                            <details className="fz-kib">
+                                <summary>
+                                    {L(T.kibQ)}
+                                    <Ico d={I.down} s={18} w={2.2} />
+                                </summary>
+                                <label className="fz-lbl" htmlFor="fz-kc">
+                                    {L(T.foodK)}
+                                </label>
+                                {seg(T.foods, foodI, (i) => setKcTxt(String(FOODS[i])), T.foodK)}
+                                <div className="fz-kcin">
+                                    <input id="fz-kc" className="fz-inp" inputMode="decimal" value={kcTxt} maxLength={5} autoComplete="off" onChange={(e) => setKcTxt(e.target.value.replace(/[^\d.,]/g, ""))} />
+                                    <span>{L(T.per100)}</span>
+                                </div>
+                                <p className={"fz-hint" + (kcOdd || !kcOk ? " fz-hint--w" : "")}>{kcOdd || (!kcOk && kcTxt) ? L(T.kcalBad) : L(T.foodHint)}</p>
+                                <div className="fz-res fz-kibr">
+                                <div className="fz-tile">
+                                    <div className="k">
+                                        {L(T.foodDay)}
+                                        {foodI >= 0 ? " · " + L(T.foods[foodI]).toLowerCase() : ""}
+                                    </div>
+                                    {kcOk ? (
                                         <>
-                                            –<Num v={rK(kHi)} lang={lang} />
+                                            <div className="v">
+                                                <Num v={rG(gLo)} lang={lang} />
+                                                {gHi > gLo && (
+                                                    <>
+                                                        –<Num v={rG(gHi)} lang={lang} />
+                                                    </>
+                                                )}
+                                                <small>g</small>
+                                            </div>
+                                            <div className="d">
+                                                {L(T.meals2)} {nf(rG(gLo / 2), lang)}
+                                                {gHi > gLo ? "–" + nf(rG(gHi / 2), lang) : ""} g · {nf(kc100, lang, kc100 % 1 ? 1 : 0)} {L(T.per100)}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="v">–</div>
+                                            <div className="d">{L(T.foodDayNo)}</div>
                                         </>
                                     )}
-                                    <small>kcal</small>
                                 </div>
-                                <div className="d">
-                                    {L(T.restE)} {nf(Math.round(rer), lang)} kcal × {fx(FAC[fk][0], FAC[fk][1])}
+                                <div className="fz-tile fz-tile--s">
+                                    <div className="k">{L(T.needK)}</div>
+                                    <div className="v">
+                                        <Num v={rK(kLo)} lang={lang} />
+                                        {kHi > kLo && (
+                                            <>
+                                                –<Num v={rK(kHi)} lang={lang} />
+                                            </>
+                                        )}
+                                        <small>kcal</small>
+                                    </div>
+                                    <div className="d">
+                                        {L(T.restE)} {nf(Math.round(rer), lang)} kcal × {fx(FAC[fk][0], FAC[fk][1])}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="fz-tile fz-tile--o">
-                                <div className="k">{L(T.treatK)}</div>
-                                <div className="v">
-                                    <em>{L(T.upTo)}</em>
-                                    <Num v={Math.max(5, fl5(kLo * 0.1))} lang={lang} />
-                                    <small>kcal</small>
+                                <div className="fz-tile fz-tile--o">
+                                    <div className="k">{L(T.treatK)}</div>
+                                    <div className="v">
+                                        <em>{L(T.upTo)}</em>
+                                        <Num v={Math.max(5, fl5(day10))} lang={lang} />
+                                        <small>kcal</small>
+                                    </div>
+                                    <div className="d">{L(T.treatD)}</div>
                                 </div>
-                                <div className="d">{L(T.treatD)}</div>
-                            </div>
+                                </div>
+                            </details>
                         </div>
                         <div className="fz-note fz-hand">
                             {L(T.calcNote)}
@@ -11001,7 +11289,10 @@ export default function FreshysSite(props: Props) {
                 <div className="fz-wrap">
                     <h2 className="fz-h2">{L(T.weekH)}</h2>
                     <p className="fz-lead">{L(SHOP ? T.weekSub : T.weekSubNow)}</p>
-                    <div className="fz-grid fz-grid--week">{weekIds.map((id, i) => card(RECIPES.find((r) => r.id === id) as Rec, i))}</div>
+                    <div className="fz-grid fz-grid--week">
+                        {weekDay.map((id, i) => dcard(id, i))}
+                        {weekIds.map((id, i) => card(RECIPES.find((r) => r.id === id) as Rec, i + weekDay.length))}
+                    </div>
                     <div className="fz-center">
                         <button type="button" className="fz-btn fz-btn--g" onClick={() => go({ p: "recipes" })}>
                             {L(T.allR)} <Ico d={I.right} s={16} w={2.4} />
@@ -11441,7 +11732,8 @@ export default function FreshysSite(props: Props) {
     const rec = RECIPES[rIdx]
     const recPouch = rec.pouch ? POUCHES.find((p) => p.id === rec.pouch) : undefined
     /* Why the amount is small: a topper or treats are 10% of the day, the usual food is the other 90%. */
-    const share10 = (treat: boolean) => (
+    /* the 10 % bar and why: shown under "How we worked it out" */
+    const share10Bar = (treat: boolean) => (
         <>
             <div className="fz-share" aria-hidden="true">
                 <i />
@@ -11454,20 +11746,9 @@ export default function FreshysSite(props: Props) {
                     <b>{lang === "en" ? "90%" : "90 %"}</b> {L(T.shFood)}
                 </span>
             </div>
-            <p className="t">
-                {lang === "en" ? "Your dog needs about " : "Tvom psu dnevno treba oko "}
-                <span style={{ whiteSpace: "nowrap" }}>
-                    {rK(kLo) === rK(kHi) ? nf(rK(kLo), lang) : nf(rK(kLo), lang) + "–" + nf(rK(kHi), lang)} kcal
-                </span>
-                {lang === "en" ? " a day. " : ". "}
-                {L(treat ? T.shWhyT : T.shWhyR)} (
-                <a className="fz-link" href={AAHA_10_URL} target="_blank" rel="noopener noreferrer">
-                    {L(T.shSrc)}
-                </a>
-                )
-            </p>
         </>
     )
+    const share10 = (treat: boolean) => <p className="t">{L(treat ? T.treatsAll : T.onTop)}</p>
     const lowCal = (pc = false) => (
         <>
             <p className="fz-low">{L(T.lowK)}</p>
@@ -11488,7 +11769,7 @@ export default function FreshysSite(props: Props) {
        yMax: pieces in the batch (the larger number of a range, so a part is never over the limit; 0 if unknown). */
     const pcView = (n: number, perPc: number, yMax: number, word: (k: number) => string, gen1: string) => {
         if (n < 1) {
-            const f = Math.ceil(perPc / (kLo * 0.1))
+            const f = Math.ceil(perPc / day10)
             return (
                 <>
                     <div className="big">
@@ -11548,9 +11829,9 @@ export default function FreshysSite(props: Props) {
         )
     }
     /* Millilitres a day: spoons only for small amounts, and how to split the batch when its volume is known (vMax, larger number). */
-    const gView = (g: number, total: number) => {
+    const gView = (g: number, total: number, sub?: React.ReactNode) => {
         const parts = total ? Math.ceil(total / g) : 0
-        const [v, u] = gTxt(g)
+        const [v, u] = gTxtDn(g)
         return (
             <>
                 <div className="big">
@@ -11558,6 +11839,7 @@ export default function FreshysSite(props: Props) {
                     {v}
                     <small>{u + " " + L(T.aDay)}</small>
                 </div>
+                {sub}
                 {g <= 120 && <p className="t">{tbspTxt(g)}</p>}
                 {parts === 1 && <p className="t">{lang === "en" ? "The whole batch fits in one day." : "Cijeli recept stane u jedan dan."}</p>}
                 {parts > 12 && <p className="t">{longTxt(parts)}</p>}
@@ -11571,7 +11853,7 @@ export default function FreshysSite(props: Props) {
             </>
         )
     }
-    const mlView = (ml: number, vMax: number) => {
+    const mlView = (ml: number, vMax: number, sub?: React.ReactNode) => {
         const parts = vMax ? Math.ceil(vMax / ml) : 0
         return (
             <>
@@ -11580,6 +11862,7 @@ export default function FreshysSite(props: Props) {
                     <Num v={ml} lang={lang} />
                     <small>{L(T.mlDay)}</small>
                 </div>
+                {sub}
                 {ml <= 120 && <p className="t">{tbspTxt(ml)}</p>}
                 {parts === 1 && <p className="t">{lang === "en" ? "The whole batch fits in one day." : "Cijeli recept stane u jedan dan."}</p>}
                 {parts > 12 && <p className="t">{longTxt(parts)}</p>}
@@ -11594,11 +11877,6 @@ export default function FreshysSite(props: Props) {
         )
     }
     /* ---- whole meal: the day's food from this recipe, in litres, pieces or parts of the recipe, and how long one recipe lasts ---- */
-    const kMid = (kLo + kHi) / 2
-    const pup = dog.age < 2
-    /* share of the day's calories that comes from the home-cooked recipe; puppies stay on 10 % */
-    const SHARES = [1, 0.5, 0.1]
-    const shareOf = (ok: boolean) => (ok && !pup ? SHARES[feed] : 0.1)
     const cookOn = cook > 0
     const feedSeg = (ok: boolean) =>
         ok ? (
@@ -11629,15 +11907,6 @@ export default function FreshysSite(props: Props) {
         if (ml >= 1000) { const l = Math.round(ml / 100) / 10; return [nf(l, lang, l % 1 ? 1 : 0), "l"] }
         return [nf(ml >= 300 ? Math.round(ml / 50) * 50 : Math.max(10, Math.round(ml / 10) * 10), lang), "ml"]
     }
-    /* grams a day: 10 g steps up to 300 g, 50 g up to 1 kg, then kilograms with one decimal */
-    const gTxt = (g: number): [string, string] => {
-        const r = g >= 300 ? Math.round(g / 50) * 50 : Math.max(5, Math.round(g / (g >= 100 ? 10 : 5)) * (g >= 100 ? 10 : 5))
-        if (r >= 1000) {
-            const k = g >= 10000 ? Math.round(g / 1000) : Math.round(g / 100) / 10
-            return [nf(k, lang, k % 1 ? 1 : 0), "kg"]
-        }
-        return [nf(r, lang), "g"]
-    }
     /* how long one recipe lasts as the whole day's food (d = days) */
     const lastsTxt = (d: number) => {
         if (d < 0.9) return ""
@@ -11645,24 +11914,11 @@ export default function FreshysSite(props: Props) {
         const n = h === 1.5 ? (lang === "en" ? "a day and a half" : "dan i pol") : h === 2.5 ? (lang === "en" ? "two and a half days" : "dva i pol dana") : lang === "en" ? h + (h === 1 ? " day" : " days") : h + " " + plHr(h, ["dan", "dana", "dana"])
         return (lang === "en" ? "One recipe lasts about " + n + "." : "Jedan recept je dovoljan za oko " + n + ".") + (d > 3 ? (lang === "en" ? " Freeze what you won't use in time." : " Što nećeš potrošiti na vrijeme, zamrzni.") : "")
     }
-    const needsLine = (
-        <p className="t">
-            {lang === "en" ? "Your dog needs about " : "Tvom psu dnevno treba oko "}
-            <span style={{ whiteSpace: "nowrap" }}>{rK(kLo) === rK(kHi) ? nf(rK(kLo), lang) : nf(rK(kLo), lang) + "–" + nf(rK(kHi), lang)} kcal</span>
-            {lang === "en" ? " a day" : ""} (
-            <a className="fz-link" href={AAHA_URL} target="_blank" rel="noopener noreferrer">
-                {L(T.needsSrc)}
-            </a>
-            ).
-        </p>
-    )
     const mealTail = (sh: number) => (
         <>
-            {shareBar(sh)}
             {sh < 1 && <p className="t">{L(T.halfRest)}</p>}
-            {needsLine}
             <p className="fz-mnote">
-                {L(T.mealNote)} (
+                {L(T.vetDay)} (
                 <a className="fz-link" href={HOME_URL} target="_blank" rel="noopener noreferrer">
                     {L(T.mealWhy)}
                 </a>
@@ -11720,7 +11976,7 @@ export default function FreshysSite(props: Props) {
     }
     /* by pieces (per = kcal in one piece, yMax = pieces in the batch or 0) */
     const mealPc = (per: number, yMax: number, word: (k: number) => string, sh: number) => {
-        const n = Math.max(1, Math.round((kMid * sh) / per))
+        const n = Math.max(1, Math.round(needDay(sh) / per))
         return (
             <>
                 {bigAbout(<Num v={n} lang={lang} />, word(n) + " " + L(T.aDay))}
@@ -11731,6 +11987,82 @@ export default function FreshysSite(props: Props) {
         )
     }
     const pupNote = (ok: boolean) => (ok && pup ? <p className="t">{L(T.mealPup)}</p> : null)
+    /* "How we worked it out", closed: the share of the day, the dog's energy (AAHA), the dish's calories (USDA) and the sum */
+    const howBox = (sh: number, kpg: number, treat: boolean, kcTxt: string, usda: boolean, vet = false) => {
+        const en = lang === "en"
+        const need = needDay(sh)
+        return (
+            <details className="fz-calcd">
+                <summary>
+                    {L(T.howK)}
+                    <Ico d={I.down} s={16} w={2.2} />
+                </summary>
+                {!vet && (sh > 0.1 ? shareBar(sh) : share10Bar(treat))}
+                {!vet && (
+                    <p className="t">
+                        {en ? "Your dog needs " : "Tvom psu dnevno treba "}
+                        <span style={{ whiteSpace: "nowrap" }}>
+                            {nf(kLoD, lang)}–{nf(kHiD, lang)} kcal
+                        </span>
+                        {en ? " a day" : ""} (
+                        <a className="fz-link" href={AAHA_URL} target="_blank" rel="noopener noreferrer">
+                            {L(T.needsSrc)}
+                        </a>
+                        ).
+                    </p>
+                )}
+                {!vet &&
+                    (sh > 0.1 ? (
+                        <p className="t">
+                            {L(T.kcMid)} {nf(kMid, lang)} kcal
+                            {sh < 1 ? (en ? ", " + pct(sh * 100) + " of it from this dish: " : ", od toga iz ovog jela " + pct(sh * 100) + ": ") + nf(need, lang) + " kcal" : ""}.
+                        </p>
+                    ) : (
+                        <p className="t">
+                            {L(treat ? T.shWhyT : T.shWhyR)} (
+                            <a className="fz-link" href={AAHA_10_URL} target="_blank" rel="noopener noreferrer">
+                                {L(T.shSrc)}
+                            </a>
+                            ) {en ? `10% of ${nf(kLoD, lang)} kcal ≈ ${nf(day10, lang)} kcal.` : `10 % od ${nf(kLoD, lang)} kcal ≈ ${nf(day10, lang)} kcal.`}
+                        </p>
+                    ))}
+                {kcTxt && (
+                    <p className="t">
+                        {L(T.kcal)}: {kcTxt}
+                        {usda ? " · " + L(T.kcSrc) : ""}
+                    </p>
+                )}
+                {!vet && kpg > 0 && (
+                    <p className="t fz-sum">
+                        {nf(need, lang)} kcal ÷ {nf(kpg, lang, 2)} {en ? "kcal per gram" : "kcal po gramu"} = {nf(Math.round((need / kpg) * 10) / 10, lang, 1)} g
+                    </p>
+                )}
+            </details>
+        )
+    }
+    /* a light dish someone wants to cook as the whole day's food: how much that would be, and a similar whole-day dish */
+    const swapBox = (key: string, kpg: number) => {
+        if (pup || feed === 2 || !(kpg > 0)) return null
+        const alt = (DAY_SWAP[key] || []).find(dayOk)
+        if (!alt) return null
+        const sh = SHARES[feed]
+        const [v, u] = gTxt(needDay(sh) / kpg)
+        const en = lang === "en"
+        return (
+            <div className="fz-swap">
+                <p>
+                    {sh === 1
+                        ? en
+                            ? `This dish has fewer calories: as the whole day's food your dog would have to eat about ${v} ${u} of it a day. Similar, but more filling:`
+                            : `Ovo jelo ima manje kalorija: za cijeli dan tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Slično, a izdašnije:`
+                        : en
+                          ? `This dish has fewer calories: for half and half your dog would have to eat about ${v} ${u} of it a day. Similar, but more filling:`
+                          : `Ovo jelo ima manje kalorija: za pola-pola tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Slično, a izdašnije:`}
+                </p>
+                {dayRow(alt, sh, false)}
+            </div>
+        )
+    }
     /* ---- cooking ahead ---- */
     const daysT = (n: number) => (lang === "en" ? n + (n === 1 ? " day" : " days") : n + " " + plHr(n, ["dan", "dana", "dana"]))
     const cookOthOn = cookOth || (cook > 0 && cook !== 7 && cook !== 30)
@@ -11855,8 +12187,8 @@ export default function FreshysSite(props: Props) {
         const sh = shareOf(recMealOk(rec))
         if (!recMealOk(rec) || sh <= 0.1 || !rec.batch || vnOn) return null
         const kpg = kpgR(rec)
-        if (kpg) return { d1: rec.tk! / (kMid * sh), ml: (kMid * sh) / kpg, tot: rec.fw!, wt: true }
-        const ml = (kMid * sh) / (rec.kc.g || 0.75)
+        if (kpg) return { d1: rec.fw! / (needDay(sh) / kpg), ml: needDay(sh) / kpg, tot: rec.fw!, wt: true }
+        const ml = needDay(sh) / (rec.kc.g || 0.75)
         return { d1: rec.batch / ml, ml, tot: rec.batch }
     })()
     const rPlan = cookPlan(rInfo, rStore[0], rStore[1])
@@ -11927,7 +12259,7 @@ export default function FreshysSite(props: Props) {
         if (vnOn) return null
         if (rec.kind === "treat") {
             const per = rec.kc.pc || 1
-            const n = Math.floor((kLo * 0.1) / per)
+            const n = Math.floor(day10 / per)
             const w = (k: number) => pl(lang, k, rec.pcw!.en, rec.pcw!.hr)
             return (
                 <>
@@ -11938,22 +12270,20 @@ export default function FreshysSite(props: Props) {
         }
         const sh = shareOf(recMealOk(rec))
         const kpg = kpgR(rec)
-        if (sh > 0.1 && kpg) return mealVol((kMid * sh) / kpg, rec.fw! * bk, sh, 0, true)
-        if (sh > 0.1) return mealVol((kMid * sh) / (rec.kc.g || 0.75), rec.batch ? rec.batch * bk : 0, sh)
+        if (sh > 0.1 && kpg) return mealVol(needDay(sh) / kpg, rec.fw! * bk, sh, 0, true)
+        if (sh > 0.1) return mealVol(needDay(sh) / (rec.kc.g || 0.75), rec.batch ? rec.batch * bk : 0, sh)
         if (kpg)
             return (
                 <>
                     {pupNote(recMealOk(rec))}
-                    {gView(Math.max(5, fl5((kLo * 0.1) / kpg)), rec.fw! * bk)}
-                    {share10(false)}
+                    {gView(Math.max(5, fl5(day10 / kpg)), rec.fw! * bk, share10(false))}
                 </>
             )
-        const ml = Math.max(5, fl5((kLo * 0.1) / (rec.kc.g || 0.75)))
+        const ml = Math.max(5, fl5(day10 / (rec.kc.g || 0.75)))
         return (
             <>
                 {pupNote(recMealOk(rec))}
-                {mlView(ml, rec.batch ? rec.batch * bk : 0)}
-                {share10(false)}
+                {mlView(ml, rec.batch ? rec.batch * bk : 0, share10(false))}
             </>
         )
     }
@@ -12009,24 +12339,16 @@ export default function FreshysSite(props: Props) {
                                     {weightSlider("fz-kg2")}
                                     <span>{kgTxt} kg</span>
                                 </div>
-                                {dog.age === 2 && seg(T.acts, dog.act, (i) => setDog({ ...dog, act: i }), T.active)}
-                                <p className="fz-hint">
-                                    {L(T.ages[dog.age])}
-                                    {dog.age === 2 ? ", " + L(T.neutS[dog.neut ? 0 : 1]) : ""}.{" "}
-                                    <button type="button" className="fz-link" onClick={() => goSec("calc")}>
-                                        {L(T.onScale)}
-                                    </button>
-                                </p>
+                                {dogLine}
                                 {!vnOn && feedSeg(recMealOk(rec))}
                                 <div style={{ marginTop: 14 }} aria-live="polite">
                                     {portion()}
                                 </div>
+                                {!vnOn && recLight(rec) && swapBox(rec.id, kpgR(rec))}
                                 {cookBox(rInfo, rStore[0], rStore[1])}
                                 {vetBox}
-                                {kitchenBtn(() => logMeal("r:" + rec.id, rec.kind === "bland" && vnOn ? 0 : rec.kc.pc ? 1 : kpgR(rec) ? (shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round((kMid * shareOf(recMealOk(rec))) / kpgR(rec) / 10) * 10) : Math.max(5, fl5((kLo * 0.1) / kpgR(rec)))) : shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round((kMid * shareOf(recMealOk(rec))) / (rec.kc.g || 0.75) / 10) * 10) : Math.max(5, fl5((kLo * 0.1) / (rec.kc.g || 0.75)))))}
-                                <div className="fine">
-                                    {L(T.kcal)}: {kpgR(rec) ? "100 g ≈ " + nf(Math.round(kpgR(rec) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(rec.tk!, lang) + " kcal" : L(rec.kc.per) + " ≈ " + rec.kc.v + " kcal"} · {L(T.kcSrc)}
-                                </div>
+                                {kitchenBtn(() => logMeal("r:" + rec.id, rec.kind === "bland" && vnOn ? 0 : rec.kc.pc ? 1 : kpgR(rec) ? (shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec))) / kpgR(rec) / 10) * 10) : Math.max(5, fl5(day10 / kpgR(rec)))) : shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec))) / (rec.kc.g || 0.75) / 10) * 10) : Math.max(5, fl5(day10 / (rec.kc.g || 0.75)))))}
+                                {howBox(shareOf(recMealOk(rec)), rec.kc.pc ? 0 : kpgR(rec), rec.kind === "treat", kpgR(rec) ? "100 g ≈ " + nf(Math.round(kpgR(rec) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(rec.tk!, lang) + " kcal" : L(rec.kc.per) + " ≈ " + rec.kc.v + " kcal", true, vnOn)}
                             </div>
                             <div className="fz-box">
                                 <div className="k">{L(T.keeps)}</div>
@@ -12178,11 +12500,11 @@ export default function FreshysSite(props: Props) {
         const kc = r.kc
         const sh = shareOf(cMealOk(r))
         if (!kc || sh <= 0.1) return null
-        const need = kMid * sh
+        const need = needDay(sh)
         const vr = volRange(r.y || "")
         const vol = vr ? (vr[0] + vr[1]) / 2 : 0
         const kpg = kpgC(r)
-        if (kpg && kc.p !== "pc") return { d1: r.tk! / need, ml: need / kpg, tot: r.fw!, wt: true }
+        if (kpg && kc.p !== "pc") return { d1: r.fw! / (need / kpg), ml: need / kpg, tot: r.fw!, wt: true }
         if (kc.p === "pc") {
             const pcs = volOf(r.y || "") || /cup/i.test(r.y || "") ? 0 : midNum(r.y || "")
             const n = Math.max(1, Math.round(need / (kc.k / kc.a)))
@@ -12197,23 +12519,22 @@ export default function FreshysSite(props: Props) {
     }
     const cPortion = (r: CRec) => {
         const kc = r.kc
-        const budget = kLo * 0.1
+        const budget = day10
         const tail = share10(r.k === "t")
         const vr = volRange(r.y || "")
         const sh = shareOf(cMealOk(r))
         const kpg = kpgC(r)
-        if (kc && sh > 0.1 && kpg && kc.p !== "pc") return mealVol((kMid * sh) / kpg, r.fw!, sh, 0, true)
+        if (kc && sh > 0.1 && kpg && kc.p !== "pc") return mealVol(needDay(sh) / kpg, r.fw!, sh, 0, true)
         if (kc && kpg && kc.p !== "pc" && kpg < LIGHT_KCAL_ML) return lowCal()
         if (kc && kpg && kc.p !== "pc")
             return (
                 <>
                     {pupNote(cMealOk(r))}
-                    {gView(Math.max(5, fl5(budget / kpg)), r.fw!)}
-                    {tail}
+                    {gView(Math.max(5, fl5(day10 / kpg)), r.fw!, tail)}
                 </>
             )
         if (kc && sh > 0.1) {
-            const need = kMid * sh
+            const need = needDay(sh)
             if (kc.p === "pc") return mealPc(kc.k / kc.a, volOf(r.y || "") || /cup/i.test(r.y || "") ? 0 : midNum(r.y || ""), (k) => pcWord(kc, k), sh)
             if (kc.p === "ml") return mealVol(need / (kc.k / kc.a), vr ? (vr[0] + vr[1]) / 2 : 0, sh, WHOLE_KCAL[r.id] ? WHOLE_KCAL[r.id] / need : 0)
             // calories for the whole recipe: by volume when the yield is one, otherwise in parts of the recipe
@@ -12252,8 +12573,8 @@ export default function FreshysSite(props: Props) {
             return (
                 <>
                     {pupNote(cMealOk(r))}
-                    {mlView(brothCap ? byBroth : byKcal, volOf(r.y || ""))}
-                    {brothCap ? (
+                    {mlView(brothCap ? byBroth : byKcal, volOf(r.y || ""), brothCap ? undefined : tail)}
+                    {brothCap && (
                         <p className="t">
                             {L(T.brothP)} (
                             <a className="fz-link" href={BROTH_URL} target="_blank" rel="noopener noreferrer">
@@ -12261,8 +12582,6 @@ export default function FreshysSite(props: Props) {
                             </a>
                             )
                         </p>
-                    ) : (
-                        tail
                     )}
                 </>
             )
@@ -12274,8 +12593,7 @@ export default function FreshysSite(props: Props) {
             return (
                 <>
                     {pupNote(cMealOk(r))}
-                    {mlView(Math.max(5, fl5(budget / (whole / ((vr[0] + vr[1]) / 2)))), vr[1])}
-                    {tail}
+                    {mlView(Math.max(5, fl5(budget / (whole / ((vr[0] + vr[1]) / 2)))), vr[1], tail)}
                 </>
             )
         return (
@@ -12404,26 +12722,15 @@ export default function FreshysSite(props: Props) {
                                             {weightSlider("fz-kg4")}
                                             <span>{kgTxt} kg</span>
                                         </div>
-                                        {dog.age === 2 && seg(T.acts, dog.act, (i) => setDog({ ...dog, act: i }), T.active)}
-                                        <p className="fz-hint">
-                                            {L(T.ages[dog.age])}
-                                            {dog.age === 2 ? ", " + L(T.neutS[dog.neut ? 0 : 1]) : ""}.{" "}
-                                            <button type="button" className="fz-link" onClick={() => goSec("calc")}>
-                                                {L(T.onScale)}
-                                            </button>
-                                        </p>
+                                        {dogLine}
                                         {feedSeg(cMealOk(r))}
                                         <div style={{ marginTop: 14 }} aria-live="polite">
                                             {cPortion(r)}
                                         </div>
+                                        {cLight(r) && swapBox(String(r.id), kpgC(r))}
                                         {cookBox(cInfo, cFr, cFz)}
-                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round((kMid * shareOf(cMealOk(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5((kLo * 0.1) / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round((kMid * shareOf(cMealOk(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5((kLo * 0.1) / (r.kc.k / r.kc.a)))) : 1))}
-                                        {r.kc && (
-                                            <div className="fine">
-                                                {L(T.kcal)}: {kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc)}
-                                                {r.kc.s === "u" || kpgC(r) ? " · " + L(T.kcSrc) : ""}
-                                            </div>
-                                        )}
+                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(day10 / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(day10 / (r.kc.k / r.kc.a)))) : 1))}
+                                        {r.kc && howBox(shareOf(cMealOk(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), r.k === "t", kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r))}
                                     </div>
                                     {st.length > 0 && (
                                         <div className="fz-box">
@@ -12545,7 +12852,7 @@ export default function FreshysSite(props: Props) {
     const selV = bv.filter((k) => !bNo(k))
     const bKeys = selP ? [selP, ...(selC ? [selC] : []), ...selV] : []
     const bShare = dog.age < 2 ? 0.1 : [1, 0.5, 0.1][feed]
-    const bBudget = bShare > 0.1 ? Math.max(10, Math.round((((kLo + kHi) / 2) * bShare) / 10) * 10) : Math.max(5, fl5(kLo * 0.1))
+    const bBudget = bShare > 0.1 ? Math.max(10, Math.round((kMid * bShare) / 10) * 10) : Math.max(5, fl5(day10))
     const bg = bKeys.length ? buildGrams(bKeys, bdays, bBudget) : null
     /* how the portion sits in the day, by the choice above */
     const bWith = bShare === 1 ? { en: "", hr: "" } : bShare === 0.5 ? { en: ", with half of the usual food", hr: ", uz pola uobičajene hrane" } : { en: ", on top of the usual food", hr: ", uz uobičajenu hranu" }
@@ -12658,14 +12965,7 @@ export default function FreshysSite(props: Props) {
                             {weightSlider("fz-kg5")}
                             <span>{kgTxt} kg</span>
                         </div>
-                        {dog.age === 2 && seg(T.acts, dog.act, (i) => setDog({ ...dog, act: i }), T.active)}
-                        <p className="fz-hint">
-                            {L(T.ages[dog.age])}
-                            {dog.age === 2 ? ", " + L(T.neutS[dog.neut ? 0 : 1]) : ""}.{" "}
-                            <button type="button" className="fz-link" onClick={() => goSec("calc")}>
-                                {L(T.onScale)}
-                            </button>
-                        </p>
+                        {dogLine}
                         <div className="fz-res-o">{seg(T.bModes, bmode, setBmode, T.bModeL)}</div>
                         {bmode === 0 && (
                             <div className="fz-feed">
