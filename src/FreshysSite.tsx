@@ -1712,7 +1712,7 @@ T.faqNow = T.faq.map(([q, a], i): [LS, LS] =>
 /* age: 0 puppy under 4 months, 1 puppy 4 months to adult, 2 adult. act: 0 not much / gains weight easily, 1 normal, 2 light work or sport */
 type Dog = { name: string; kg: number; age: number; neut: boolean; act: number; no: string[]; lose?: boolean }
 type Ord = { step: number; sel: Record<string, boolean>; plan: number; street: string; city: string; zip: string; day: number; done: boolean }
-type Page = { p: "home" | "recipes" | "recipe" | "order" | "build" | "list" | "dog" | "plus"; id?: string }
+type Page = { p: "home" | "recipes" | "recipe" | "order" | "build" | "list" | "dog" | "plus" | "acct" | "privacy"; id?: string }
 
 /* Dog profile ("Moj pas"). Kept only in this browser. Breeds: FCI nomenclature, Croatian names from HKS,
    weights only where the FCI breed standard gives them. Body shape: WSAVA body condition score in four groups. */
@@ -2231,6 +2231,299 @@ const writeStore = (s: PStore) => {
         return false
     }
 }
+/* ---------- account: Firebase Authentication + Firestore over their REST APIs (no SDK) ----------
+   Pets and photos stay on the device exactly as before (localStorage + IndexedDB); when someone is signed in,
+   the same store is also kept in Firestore users/{uid} (s: the store as JSON, t: when it was saved) and each photo in
+   users/{uid}/photos/{id} (d: the photo as a data URL). The web config below is public by design: access is limited by
+   the Firestore rules (a signed-in user reads and writes only their own documents). No cookies: the session is in localStorage. */
+const FB_KEY = "AIzaSyCHFx1D_rrV5EfaUB_5uHh03ozZ8UHxrCA"
+const FB_PROJ = "freshys"
+const FB_AUTH = "https://identitytoolkit.googleapis.com/v1/accounts:"
+const FB_TOK = "https://securetoken.googleapis.com/v1/token?key=" + FB_KEY
+const FB_DOC = "https://firestore.googleapis.com/v1/projects/" + FB_PROJ + "/databases/(default)/documents/users/"
+const ACCT_KEY = "fz-acct"
+const SYNC_KEY = "fz-sync"
+const GUEST_KEY = "fz-guest"
+const INV_KEY = "fz-inv"
+const PW_MIN = 8
+/* uid, e-mail, name, ID token, refresh token, when the ID token expires, e-mail confirmed */
+type Acct = { uid: string; em: string; nm: string; tok: string; rt: string; exp: number; ver: boolean }
+/* the account this device's copy belongs to, the save time of the account copy it was last in step with,
+   changes not yet sent, and photos already in the account */
+type SyncSt = { uid: string; base: number; dirty: boolean; ph: string[] }
+class FbErr extends Error {
+    code: string
+    constructor(c: string) {
+        super(c)
+        this.code = c
+    }
+}
+const fbCode = (j: any, st: number) => String((j && j.error && j.error.message) || "HTTP_" + st).split(" ")[0].split(":")[0]
+const fbFetch = async (url: string, init: RequestInit): Promise<{ st: number; j: any }> => {
+    let r: Response
+    try {
+        r = await fetch(url, init)
+    } catch (e) {
+        throw new FbErr("NET")
+    }
+    const j = await r.json().catch(() => ({}))
+    return { st: r.status, j }
+}
+const fbPost = async (op: string, body: object, lang?: string) => {
+    const h: Record<string, string> = { "Content-Type": "application/json" }
+    if (lang) h["X-Firebase-Locale"] = lang
+    const { st, j } = await fbFetch(FB_AUTH + op + "?key=" + FB_KEY, { method: "POST", headers: h, body: JSON.stringify(body) })
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+    return j
+}
+const lsGet = <X,>(k: string): X | null => {
+    try {
+        return JSON.parse(window.localStorage.getItem(k) || "null")
+    } catch (e) {
+        return null
+    }
+}
+const lsSet = (k: string, v: unknown) => {
+    try {
+        if (v === null) window.localStorage.removeItem(k)
+        else window.localStorage.setItem(k, JSON.stringify(v))
+    } catch (e) {}
+}
+const acctRead = (): Acct | null => {
+    const a = lsGet<any>(ACCT_KEY)
+    return a && typeof a.uid === "string" && a.uid && typeof a.rt === "string" && a.rt
+        ? { uid: a.uid, em: strIn(a.em, 200), nm: strIn(a.nm, 60), tok: strIn(a.tok, 4000), rt: a.rt, exp: numIn(a.exp, 0, 1e15, 0), ver: a.ver === true }
+        : null
+}
+const acctSave = (a: Acct | null) => lsSet(ACCT_KEY, a)
+const acctOf = (j: any, ver: boolean, nm?: string): Acct => ({
+    uid: String(j.localId || ""),
+    em: String(j.email || ""),
+    nm: nm !== undefined ? nm : String(j.displayName || ""),
+    tok: String(j.idToken || ""),
+    rt: String(j.refreshToken || ""),
+    exp: Date.now() + (parseInt(String(j.expiresIn || "3600"), 10) - 120) * 1000,
+    ver,
+})
+/* a fresh ID token (they last an hour); a refresh the server refuses means the account is gone or was signed out elsewhere */
+const acctTok = async (a: Acct): Promise<Acct> => {
+    if (a.tok && a.exp > Date.now()) return a
+    const { st, j } = await fbFetch(FB_TOK, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(a.rt) })
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+    const n = { ...a, tok: String(j.id_token), rt: String(j.refresh_token), exp: Date.now() + (parseInt(String(j.expires_in || "3600"), 10) - 120) * 1000 }
+    acctSave(n)
+    return n
+}
+const fbLookup = async (a: Acct) => {
+    const j = await fbPost("lookup", { idToken: a.tok })
+    const u = j && j.users && j.users[0]
+    if (!u) throw new FbErr("USER_NOT_FOUND")
+    return { ver: u.emailVerified === true, nm: String(u.displayName || ""), em: String(u.email || a.em) }
+}
+const fbSignIn = async (em: string, pw: string) => {
+    const j = await fbPost("signInWithPassword", { email: em, password: pw, returnSecureToken: true })
+    const a = acctOf(j, false)
+    const u = await fbLookup(a)
+    return { ...a, ver: u.ver, nm: u.nm, em: u.em }
+}
+const fbSendVerify = (a: Acct, lang: string) => fbPost("sendOobCode", { requestType: "VERIFY_EMAIL", idToken: a.tok }, lang)
+const fbSignUp = async (nm: string, em: string, pw: string, lang: string) => {
+    const j = await fbPost("signUp", { email: em, password: pw, returnSecureToken: true })
+    let a = acctOf(j, false, "")
+    if (nm) {
+        const u = await fbPost("update", { idToken: a.tok, displayName: nm, returnSecureToken: true })
+        a = { ...acctOf({ ...u, localId: a.uid, email: a.em }, false, nm), tok: String(u.idToken || a.tok), rt: String(u.refreshToken || a.rt) }
+    }
+    try {
+        await fbSendVerify(a, lang)
+    } catch (e) {} // the account is made; the e-mail can be sent again from the banner
+    return a
+}
+/* Firestore: the account copy of the store and of each photo */
+const fsHead = (a: Acct) => ({ Authorization: "Bearer " + a.tok, "Content-Type": "application/json" })
+const fsGetStore = async (a: Acct): Promise<{ s: PStore | null; t: number } | null> => {
+    const { st, j } = await fbFetch(FB_DOC + encodeURIComponent(a.uid), { headers: fsHead(a) })
+    if (st === 404) return null
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+    const f = (j && j.fields) || {}
+    let s: PStore | null = null
+    try {
+        s = storeClean(JSON.parse((f.s && f.s.stringValue) || "null"))
+    } catch (e) {}
+    return { s, t: parseInt((f.t && f.t.integerValue) || "0", 10) || 0 }
+}
+const fsPutStore = async (a: Acct, s: PStore, t: number) => {
+    const { st, j } = await fbFetch(FB_DOC + encodeURIComponent(a.uid), { method: "PATCH", headers: fsHead(a), body: JSON.stringify({ fields: { s: { stringValue: JSON.stringify(s) }, t: { integerValue: String(t) } } }) })
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+}
+const fsPhUrl = (a: Acct, id: string) => FB_DOC + encodeURIComponent(a.uid) + "/photos/" + encodeURIComponent(id)
+const fsPutPh = async (a: Acct, id: string, d: string) => {
+    const { st, j } = await fbFetch(fsPhUrl(a, id), { method: "PATCH", headers: fsHead(a), body: JSON.stringify({ fields: { d: { stringValue: d } } }) })
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+}
+const fsGetPh = async (a: Acct, id: string): Promise<string | null> => {
+    const { st, j } = await fbFetch(fsPhUrl(a, id), { headers: fsHead(a) })
+    if (st === 404) return null
+    if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+    const d = j && j.fields && j.fields.d && j.fields.d.stringValue
+    return typeof d === "string" && d.startsWith("data:image/") ? d : null
+}
+const fsDelPh = async (a: Acct, id: string) => {
+    const { st, j } = await fbFetch(fsPhUrl(a, id), { method: "DELETE", headers: fsHead(a) })
+    if (st !== 404 && (st < 200 || st >= 300)) throw new FbErr(fbCode(j, st))
+}
+const fsListPh = async (a: Acct): Promise<string[]> => {
+    const out: string[] = []
+    let tok = ""
+    for (let i = 0; i < 50; i++) {
+        const { st, j } = await fbFetch(FB_DOC + encodeURIComponent(a.uid) + "/photos?pageSize=100&mask.fieldPaths=x" + (tok ? "&pageToken=" + encodeURIComponent(tok) : ""), { headers: fsHead(a) })
+        if (st < 200 || st >= 300) throw new FbErr(fbCode(j, st))
+        ;((j && j.documents) || []).forEach((d: any) => out.push(decodeURIComponent(String(d.name).split("/").pop() || "")))
+        tok = (j && j.nextPageToken) || ""
+        if (!tok) break
+    }
+    return out.filter(Boolean)
+}
+const fsDelStore = async (a: Acct) => {
+    const { st, j } = await fbFetch(FB_DOC + encodeURIComponent(a.uid), { method: "DELETE", headers: fsHead(a) })
+    if (st !== 404 && (st < 200 || st >= 300)) throw new FbErr(fbCode(j, st))
+}
+const phIds = (s: PStore) => Array.from(new Set(s.log.flatMap((e) => e.ph || []).concat(s.pets.map((p) => p.pic).filter(Boolean))))
+/* a Firestore document holds at most 1 MiB: a photo that would not fit is made smaller (photos are kept at up to 1280 px) */
+const phData = async (b: Blob): Promise<string> => {
+    let d = await toDataUrl(b)
+    for (const px of [960, 720, 520]) {
+        if (d.length <= 900000) break
+        const sm = await new Promise<Blob>((res, rej) => {
+            const u = URL.createObjectURL(b),
+                img = new Image()
+            img.onload = () => {
+                const k = Math.min(1, px / Math.max(img.naturalWidth, img.naturalHeight))
+                const c = document.createElement("canvas")
+                c.width = Math.max(1, Math.round(img.naturalWidth * k))
+                c.height = Math.max(1, Math.round(img.naturalHeight * k))
+                const g = c.getContext("2d")
+                URL.revokeObjectURL(u)
+                if (!g) return rej(new Error("canvas"))
+                g.drawImage(img, 0, 0, c.width, c.height)
+                c.toBlob((x) => (x ? res(x) : rej(new Error("blob"))), "image/jpeg", 0.8)
+            }
+            img.onerror = () => {
+                URL.revokeObjectURL(u)
+                rej(new Error("img"))
+            }
+            img.src = u
+        })
+        d = await toDataUrl(sm)
+    }
+    if (d.length > 1000000) throw new FbErr("PHOTO_TOO_BIG")
+    return d
+}
+/* two copies changed apart (two devices, or this device's pets before signing in): keep everything from both, matched by id;
+   where both have the same item, this device's copy wins */
+const storeMerge = (acc: PStore, dev: PStore): PStore => {
+    const byKey = <X,>(a: X[] | undefined, b: X[] | undefined, k: (x: X) => string): X[] => {
+        const m = new Map<string, X>()
+        ;(a || []).forEach((x) => m.set(k(x), x))
+        ;(b || []).forEach((x) => m.set(k(x), x))
+        return Array.from(m.values())
+    }
+    const id = (x: any) => String(x.id)
+    const out: any = { ...acc, ...dev }
+    out.pets = byKey(acc.pets, dev.pets, id)
+    out.log = byKey(acc.log, dev.log, id).sort((x, y) => x.at - y.at)
+    out.ck = byKey(acc.ck, dev.ck, (x) => x.pet + "|" + x.d)
+    for (const k of ["ml", "wk", "md", "dy", "fd", "vi", "vz"]) out[k] = byKey((acc as any)[k], (dev as any)[k], id)
+    out.dz = byKey(acc.dz, dev.dz, (x) => x.med + "|" + x.d + "|" + x.tm)
+    if (!out.pets.some((p: Pet) => p.id === out.cur)) out.cur = out.pets[0] ? out.pets[0].id : ""
+    return storeClean(out) || dev
+}
+
+/* texts for the account (log in, sign up, password, account page, privacy) */
+const TA = {
+    login: X("Log in", "Prijava"),
+    myAcct: X("My account", "Moj račun"),
+    inLead: X("Your pets on your phone, tablet and computer.", "Tvoji ljubimci na mobitelu, tabletu i računalu."),
+    em: X("E-mail", "E-mail"),
+    pw: X("Password", "Lozinka"),
+    show: X("Show password", "Pokaži lozinku"),
+    hide: X("Hide password", "Sakrij lozinku"),
+    inBtn: X("Log in", "Prijavi se"),
+    forgotQ: X("Forgotten password?", "Zaboravljena lozinka?"),
+    or: X("or", "ili"),
+    newAcct: X("Create new account", "Izradi novi račun"),
+    guest: X("Continue without an account", "Nastavi bez računa"),
+    guestN: X("Your pets will be on this device only.", "Ljubimci će biti samo na ovom uređaju."),
+    upH: X("Create account", "Izradi račun"),
+    upLead: X("It's free. Right after, you add your pet.", "Besplatno je. Odmah zatim upisuješ ljubimca."),
+    nm: X("Name", "Ime"),
+    pwMin: X("At least 8 characters.", "Najmanje 8 znakova."),
+    upNote: X("We use your e-mail only to log you in and to send you a new password if you forget it.", "E-mail služi samo za prijavu i za novu lozinku ako je zaboraviš."),
+    privacy: X("Privacy policy", "Pravila privatnosti"),
+    haveQ: X("Already have an account?", "Već imaš račun?"),
+    fgH: X("Forgotten password", "Zaboravljena lozinka"),
+    fgP: X("Type the e-mail of your account. We'll send you a link for a new password.", "Upiši e-mail svog računa. Poslat ćemo ti poveznicu za novu lozinku."),
+    fgBtn: X("Send link", "Pošalji poveznicu"),
+    fgTip: X("The link opens our site, where you type a new password. Can't see the e-mail? Check the Spam folder too.", "Poveznica otvara našu stranicu, gdje upišeš novu lozinku. Ne vidiš e-mail? Pogledaj i u Neželjenu poštu (Spam)."),
+    fgSent: X("If there is an account with this e-mail, we've sent a link for a new password to it.", "Ako postoji račun s tom adresom, poslali smo na nju poveznicu za novu lozinku."),
+    back: X("Back to log in", "Natrag na prijavu"),
+    rsH: X("New password", "Nova lozinka"),
+    rsBtn: X("Save new password", "Spremi novu lozinku"),
+    rsOk: X("Your password has been changed. Log in with the new one.", "Lozinka je promijenjena. Prijavi se novom lozinkom."),
+    vfOk: X("Your e-mail is confirmed.", "E-mail je potvrđen."),
+    verH: X("Confirm your e-mail", "Potvrdi e-mail"),
+    verP: X("We've sent a link to ", "Poslali smo ti poveznicu na "),
+    verP2: X(". Open the e-mail and tap the link in it.", ". Otvori e-mail i stisni poveznicu u njemu."),
+    verAgain: X("Send again", "Pošalji ponovno"),
+    verSent: X("Sent. Check the Spam folder too.", "Poslano. Pogledaj i u Neželjenu poštu."),
+    saved: X("Saved in your account", "Spremljeno u tvom računu"),
+    savedFoot: X("Saved in your account. You see it on all your devices.", "Spremljeno u tvom računu. Vidi se na svim tvojim uređajima."),
+    syncOff: X("Not in your account yet: no connection. It will be saved when you're back online.", "Još nije spremljeno u račun jer nema veze. Spremit će se kad se veza vrati."),
+    invOne: X(" is saved only on this device", " je spremljen samo na ovom uređaju"),
+    invMany: X(" are saved only on this device", " su spremljeni samo na ovom uređaju"),
+    invP1: X("Save it to your account: then it's on all your devices and isn't lost when you change phones.", "Spremi u svoj račun: tako je na svim tvojim uređajima i ne gubi se kad promijeniš mobitel."),
+    invP: X("Save them to your account: then they're on all your devices and aren't lost when you change phones.", "Spremi ih u svoj račun: tako su na svim tvojim uređajima i ne gube se kad promijeniš mobitel."),
+    invBtn: X("Save to my account", "Spremi u račun"),
+    notNow: X("Not now", "Ne sada"),
+    and: X(" and ", " i "),
+    verYes: X("confirmed", "potvrđen"),
+    verNo: X("not confirmed", "nije potvrđen"),
+    pets: X("Pets", "Ljubimci"),
+    noPets: X("None yet", "Još nijedan"),
+    allSaved: X("Everything is saved.", "Sve je spremljeno."),
+    saving: X("Saving…", "Spremam…"),
+    chPw: X("Change password", "Promijeni lozinku"),
+    curPw: X("Current password", "Sadašnja lozinka"),
+    newPw: X("New password", "Nova lozinka"),
+    chPwOk: X("Password changed.", "Lozinka je promijenjena."),
+    out: X("Log out", "Odjava"),
+    outNote: X("After you log out, your pets stay in your account. You'll see them on this device again when you log in.", "Nakon odjave ljubimci ostaju u računu. Na ovom uređaju opet ih vidiš kad se prijaviš."),
+    outUnsaved: X("Some changes aren't in your account yet. Connect to the internet, then log out.", "Neke promjene još nisu u računu. Spoji se na internet pa se odjavi."),
+    expAcct: X("Download a copy of your data", "Preuzmi kopiju svojih podataka"),
+    delL: X("Delete account and all data", "Izbriši račun i sve podatke"),
+    delP: X("This deletes your account, your pets, all entries and photos. It can't be undone. Type your password to confirm.", "Ovo briše tvoj račun, ljubimce, sve zapise i slike. Ne može se vratiti. Za potvrdu upiši lozinku."),
+    delBtn: X("Delete everything", "Izbriši sve"),
+    delOk: X("Your account and all its data have been deleted.", "Račun i svi podaci su izbrisani."),
+    cancel: X("Cancel", "Odustani"),
+    save: X("Save", "Spremi"),
+    eNet: X("No connection. Check the internet and try again.", "Nema veze. Provjeri internet i pokušaj ponovno."),
+    eExists: X("There's already an account with this e-mail. Log in, or use Forgotten password.", "S ovom adresom već postoji račun. Prijavi se ili otvori Zaboravljena lozinka."),
+    eCred: X("Wrong e-mail or password.", "Pogrešan e-mail ili lozinka."),
+    ePw: X("Wrong password.", "Pogrešna lozinka."),
+    eEmail: X("That doesn't look like an e-mail address.", "To ne izgleda kao e-mail adresa."),
+    eWeak: X("The password needs at least 8 characters.", "Lozinka treba imati najmanje 8 znakova."),
+    eMany: X("Too many tries. Wait a few minutes and try again.", "Previše pokušaja. Pričekaj nekoliko minuta pa pokušaj ponovno."),
+    eDis: X("This account has been turned off.", "Ovaj račun je isključen."),
+    eOob: X("This link has expired or was already used. Ask for a new one.", "Ova poveznica je istekla ili je već iskorištena. Zatraži novu."),
+    eMiss: X("Fill in the e-mail and password.", "Upiši e-mail i lozinku."),
+    eGen: X("Something went wrong. Try again.", "Nešto nije u redu. Pokušaj ponovno."),
+}
+
+/* privacy policy: who answers for the data (filled in by the owner before the account goes live) */
+const PRIV_WHO = "Tonči Hrgović"
+const PRIV_MAIL = "freshys.osijek@gmail.com"
+const PRIV_DATE = X("23 November 2026", "23. 11. 2026.")
+
 /* photos: IndexedDB, one blob per photo */
 let phDb: Promise<IDBDatabase> | null = null
 const phOpen = () =>
@@ -2990,13 +3283,15 @@ const parseHash = (h: string): Page | null => {
     if (s === "list" || s === "popis") return { p: "list" }
     if (s === "dog" || s === "moj-pas" || s === "pets" || s === "ljubimci") return { p: "dog" }
     if (s === "plus") return { p: "plus" }
+    if (s === "racun" || s === "account" || s === "prijava" || s === "login") return { p: "acct" }
+    if (s === "privatnost" || s === "privacy") return { p: "privacy" }
     if (s.startsWith("recipe/")) {
         const id = s.slice(7)
         return RECIPES.some((r) => r.id === id) || /^mdr-\d+$/.test(id) ? { p: "recipe", id } : { p: "recipes" }
     }
     return null
 }
-const toHash = (pg: Page) => (pg.p === "home" ? "#/" : pg.p === "recipe" ? "#/recipe/" + pg.id : pg.p === "dog" ? "#/pets" : "#/" + pg.p)
+const toHash = (pg: Page) => (pg.p === "home" ? "#/" : pg.p === "recipe" ? "#/recipe/" + pg.id : pg.p === "dog" ? "#/pets" : pg.p === "acct" ? "#/racun" : pg.p === "privacy" ? "#/privatnost" : "#/" + pg.p)
 const SEARCH_IDX: Record<string, string> = Object.fromEntries(
     RECIPES.map((r) => [r.id, norm([r.t.en, r.t.hr, ...r.ing.map((i) => plain(i.n.en) + " " + plain(i.n.hr))].join(" "))])
 )
@@ -4004,7 +4299,7 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-shl{grid-template-columns:minmax(0,1fr) 320px;gap:32px}
 }
 @container fz (max-width:900px){
-.fz-links{display:none}.fz-burger{display:flex}.fz-nr>.fz-btn{display:none}
+.fz-links{display:none}.fz-burger{display:flex}.fz-nr>.fz-btn{display:none}.fz-ac-nav{display:none}
 .fz-sec{padding:76px 0}
 .fz-h1{font-size:54px}.fz-h2{font-size:40px}.fz-lead{font-size:18px}
 .fz-hero{padding:44px 0 64px}
@@ -4290,6 +4585,59 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-pt-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:18px}
 .fz-pt-foot .fz-pf-saved{margin:0}
 .fz-pt-foot .fz-link{font-size:14px}
+.fz-ac{max-width:520px}
+.fz-ac-lead{margin-top:10px}
+.fz-ac-card{display:block;background:var(--card);border-radius:24px;box-shadow:var(--sh);padding:22px 20px;margin-top:20px}
+.fz-ac-card .fz-lbl{margin:0 0 8px}
+.fz-ac .fz-ac-l2{margin-top:16px}
+.fz-ac-pw{position:relative}
+.fz-ac-pw .fz-inp{padding-right:54px}
+.fz-ac-eye{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;color:var(--ink2);border-radius:12px}
+.fz-ac-wide{width:100%;margin-top:18px}
+.fz-ac-c{text-align:center;margin-top:14px}
+.fz-ac-c .fz-link,.fz-ac-alt .fz-link,.fz-ac-s .fz-link{display:inline}
+.fz-ac-or{display:flex;align-items:center;gap:12px;margin-top:18px;color:var(--ink2);font-size:14px}
+.fz-ac-or:before,.fz-ac-or:after{content:"";flex:1;height:1px;background:var(--line)}
+.fz-ac-or+.fz-ac-wide{margin-top:16px}
+.fz-ac-alt{text-align:center;margin-top:18px;font-size:15px;line-height:1.5;color:var(--ink2)}
+.fz-ac-s{font-size:14px;line-height:1.45;margin-top:10px;color:var(--ink2)}
+.fz-ac-p{font-size:16.5px;line-height:1.45;color:var(--ink3);margin:0 0 16px}
+.fz-ac-tip{margin-top:16px;background:var(--bg2);border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.45;color:var(--ink3)}
+.fz-ac-msg{margin-top:14px;font-size:15px;line-height:1.45;font-weight:600;color:var(--g)}
+.fz-ac-msg.is-err{color:#B3261E}
+.fz-ac-ver{background:var(--sky0);border-radius:20px;padding:14px 16px;margin-top:16px;max-width:640px}
+.fz-ac-ver b{color:var(--skyInk);font-size:16px}
+.fz-ac-ver p{font-size:15px;line-height:1.45;color:var(--ink3);margin:4px 0 6px;overflow-wrap:anywhere}
+.fz-ac-ok{display:flex;gap:7px;align-items:center;margin:14px 0 2px;font-size:15px;font-weight:600;color:var(--g)}
+.fz-ac-ok.is-off{color:var(--orInk);font-weight:500}
+.fz-ac-inv{background:var(--g0);border-radius:22px;padding:16px 18px 14px;margin:16px 0 6px;max-width:640px}
+.fz-ac-inv b{display:block;font-size:17px;line-height:1.3}
+.fz-ac-inv p{font-size:15px;line-height:1.45;color:var(--ink3);margin:6px 0 12px}
+.fz-ac-invb{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.fz-ac-row{padding:11px 0;border-top:1px solid var(--line)}
+.fz-ac-row:first-child{border-top:0;padding-top:0}
+.fz-ac-row .fz-lbl{margin:0 0 2px;font-size:13.5px}
+.fz-ac-row b{font-size:18px;font-weight:600;overflow-wrap:anywhere}
+.fz-ac-row em{font-style:normal;font-size:13.5px;font-weight:600;color:var(--g);margin-left:8px;white-space:nowrap}
+.fz-ac-row em.is-no{color:var(--orInk)}
+.fz-ac-again{margin-left:8px;font-size:13.5px}
+.fz-ac-two{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.fz-ac-two .fz-btn--g{flex:1 1 140px;padding:0 12px}
+.fz-ac-sub{margin-top:14px}
+.fz-ac-exp{margin-top:14px}
+.fz-ac-exp .fz-link{font-size:15px}
+.fz-ac-dl{margin-top:22px}
+.fz-ac-dl .fz-link{color:#B3261E;font-size:15px}
+.fz-ac-del{background:#FCEDEC;box-shadow:none;margin-top:10px}
+.fz-ac-del p{font-size:15px;line-height:1.45;color:#5C2622;margin:0 0 12px}
+.fz-ac-del .fz-inp{background:#fff}
+.fz-ac-nav{font-size:15px;font-weight:600;padding:0 6px;color:var(--ink)}
+.fz-ac-nav[aria-current=page]{color:var(--g)}
+.fz-priv{max-width:720px}
+.fz-priv h2{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:26px 0 6px}
+.fz-priv p{font-size:16.5px;line-height:1.55;color:var(--ink3)}
+.fz-priv .fz-priv-d{margin-top:10px;font-size:14px;color:var(--ink2)}
+.fz-priv .fz-link{display:inline}
 .fz-pt-imp{position:relative;cursor:pointer}
 .fz-pt-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
 .fz-pt-imp:focus-within,.fz-pt-phadd:focus-within{outline:2px solid var(--g);outline-offset:2px;border-radius:6px}
@@ -6245,6 +6593,7 @@ export default function FreshysSite(props: Props) {
     const commit = (s: PStore) => {
         setPs(s)
         setSaveErr(!writeStore(s))
+        if (acctRef.current) syncLater()
     }
     const syncDog = (s: PStore) => {
         const c = s.pets.find((p) => p.id === s.cur)
@@ -6506,6 +6855,634 @@ export default function FreshysSite(props: Props) {
         setPv("dash")
         setImp({ ok: L(T.ptImpOk) })
     }
+    /* ---------- account: state, saving to the account, forms ---------- */
+    const [acct, setAcctS] = useState<Acct | null>(null)
+    const acctRef = useRef<Acct | null>(null)
+    const setAcct = (a: Acct | null) => {
+        acctRef.current = a
+        setAcctS(a)
+        acctSave(a)
+    }
+    const [syncSt, setSyncSt] = useState<"" | "busy" | "ok" | "off">("")
+    type AuM = "in" | "up" | "forgot" | "sent" | "reset"
+    const au0 = { m: "in" as AuM, nm: "", em: "", pw: "", show: false, busy: false, err: "", ok: "", oob: "" }
+    const [au, setAu] = useState(au0)
+    const auSet = (p: Partial<typeof au0>) => setAu((x) => ({ ...x, err: "", ...p }))
+    const [guest, setGuestS] = useState(false)
+    const [invOff, setInvOff] = useState(false)
+    const [delQ, setDelQ] = useState<{ pw: string; busy: boolean; err: string } | null>(null)
+    const [cpw, setCpw] = useState<{ cur: string; nw: string; busy: boolean; err: string } | null>(null)
+    const [acMsg, setAcMsg] = useState("")
+    const [verMsg, setVerMsg] = useState("")
+    const psRef = useRef<PStore | null>(null)
+    psRef.current = ps
+    const syncT = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const syncRun = useRef(false)
+    const syncMore = useRef(false)
+    const syncGet = (uid: string): SyncSt => {
+        const s = lsGet<any>(SYNC_KEY)
+        return s && s.uid === uid ? { uid, base: numIn(s.base, 0, 1e15, 0), dirty: s.dirty === true, ph: Array.isArray(s.ph) ? s.ph.filter((x: unknown) => typeof x === "string") : [] } : { uid, base: 0, dirty: false, ph: [] }
+    }
+    const auErr = (e: unknown) => {
+        const c = e instanceof FbErr ? e.code : ""
+        return L(
+            c === "NET"
+                ? TA.eNet
+                : c === "EMAIL_EXISTS"
+                ? TA.eExists
+                : c === "INVALID_LOGIN_CREDENTIALS" || c === "INVALID_PASSWORD" || c === "EMAIL_NOT_FOUND"
+                ? TA.eCred
+                : c === "INVALID_EMAIL" || c === "MISSING_EMAIL"
+                ? TA.eEmail
+                : c === "WEAK_PASSWORD"
+                ? TA.eWeak
+                : c === "TOO_MANY_ATTEMPTS_TRY_LATER"
+                ? TA.eMany
+                : c === "USER_DISABLED"
+                ? TA.eDis
+                : c === "EXPIRED_OOB_CODE" || c === "INVALID_OOB_CODE"
+                ? TA.eOob
+                : TA.eGen
+        )
+    }
+    const gone = (e: unknown) => e instanceof FbErr && ["TOKEN_EXPIRED", "USER_NOT_FOUND", "USER_DISABLED", "INVALID_REFRESH_TOKEN"].includes(e.code)
+    /* the device copy and the account copy brought into step: the newer one is taken, two that changed apart are merged */
+    const syncNow = async (): Promise<boolean> => {
+        if (!acctRef.current) return false
+        if (syncRun.current) {
+            syncMore.current = true
+            return false
+        }
+        syncRun.current = true
+        setSyncSt("busy")
+        let ok = false
+        try {
+            const a = await acctTok(acctRef.current)
+            acctRef.current = a
+            const st = syncGet(a.uid)
+            const rem = await fsGetStore(a)
+            let local = psRef.current && psRef.current.pets.length ? psRef.current : null
+            let send = st.dirty || (!rem && !!local)
+            if (rem && rem.s && rem.t > st.base) {
+                st.ph = Array.from(new Set(st.ph.concat(phIds(rem.s))))
+                if (local && (st.dirty || st.base === 0)) {
+                    local = storeMerge(rem.s, local)
+                    send = JSON.stringify(local) !== JSON.stringify(rem.s)
+                } else {
+                    local = rem.s
+                    send = false
+                }
+                for (const id of phIds(local)) {
+                    if (await phGet(id).catch(() => undefined)) continue
+                    const d = await fsGetPh(a, id)
+                    if (d) await phPut(id, await (await fetch(d)).blob())
+                }
+                if (!psRef.current || JSON.stringify(psRef.current) !== JSON.stringify(local)) {
+                    psRef.current = local
+                    setPs(local)
+                    writeStore(local)
+                    syncDog(local)
+                    setPmode("res")
+                    setNewPet(false)
+                }
+                if (!send) lsSet(SYNC_KEY, { uid: a.uid, base: rem.t, dirty: false, ph: st.ph })
+            }
+            if (send && local) {
+                const want = phIds(local)
+                for (const id of want) {
+                    if (st.ph.includes(id)) continue
+                    const b = await phGet(id).catch(() => undefined)
+                    if (!b) continue
+                    await fsPutPh(a, id, await phData(b))
+                    st.ph.push(id)
+                }
+                const t = Date.now()
+                await fsPutStore(a, local, t)
+                for (const id of st.ph.filter((x) => !want.includes(x))) await fsDelPh(a, id)
+                /* a change made while this was sending is sent on the next round */
+                lsSet(SYNC_KEY, { uid: a.uid, base: t, dirty: syncMore.current, ph: st.ph.filter((x) => want.includes(x)) })
+            } else if (!rem || rem.t <= st.base) lsSet(SYNC_KEY, { ...st, dirty: false })
+            ok = true
+            setSyncSt("ok")
+        } catch (e) {
+            if (gone(e)) setAcct(null)
+            setSyncSt("off")
+        } finally {
+            syncRun.current = false
+            if (syncMore.current) {
+                syncMore.current = false
+                syncLater(300)
+            }
+        }
+        return ok
+    }
+    const syncLater = (ms = 1500) => {
+        const a = acctRef.current
+        if (!a) return
+        const st = syncGet(a.uid)
+        if (!st.dirty) lsSet(SYNC_KEY, { ...st, dirty: true })
+        if (syncT.current) clearTimeout(syncT.current)
+        syncT.current = setTimeout(() => void syncNow(), ms)
+    }
+    const verCheck = async () => {
+        const a0 = acctRef.current
+        if (!a0 || a0.ver) return
+        try {
+            const a = await acctTok(a0)
+            const u = await fbLookup(a)
+            if (u.ver && acctRef.current) setAcct({ ...acctRef.current, ...a, ver: true, nm: u.nm || a.nm })
+        } catch (e) {
+            if (gone(e)) setAcct(null)
+        }
+    }
+    useEffect(() => {
+        if (isCanvas || typeof window === "undefined") return
+        const a = acctRead()
+        if (a) {
+            acctRef.current = a
+            setAcctS(a)
+            void syncNow()
+            void verCheck()
+        }
+        setGuestS(lsGet(GUEST_KEY) === 1)
+        const io = lsGet<number>(INV_KEY)
+        setInvOff(typeof io === "number" && Date.now() - io < 30 * 864e5)
+        /* links from the e-mails Firebase sends: ?mode=verifyEmail|resetPassword&oobCode=… */
+        const q = new URLSearchParams(window.location.search)
+        const mode = q.get("mode"),
+            oob = q.get("oobCode")
+        if ((mode === "verifyEmail" || mode === "resetPassword") && oob) {
+            try {
+                window.history.replaceState(window.history.state, "", window.location.pathname + "#/racun")
+            } catch (e) {}
+            setPage({ p: "acct" })
+            if (mode === "resetPassword") setAu({ ...au0, m: "reset", oob })
+            else
+                fbPost("update", { oobCode: oob })
+                    .then(() => {
+                        setVerMsg(L(TA.vfOk))
+                        if (acctRef.current) setAcct({ ...acctRef.current, ver: true })
+                    })
+                    .catch((e) => setVerMsg(auErr(e)))
+        }
+        const back = () => {
+            if (document.visibilityState !== "visible" || !acctRef.current) return
+            void syncNow()
+            void verCheck()
+        }
+        document.addEventListener("visibilitychange", back)
+        window.addEventListener("online", back)
+        return () => {
+            document.removeEventListener("visibilitychange", back)
+            window.removeEventListener("online", back)
+        }
+    }, [])
+    const emOk = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim())
+    const signedIn = (a: Acct) => {
+        setAcct(a)
+        setAu(au0)
+        setGuestS(false)
+        lsSet(GUEST_KEY, null)
+        setAcMsg("")
+        void syncNow()
+        go({ p: "dog" })
+    }
+    const doIn = async () => {
+        const em = au.em.trim()
+        if (!em || !au.pw) return auSet({ err: L(TA.eMiss) })
+        auSet({ busy: true })
+        try {
+            signedIn(await fbSignIn(em, au.pw))
+        } catch (e) {
+            setAu((x) => ({ ...x, busy: false, err: auErr(e) }))
+        }
+    }
+    const doUp = async () => {
+        const em = au.em.trim()
+        if (!emOk(em)) return auSet({ err: L(TA.eEmail) })
+        if (au.pw.length < PW_MIN) return auSet({ err: L(TA.eWeak) })
+        auSet({ busy: true })
+        try {
+            signedIn(await fbSignUp(au.nm.trim().slice(0, 60), em, au.pw, lang))
+        } catch (e) {
+            setAu((x) => ({ ...x, busy: false, err: auErr(e) }))
+        }
+    }
+    const doForgot = async () => {
+        const em = au.em.trim()
+        if (!emOk(em)) return auSet({ err: L(TA.eEmail) })
+        auSet({ busy: true })
+        try {
+            await fbPost("sendOobCode", { requestType: "PASSWORD_RESET", email: em }, lang)
+            setAu((x) => ({ ...x, busy: false, m: "sent", pw: "" }))
+        } catch (e) {
+            setAu((x) => ({ ...x, busy: false, err: auErr(e) }))
+        }
+    }
+    const doReset = async () => {
+        if (au.pw.length < PW_MIN) return auSet({ err: L(TA.eWeak) })
+        auSet({ busy: true })
+        try {
+            const j = await fbPost("resetPassword", { oobCode: au.oob, newPassword: au.pw })
+            setAu({ ...au0, em: String(j.email || ""), ok: L(TA.rsOk) })
+        } catch (e) {
+            setAu((x) => ({ ...x, busy: false, err: auErr(e) }))
+        }
+    }
+    const resendVer = async () => {
+        if (!acctRef.current) return
+        try {
+            const a = await acctTok(acctRef.current)
+            await fbSendVerify(a, lang)
+            setVerMsg(L(TA.verSent))
+        } catch (e) {
+            setVerMsg(auErr(e))
+        }
+    }
+    /* this device forgets the account and its copy of the pets (they stay in the account) */
+    const forget = async () => {
+        if (syncT.current) clearTimeout(syncT.current)
+        setAcct(null)
+        lsSet(SYNC_KEY, null)
+        try {
+            window.localStorage.removeItem(PETS_KEY)
+        } catch (e) {}
+        await phClear().catch(() => {})
+        phUrls.forEach((u) => URL.revokeObjectURL(u))
+        phUrls.clear()
+        setPs(null)
+        psRef.current = null
+        setPmode("wiz")
+        setNewPet(true)
+        setPstep(0)
+        setCpw(null)
+        setDelQ(null)
+    }
+    const doOut = async () => {
+        const a = acctRef.current
+        if (!a) return
+        if (syncGet(a.uid).dirty && !(await syncNow())) return setAcMsg(L(TA.outUnsaved))
+        if (syncGet(a.uid).dirty) return setAcMsg(L(TA.outUnsaved))
+        await forget()
+        setAu(au0)
+        setAcMsg("")
+        go({ p: "dog" })
+    }
+    const doChPw = async () => {
+        const a0 = acctRef.current
+        if (!a0 || !cpw) return
+        if (cpw.nw.length < PW_MIN) return setCpw({ ...cpw, err: L(TA.eWeak) })
+        setCpw({ ...cpw, busy: true, err: "" })
+        try {
+            const a = await fbSignIn(a0.em, cpw.cur)
+            const j = await fbPost("update", { idToken: a.tok, password: cpw.nw, returnSecureToken: true })
+            setAcct({ ...a, tok: String(j.idToken || a.tok), rt: String(j.refreshToken || a.rt), exp: Date.now() + (parseInt(String(j.expiresIn || "3600"), 10) - 120) * 1000 })
+            setCpw(null)
+            setAcMsg(L(TA.chPwOk))
+        } catch (e) {
+            const c = e instanceof FbErr ? e.code : ""
+            setCpw((x) => (x ? { ...x, busy: false, err: c === "INVALID_LOGIN_CREDENTIALS" || c === "INVALID_PASSWORD" ? L(TA.ePw) : auErr(e) } : x))
+        }
+    }
+    const doDel = async () => {
+        const a0 = acctRef.current
+        if (!a0 || !delQ) return
+        setDelQ({ ...delQ, busy: true, err: "" })
+        try {
+            const a = await fbSignIn(a0.em, delQ.pw)
+            for (const id of await fsListPh(a)) await fsDelPh(a, id)
+            await fsDelStore(a)
+            await fbPost("delete", { idToken: a.tok })
+            await forget()
+            setAu(au0)
+            setAcMsg(L(TA.delOk))
+        } catch (e) {
+            const c = e instanceof FbErr ? e.code : ""
+            setDelQ((x) => (x ? { ...x, busy: false, err: c === "INVALID_LOGIN_CREDENTIALS" || c === "INVALID_PASSWORD" ? L(TA.ePw) : auErr(e) } : x))
+        }
+    }
+    const beGuest = () => {
+        setGuestS(true)
+        lsSet(GUEST_KEY, 1)
+        go({ p: "dog" })
+    }
+    const eye = (on: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+            <circle cx="12" cy="12" r="3" />
+            {on && <path d="M4 20L20 4" />}
+        </svg>
+    )
+    const okIco = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9.5" />
+            <path d="M8 12.3l2.6 2.6L16 9.6" />
+        </svg>
+    )
+    const pwIn = (id: string, v: string, set: (s: string) => void, ac: string, show: boolean, tog?: () => void) => (
+        <div className="fz-ac-pw">
+            <input id={id} className="fz-inp" type={show ? "text" : "password"} value={v} autoComplete={ac} onChange={(e) => set(e.target.value)} />
+            {tog && (
+                <button type="button" className="fz-ac-eye" aria-label={L(show ? TA.hide : TA.show)} aria-pressed={show} onClick={tog}>
+                    {eye(show)}
+                </button>
+            )}
+        </div>
+    )
+    const auMsg = (au.err || au.ok) && (
+        <p className={"fz-ac-msg" + (au.err ? " is-err" : "")} role={au.err ? "alert" : "status"}>
+            {au.err || au.ok}
+        </p>
+    )
+    const sub = (f: () => void) => (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!au.busy) f()
+    }
+    /* log in / sign up / forgotten / new password: the same card on the account page and on My pets */
+    const authBox = () => {
+        const m = au.m
+        const h = m === "up" ? TA.upH : m === "forgot" || m === "sent" ? TA.fgH : m === "reset" ? TA.rsH : TA.login
+        return (
+            <div className="fz-ac">
+                <h1 className="fz-h2">{L(h)}</h1>
+                {m === "in" && <p className="fz-lead fz-ac-lead">{L(TA.inLead)}</p>}
+                {m === "up" && <p className="fz-lead fz-ac-lead">{L(TA.upLead)}</p>}
+                {verMsg && <p className="fz-ac-msg" role="status">{verMsg}</p>}
+                {m === "in" && (
+                    <form className="fz-ac-card" onSubmit={sub(doIn)} noValidate>
+                        <label className="fz-lbl" htmlFor="fz-ac-em">{L(TA.em)}</label>
+                        <input id="fz-ac-em" className="fz-inp" type="email" inputMode="email" autoComplete="email" value={au.em} onChange={(e) => auSet({ em: e.target.value })} />
+                        <label className="fz-lbl fz-ac-l2" htmlFor="fz-ac-pw">{L(TA.pw)}</label>
+                        {pwIn("fz-ac-pw", au.pw, (s) => auSet({ pw: s }), "current-password", au.show, () => auSet({ show: !au.show }))}
+                        {auMsg}
+                        <button type="submit" className="fz-btn fz-btn--p fz-ac-wide" disabled={au.busy}>{L(TA.inBtn)}</button>
+                        <p className="fz-ac-c">
+                            <button type="button" className="fz-link" onClick={() => setAu({ ...au0, m: "forgot", em: au.em })}>{L(TA.forgotQ)}</button>
+                        </p>
+                        <div className="fz-ac-or">{L(TA.or)}</div>
+                        <button type="button" className="fz-btn fz-btn--g fz-ac-wide" onClick={() => setAu({ ...au0, m: "up", em: au.em })}>{L(TA.newAcct)}</button>
+                    </form>
+                )}
+                {m === "up" && (
+                    <form className="fz-ac-card" onSubmit={sub(doUp)} noValidate>
+                        <label className="fz-lbl" htmlFor="fz-ac-nm">{L(TA.nm)}</label>
+                        <input id="fz-ac-nm" className="fz-inp" autoComplete="given-name" maxLength={60} value={au.nm} onChange={(e) => auSet({ nm: e.target.value })} />
+                        <label className="fz-lbl fz-ac-l2" htmlFor="fz-ac-em">{L(TA.em)}</label>
+                        <input id="fz-ac-em" className="fz-inp" type="email" inputMode="email" autoComplete="email" value={au.em} onChange={(e) => auSet({ em: e.target.value })} />
+                        <label className="fz-lbl fz-ac-l2" htmlFor="fz-ac-pw">{L(TA.pw)}</label>
+                        {pwIn("fz-ac-pw", au.pw, (s) => auSet({ pw: s }), "new-password", au.show, () => auSet({ show: !au.show }))}
+                        <p className="fz-ac-s">{L(TA.pwMin)}</p>
+                        {auMsg}
+                        <button type="submit" className="fz-btn fz-btn--p fz-ac-wide" disabled={au.busy}>{L(TA.upH)}</button>
+                        <p className="fz-ac-s">
+                            {L(TA.upNote)}{" "}
+                            <button type="button" className="fz-link" onClick={() => go({ p: "privacy" })}>{L(TA.privacy)}</button>
+                        </p>
+                    </form>
+                )}
+                {(m === "forgot" || m === "sent") && (
+                    <form className="fz-ac-card" onSubmit={sub(doForgot)} noValidate>
+                        {m === "sent" ? (
+                            <p className="fz-ac-p" role="status">{L(TA.fgSent)}</p>
+                        ) : (
+                            <>
+                                <p className="fz-ac-p">{L(TA.fgP)}</p>
+                                <label className="fz-lbl" htmlFor="fz-ac-em">{L(TA.em)}</label>
+                                <input id="fz-ac-em" className="fz-inp" type="email" inputMode="email" autoComplete="email" value={au.em} onChange={(e) => auSet({ em: e.target.value })} />
+                                {auMsg}
+                                <button type="submit" className="fz-btn fz-btn--p fz-ac-wide" disabled={au.busy}>{L(TA.fgBtn)}</button>
+                            </>
+                        )}
+                        <div className="fz-ac-tip">{L(TA.fgTip)}</div>
+                    </form>
+                )}
+                {m === "reset" && (
+                    <form className="fz-ac-card" onSubmit={sub(doReset)} noValidate>
+                        <label className="fz-lbl" htmlFor="fz-ac-pw">{L(TA.newPw)}</label>
+                        {pwIn("fz-ac-pw", au.pw, (s) => auSet({ pw: s }), "new-password", au.show, () => auSet({ show: !au.show }))}
+                        <p className="fz-ac-s">{L(TA.pwMin)}</p>
+                        {auMsg}
+                        <button type="submit" className="fz-btn fz-btn--p fz-ac-wide" disabled={au.busy}>{L(TA.rsBtn)}</button>
+                    </form>
+                )}
+                <p className="fz-ac-alt">
+                    {m === "in" ? (
+                        <>
+                            <button type="button" className="fz-link" onClick={beGuest}>{L(TA.guest)}</button>
+                            <br />
+                            {L(TA.guestN)}
+                        </>
+                    ) : m === "up" ? (
+                        <>
+                            {L(TA.haveQ)}{" "}
+                            <button type="button" className="fz-link" onClick={() => setAu({ ...au0, em: au.em })}>{L(TA.inBtn)}</button>
+                        </>
+                    ) : (
+                        <button type="button" className="fz-link" onClick={() => setAu({ ...au0, em: au.em })}>{L(TA.back)}</button>
+                    )}
+                </p>
+            </div>
+        )
+    }
+    const petNames = (s: PStore) => {
+        const n = s.pets.map((p) => p.name || L(T.ptSpN[p.sp]))
+        return n.length < 2 ? n[0] || "" : n.slice(0, -1).join(", ") + L(TA.and) + n[n.length - 1]
+    }
+    /* under the title of My pets: confirm the e-mail, saved in the account, or the offer to save pets that are only on this device */
+    const acctBar = () => {
+        if (acct)
+            return (
+                <>
+                    {!acct.ver && (
+                        <div className="fz-ac-ver fz-noprint">
+                            <b>{L(TA.verH)}</b>
+                            <p>
+                                {L(TA.verP)}
+                                {acct.em}
+                                {L(TA.verP2)}
+                            </p>
+                            {verMsg ? <p className="fz-ac-s" role="status">{verMsg}</p> : <button type="button" className="fz-link" onClick={resendVer}>{L(TA.verAgain)}</button>}
+                        </div>
+                    )}
+                    {ps && ps.pets.length > 0 && pmode !== "wiz" && (
+                        <p className={"fz-ac-ok fz-noprint" + (syncSt === "off" ? " is-off" : "")} role="status">
+                            {syncSt === "off" ? L(TA.syncOff) : <>{okIco}{L(TA.saved)}</>}
+                        </p>
+                    )}
+                </>
+            )
+        if (!ps || !ps.pets.length || invOff || pmode === "wiz") return null
+        const one = ps.pets.length === 1
+        return (
+            <div className="fz-ac-inv fz-noprint">
+                <b>
+                    {petNames(ps)}
+                    {L(one ? TA.invOne : TA.invMany)}
+                </b>
+                <p>{L(one ? TA.invP1 : TA.invP)}</p>
+                <div className="fz-ac-invb">
+                    <button type="button" className="fz-btn fz-btn--p fz-btn--sm" onClick={() => (setAu({ ...au0, m: "up" }), go({ p: "acct" }))}>{L(TA.invBtn)}</button>
+                    <button
+                        type="button"
+                        className="fz-link"
+                        onClick={() => {
+                            setInvOff(true)
+                            lsSet(INV_KEY, Date.now())
+                        }}
+                    >
+                        {L(TA.notNow)}
+                    </button>
+                </div>
+            </div>
+        )
+    }
+    /* My account: name, e-mail, pets, password, log out, a copy of the data, and deleting the account (two steps, with the password) */
+    const acctPage = (
+        <section className="fz-sec fz-pf fz-ac-sec">
+            <div className="fz-wrap">
+                {acMsg && !acct && <p className="fz-ac-msg" role="status">{acMsg}</p>}
+                {!acct || au.m === "reset" ? (
+                    authBox()
+                ) : (
+                    <div className="fz-ac">
+                        <h1 className="fz-h2">{L(TA.myAcct)}</h1>
+                        {verMsg && <p className="fz-ac-msg" role="status">{verMsg}</p>}
+                        <div className="fz-ac-card">
+                            {acct.nm && (
+                                <div className="fz-ac-row">
+                                    <span className="fz-lbl">{L(TA.nm)}</span>
+                                    <b>{acct.nm}</b>
+                                </div>
+                            )}
+                            <div className="fz-ac-row">
+                                <span className="fz-lbl">{L(TA.em)}</span>
+                                <b>{acct.em}</b>
+                                <em className={acct.ver ? "" : "is-no"}>{L(acct.ver ? TA.verYes : TA.verNo)}</em>
+                                {!acct.ver && (verMsg ? null : <button type="button" className="fz-link fz-ac-again" onClick={resendVer}>{L(TA.verAgain)}</button>)}
+                            </div>
+                            <div className="fz-ac-row">
+                                <span className="fz-lbl">{L(TA.pets)}</span>
+                                <b>{ps && ps.pets.length ? petNames(ps) : L(TA.noPets)}</b>
+                            </div>
+                            <p className={"fz-ac-ok" + (syncSt === "off" ? " is-off" : "")} role="status">
+                                {syncSt === "off" ? L(TA.syncOff) : syncSt === "busy" ? L(TA.saving) : <>{okIco}{L(TA.allSaved)}</>}
+                            </p>
+                            {acMsg && <p className="fz-ac-msg" role="status">{acMsg}</p>}
+                            {cpw ? (
+                                <form className="fz-ac-sub" onSubmit={(e) => (e.preventDefault(), !cpw.busy && doChPw())} noValidate>
+                                    <label className="fz-lbl" htmlFor="fz-ac-cur">{L(TA.curPw)}</label>
+                                    {pwIn("fz-ac-cur", cpw.cur, (s) => setCpw({ ...cpw, cur: s, err: "" }), "current-password", false)}
+                                    <label className="fz-lbl fz-ac-l2" htmlFor="fz-ac-nw">{L(TA.newPw)}</label>
+                                    {pwIn("fz-ac-nw", cpw.nw, (s) => setCpw({ ...cpw, nw: s, err: "" }), "new-password", false)}
+                                    <p className="fz-ac-s">{L(TA.pwMin)}</p>
+                                    {cpw.err && <p className="fz-ac-msg is-err" role="alert">{cpw.err}</p>}
+                                    <div className="fz-ac-two">
+                                        <button type="submit" className="fz-btn fz-btn--p" disabled={cpw.busy}>{L(TA.save)}</button>
+                                        <button type="button" className="fz-link" onClick={() => setCpw(null)}>{L(TA.cancel)}</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="fz-ac-two">
+                                    <button type="button" className="fz-btn fz-btn--g" onClick={() => (setAcMsg(""), setCpw({ cur: "", nw: "", busy: false, err: "" }))}>{L(TA.chPw)}</button>
+                                    <button type="button" className="fz-btn fz-btn--g" onClick={doOut}>{L(TA.out)}</button>
+                                </div>
+                            )}
+                            <p className="fz-ac-s">{L(TA.outNote)}</p>
+                            {ps && ps.pets.length > 0 && (
+                                <p className="fz-ac-exp">
+                                    <button type="button" className="fz-link" onClick={expCopy} disabled={expBusy}>{expBusy ? L(T.ptBusy) : L(TA.expAcct)}</button>
+                                </p>
+                            )}
+                        </div>
+                        <p className="fz-ac-dl">
+                            <button type="button" className="fz-link" aria-expanded={!!delQ} onClick={() => setDelQ(delQ ? null : { pw: "", busy: false, err: "" })}>{L(TA.delL)}</button>
+                        </p>
+                        {delQ && (
+                            <form className="fz-ac-card fz-ac-del" onSubmit={(e) => (e.preventDefault(), !delQ.busy && delQ.pw && doDel())} noValidate>
+                                <p>{L(TA.delP)}</p>
+                                {pwIn("fz-ac-delpw", delQ.pw, (s) => setDelQ({ ...delQ, pw: s, err: "" }), "current-password", false)}
+                                {delQ.err && <p className="fz-ac-msg is-err" role="alert">{delQ.err}</p>}
+                                <div className="fz-ac-two">
+                                    <button type="submit" className="fz-btn fz-pf-del" disabled={delQ.busy || !delQ.pw}>{L(TA.delBtn)}</button>
+                                    <button type="button" className="fz-link" onClick={() => setDelQ(null)}>{L(TA.cancel)}</button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                )}
+            </div>
+        </section>
+    )
+    const needAuth = !acct && !guest && !(ps && ps.pets.length)
+
+    /* Privacy policy: what the account keeps, where and why (Firebase: Authentication and Firestore in Frankfurt; Vercel serves the site) */
+    const privPage = (
+        <section className="fz-sec fz-pf fz-ac-sec">
+            <div className="fz-wrap fz-priv">
+                <h1 className="fz-h2">{L(TA.privacy)}</h1>
+                {lang === "hr" ? (
+                    <>
+                        <p className="fz-priv-d">Vrijedi od {PRIV_DATE.hr}.</p>
+                        <h2>Tko je odgovoran</h2>
+                        <p>
+                            Freshy's, {PRIV_WHO}. Pitanja o podacima: <a className="fz-link" href={"mailto:" + PRIV_MAIL}>{PRIV_MAIL}</a>.
+                        </p>
+                        <h2>Bez računa</h2>
+                        <p>Ljubimci, zapisi i slike spremaju se samo u tvom pregledniku, na tom uređaju. Ništa od toga ne šaljemo nikamo.</p>
+                        <h2>S računom</h2>
+                        <p>
+                            Spremamo tvoj e-mail, ime ako ga upišeš i sve što upišeš u Moji ljubimci: ljubimce, zapise i slike. Lozinku sprema Google samo kao šifrirani zapis. Mi je ne vidimo i ne spremamo.
+                        </p>
+                        <h2>Zašto</h2>
+                        <p>
+                            Da se možeš prijaviti i da su ti ljubimci na svakom tvom uređaju. E-mail koristimo samo za prijavu, potvrdu adrese i novu lozinku. Ne šaljemo reklame i ne prodajemo podatke. Pravna osnova je pružanje usluge koju koristiš (čl. 6. st. 1. t. b) Opće uredbe o zaštiti podataka).
+                        </p>
+                        <h2>Gdje su podaci</h2>
+                        <p>
+                            Račune i podatke za nas čuva Google, u usluzi Firebase: prijava je u Firebase Authentication, a ljubimci, zapisi i slike u bazi Cloud Firestore na poslužitelju u Frankfurtu. Google podatke obrađuje po našem nalogu. Dio podataka može obrađivati i izvan Europske unije, uz zaštitu koju propisuje EU. Stranicu poslužuje Vercel, koji kao svaki poslužitelj prima tehničke podatke o posjetu, na primjer IP adresu.
+                        </p>
+                        <h2>Koliko dugo</h2>
+                        <p>Dok imaš račun. Kad ga izbrišeš (Moj račun, Izbriši račun i sve podatke), brišemo račun, ljubimce, zapise i slike.</p>
+                        <h2>Tvoja prava</h2>
+                        <p>
+                            Možeš vidjeti, ispraviti i izbrisati svoje podatke, preuzeti kopiju (Moj račun, Preuzmi kopiju svojih podataka) i uložiti prigovor. Ako misliš da podatke obrađujemo protivno propisima, možeš se obratiti Agenciji za zaštitu osobnih podataka (azop.hr).
+                        </p>
+                        <h2>Kolačići</h2>
+                        <p>Ne koristimo kolačiće. Prijava i ljubimci pamte se u spremištu preglednika (localStorage i IndexedDB) na tvom uređaju.</p>
+                    </>
+                ) : (
+                    <>
+                        <p className="fz-priv-d">In effect from {PRIV_DATE.en}.</p>
+                        <h2>Who is responsible</h2>
+                        <p>
+                            Freshy's, {PRIV_WHO}. Questions about your data: <a className="fz-link" href={"mailto:" + PRIV_MAIL}>{PRIV_MAIL}</a>.
+                        </p>
+                        <h2>Without an account</h2>
+                        <p>Pets, entries and photos are saved only in your browser, on that device. None of it is sent anywhere.</p>
+                        <h2>With an account</h2>
+                        <p>We keep your e-mail, your name if you type it, and everything you add in My pets: pets, entries and photos. Google keeps your password only in encrypted form. We never see it or store it.</p>
+                        <h2>Why</h2>
+                        <p>
+                            So you can log in and have your pets on all your devices. We use your e-mail only to log you in, to confirm the address and to send a new password. We don't send ads and don't sell data. The legal basis is providing the service you use (Art. 6(1)(b) of the General Data Protection Regulation).
+                        </p>
+                        <h2>Where the data is</h2>
+                        <p>
+                            Google keeps accounts and data for us, in Firebase: log-in in Firebase Authentication, and pets, entries and photos in a Cloud Firestore database on a server in Frankfurt. Google processes the data on our behalf. Some data may be processed outside the European Union, with the safeguards EU law requires. The site is served by Vercel, which, like any server, receives technical data about a visit, such as the IP address.
+                        </p>
+                        <h2>How long</h2>
+                        <p>As long as you have an account. When you delete it (My account, Delete account and all data), we delete the account, pets, entries and photos.</p>
+                        <h2>Your rights</h2>
+                        <p>
+                            You can see, correct and delete your data, download a copy (My account, Download a copy of your data) and object. If you think we process data against the rules, you can contact the Croatian data protection authority (azop.hr).
+                        </p>
+                        <h2>Cookies</h2>
+                        <p>We don't use cookies. Your log-in and pets are kept in the browser's storage (localStorage and IndexedDB) on your device.</p>
+                    </>
+                )}
+            </div>
+        </section>
+    )
+
     /* Escape closes the photo first, then the form; the ref always holds the latest state */
     const escRef = useRef<() => void>(() => {})
     escRef.current = () => {
@@ -10686,6 +11663,7 @@ export default function FreshysSite(props: Props) {
                         </div>
                     )}
                 </div>
+                {!shell && acctBar()}
                 {ps && ps.pets.length > 0 && !shell && !(pmode === "wiz" && !newPet) && (
                     <div className="fz-pt-pets fz-noprint" role="group" aria-label={L(T.pfH)}>
                         {ps.pets.map((x) => (
@@ -10730,7 +11708,7 @@ export default function FreshysSite(props: Props) {
                 )}
                 {ps && ps.pets.length > 0 && pmode !== "wiz" && <p className="fz-pt-bound fz-noprint">{L(T.ptBound)}</p>}
                 <div className="fz-pt-foot fz-noprint">
-                    <p className="fz-pf-saved">{L(T.pfSaved)}</p>
+                    <p className="fz-pf-saved">{L(acct ? TA.savedFoot : T.pfSaved)}</p>
                     {ps && ps.pets.length > 0 && (
                         <button type="button" className="fz-link" onClick={expCopy} disabled={expBusy}>
                             {expBusy ? L(T.ptBusy) : L(T.ptExp)}
@@ -10829,6 +11807,9 @@ export default function FreshysSite(props: Props) {
                             HR
                         </button>
                     </div>
+                    <button type="button" className="fz-ac-nav" aria-current={page.p === "acct" ? "page" : undefined} onClick={() => go({ p: "acct" })}>
+                        {L(acct ? TA.myAcct : TA.login)}
+                    </button>
                     <button type="button" className="fz-cart" aria-label={L(T.list) + (lCount ? " (" + lCount + ")" : "")} aria-current={page.p === "list" ? "page" : undefined} onClick={() => go({ p: "list" })}>
                         <Ico d={I.cart} s={21} />
                         {lCount > 0 && (
@@ -10863,6 +11844,9 @@ export default function FreshysSite(props: Props) {
                         <button type="button" onClick={() => go({ p: "list" })}>
                             {L(T.list)}
                             {lCount > 0 ? " (" + lCount + ")" : ""}
+                        </button>
+                        <button type="button" onClick={() => go({ p: "acct" })} aria-current={page.p === "acct" ? "page" : undefined}>
+                            {L(acct ? TA.myAcct : TA.login)}
                         </button>
                         <button type="button" className="fz-btn fz-btn--p" onClick={() => (SHOP ? orderPouch() : go({ p: "recipes" }))}>
                             {L(SHOP ? T.cta1 : T.cta2)}
@@ -13789,7 +14773,7 @@ export default function FreshysSite(props: Props) {
                     </div>
                 )}
                 {nav}
-                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "dog" ? dogPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
+                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? acctPage : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
                 {footer}
             </div>
         </div>
