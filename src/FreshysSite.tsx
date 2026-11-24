@@ -741,6 +741,19 @@ const T = {
     vnOver: X("The days the vet gave have passed.", "Dani koje je rekao veterinar su prošli."),
     vnWhile: X("While the vet's recommendation lasts, the vet's amount is the one that counts.", "Dok traje preporuka veterinara, vrijedi količina koju je on rekao."),
     feedL: X("How will you feed it?", "Kako ga želiš hraniti?"),
+    trtL: X("Do you give treats too?", "Daješ li i poslastice?"),
+    notDay: X("One batch isn't enough for a whole day.", "Jedan recept nije dovoljan za cijeli dan."),
+    trtO: [X("No", "Ne"), X("Yes", "Da")],
+    trtH2: X("The home-cooked food on top of the kibble and the treats share the 10% for extras: 5% each.", "Domaća hrana na granule i poslastice dijele 10 % za dodatke: svako po 5 %."),
+    trtH0: X("10% of the day is left for treats, so there's a little less of the dish.", "10 % dana ostaje za poslastice, pa je jela malo manje."),
+    rest90: X("The other 10% of the day is left for treats.", "Ostalih 10 % dana ostaje za poslastice."),
+    rest45: X("The rest is the usual food (45% of the day) and treats (10%): give a little less than half of the usual food.", "Ostatak su uobičajena hrana (45 % dana) i poslastice (10 %): uobičajene hrane daj nešto manje od pola onoga što inače."),
+    trtWhy: X("10% is left for treats: all treats together give at most 10% of daily calories", "10 % ostaje za poslastice: sve poslastice zajedno daju najviše 10 % dnevnih kalorija"),
+    trtShR: X("You give treats too, so this recipe and the treats share that 10%: 5% each.", "Daješ i poslastice, pa tih 10 % dijele ovaj recept i poslastice: svako po 5 %."),
+    trtShT: X("You also give home-cooked food on top of the kibble, so the treats and that food share that 10%: 5% each.", "Daješ i domaću hranu na granule, pa tih 10 % dijele poslastice i ta hrana: svako po 5 %."),
+    trtTopT: X("Treats and the home-cooked food on top of the kibble share the 10% for extras: 5% each.", "Poslastice i domaća hrana na granule dijele 10 % za dodatke: svako po 5 %."),
+    trtTopR: X("On top of the food your dog usually eats. This recipe and the treats share the 10% for extras: 5% each.", "Uz hranu koju inače jede. Ovaj recept i poslastice dijele 10 % za dodatke: svako po 5 %."),
+    shTop: X("home-cooked food", "domaća hrana"),
     feedO: [X("Only this food", "Samo ova hrana"), X("Half and half", "Pola-pola"), X("With kibble", "Uz granule")],
     feedD: [X("Only home-cooked food", "Samo domaća hrana"), X("Half home-cooked, half kibble", "Pola domaće hrane, pola granula"), X("A little home-cooked food on top of the kibble", "Malo domaće hrane na granule")],
     actS: [X("not very active", "malo se kreće"), X("normally active", "uobičajeno se kreće"), X("sport or work", "sport ili rad")],
@@ -4062,9 +4075,13 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-low{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:10px;color:var(--ink)}
 .fz-share{display:flex;height:10px;border-radius:99px;background:var(--bg2);overflow:hidden;margin-top:14px}
 .fz-share i{width:10%;background:var(--g);border-radius:99px 0 0 99px}
+.fz-share i.b{background:var(--or)}
+.fz-share i+i{margin-left:2px}
 .fz-share-l{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:13px;color:var(--ink2)}
 .fz-share-l b{color:var(--ink);font-weight:700}
 .fz-share-l span:first-child b{color:var(--g)}
+.fz-share-l span.b b{color:var(--orInk)}
+.fz-share-l.n3{justify-content:flex-start;flex-wrap:wrap;column-gap:16px;row-gap:2px}
 .fz-box .t .fz-link{display:inline;font-weight:600}
 .fz-box--g .t{color:rgba(255,255,255,.84)}
 .fz-box .mini{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:15px;font-weight:700}
@@ -4076,6 +4093,14 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-feed .fz-seg{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
 .fz-feed .fz-seg button,.fz-box .fz-feed .fz-seg button{justify-content:center;text-align:center;line-height:1.25;padding:9px 8px}
 @container (max-width:419px){.fz-feed .fz-seg{grid-template-columns:1fr}.fz-feed .fz-seg button,.fz-box .fz-feed .fz-seg button{justify-content:flex-start;text-align:left;padding:10px 14px;font-size:15px}}
+.fz-feed.fz-trt .fz-seg{grid-template-columns:repeat(2,1fr);max-width:260px}
+.fz-feed.fz-trt .fz-seg button,.fz-box .fz-feed.fz-trt .fz-seg button{justify-content:center;text-align:center}
+.fz-feed.fz-trt .fz-hint{flex-basis:100%;margin:0}
+.fz-trt--l{display:block;margin-top:18px}
+.fz-trt--l .fz-seg{margin-top:8px}
+.fz-trt--l .fz-hint{margin-top:8px}
+.fz-cook-p .fz-dbl{margin-top:12px}
+.fz-cook-p .fz-link{font-size:15px;margin-top:2px}
 .fz-box .ln{display:flex;align-items:center;gap:10px;font-size:15px;padding:9px 0;border-bottom:1px solid var(--line)}
 .fz-box .ln:last-child{border-bottom:0;padding-bottom:0}
 .fz-box .fine{font-size:13px;color:var(--ink2);margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
@@ -5506,6 +5531,8 @@ export default function FreshysSite(props: Props) {
     const [batch, setBatch] = useState(1)
     const [feed, setFeedS] = useState(0) // home-cooked food is 0 all of the day's food, 1 half, 2 ten per cent
     const [cook, setCookS] = useState(1) // cooking ahead for this many days (1–30)
+    const [trt, setTrtS] = useState(false) // also gives treats: they share the 10 % for extras with home-cooked food on top of kibble, or take 10 % of a whole-day dish
+    const [dblK, setDblK] = useState("") // the recipe someone chose to cook a bigger batch of, because one batch isn't enough for a day
     const [planId, setPlanIdS] = useState<number | null>(null) // the dish picked in the week's plan
     const [cookOth, setCookOth] = useState(false)
     const [cookIn, setCookIn] = useState<string | null>(null) // the days field while it is being typed in
@@ -5667,6 +5694,7 @@ export default function FreshysSite(props: Props) {
             }
             const fd = window.localStorage.getItem("fz-feed")
             if (fd === "1" || fd === "2") setFeedS(+fd)
+            if (window.localStorage.getItem("fz-trt") === "1") setTrtS(true)
             const ck = parseInt(window.localStorage.getItem("fz-cook") || "0", 10)
             if (ck >= 1) setCookS(Math.min(COOK_MAX, ck))
             const pl = parseInt(window.localStorage.getItem("fz-plan") || "0", 10)
@@ -5705,6 +5733,12 @@ export default function FreshysSite(props: Props) {
         } catch (e) {}
         // the dog the amounts are for has a profile: keep the choice there too
         if (!local && ps && feedPet && feedPet.mix !== v) commit({ ...ps, pets: ps.pets.map((x) => (x.id === feedPet.id ? { ...x, mix: v } : x)) })
+    }
+    const setTrt = (v: boolean) => {
+        setTrtS(v)
+        try {
+            window.localStorage.setItem("fz-trt", v ? "1" : "0")
+        } catch (e) {}
     }
     const setCook = (n: number) => {
         const v = Math.min(COOK_MAX, Math.max(1, Math.round(n)))
@@ -12054,11 +12088,26 @@ export default function FreshysSite(props: Props) {
     const kMid = Math.round((kLoD + kHiD) / 2)
     const day10 = Math.round(kLoD * 0.1)
     const pup = dog.age < 2
-    /* share of the day's calories that comes from the home-cooked recipe; puppies stay on 10 % */
+    /* how the dog is fed: 0 only home-cooked food, 1 half and half, 2 a little on top of the usual food (puppies always 2) */
+    const fdx = pup ? 2 : feed
+    /* share of the day's calories that comes from the home-cooked recipe (k: "t" treats, "b" bland meal, "" anything else).
+       Extras stay under 10 % of the day (AAHA): treats and home-cooked food on top of the usual food share it, 5 % each.
+       With a whole-day dish, treats take 10 % of the day and the dish 90 % (45 % for half and half). A bland meal is left as it is. */
     const SHARES = [1, 0.5, 0.1]
-    const shareOf = (ok: boolean) => (ok && !pup ? SHARES[feed] : 0.1)
-    /* kcal a day from the home-cooked dish: the middle of the need (or half of it), or up to 10 % of the lower end */
-    const needDay = (sh: number) => (sh > 0.1 ? Math.round(kMid * sh) : day10)
+    const shareOf = (ok: boolean, k = "") => {
+        const t = trt && k !== "b"
+        if (k === "t") return t && fdx === 2 ? 0.05 : 0.1
+        if (ok && fdx < 2) return Math.round(SHARES[fdx] * (t ? 90 : 100)) / 100
+        return t ? 0.05 : 0.1
+    }
+    /* kcal a day for an extra: 10 % (or 5 %) of the lower end */
+    const xKc = (sh: number) => (sh >= 0.1 ? day10 : Math.round(kLoD * sh))
+    /* kcal a day from the home-cooked dish: the middle of the need (or a share of it), or up to 10 % (5 %) of the lower end */
+    const needDay = (sh: number) => (sh > 0.1 ? Math.round(kMid * sh) : xKc(sh))
+    const recK = (r: Rec) => (r.kind === "treat" ? "t" : r.kind === "bland" ? "b" : "")
+    const catK = (r: CRec) => (r.k === "t" ? "t" : r.k === "b" ? "b" : "")
+    /* what the rest of the day is, under a whole-day dish */
+    const restTxt = (sh: number): LS | null => (sh === 0.5 ? T.halfRest : sh === 0.9 ? T.rest90 : sh === 0.45 ? T.rest45 : null)
     const tMin = (m: number) => (m < 60 ? m + " min" : Math.floor(m / 60) + " h" + (m % 60 ? " " + (m % 60) + " min" : ""))
     /* grams a day: 10 g steps up to 300 g, 50 g up to 1 kg, then kilograms with one decimal */
     const gTxt = (g: number): [string, string] => {
@@ -12078,14 +12127,14 @@ export default function FreshysSite(props: Props) {
         return [nf(Math.max(5, fl5(g)), lang), "g"]
     }
     /* grams a day of a whole-day dish (kcal per gram): about the middle of the need for a whole or half meal, up to 10 % on top of other food */
-    const dayG = (kpg: number, sh: number) => (sh > 0.1 ? needDay(sh) / kpg : Math.max(5, fl5(day10 / kpg)))
+    const dayG = (kpg: number, sh: number) => (sh > 0.1 ? needDay(sh) / kpg : Math.max(5, fl5(xKc(sh) / kpg)))
     const dayGTxt = (kpg: number, sh: number) => {
         const [v, u] = sh > 0.1 ? gTxt(dayG(kpg, sh)) : gTxtDn(dayG(kpg, sh))
         return (sh > 0.1 ? L(T.about) : L(T.upTo)) + " " + v + " " + u + " " + L(T.aDay)
     }
     /* how long one batch lasts, in a few words (d = days) */
     const daysShort = (d: number) => {
-        if (d < SHORT) return lang === "en" ? upFrac(1 / d) + " batches a day" : upFrac(1 / d) + " recepta za dan"
+        if (d < SHORT) return lang === "en" ? "one batch isn't enough for a day" : "jedan recept nije dovoljan za dan"
         const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
         if (lang === "en") return "one batch lasts " + (h % 1 ? Math.floor(h) + "½" : h) + (h === 1 ? " day" : " days")
         return "jedan recept za " + (h === 1.5 ? "dan i pol" : h % 1 ? Math.floor(h) + " i pol dana" : h + " " + plHr(h, ["dan", "dana", "dana"]))
@@ -12227,6 +12276,14 @@ export default function FreshysSite(props: Props) {
                             )}
                         </div>
                     )
+    /* "Do you give treats too?" with a line on what it changes */
+    const trtSeg = (lbl = false) => (
+        <div className={"fz-feed fz-trt" + (lbl ? " fz-trt--l" : "")}>
+            <span className={lbl ? "fz-lbl" : undefined}>{L(T.trtL)}</span>
+            {seg(T.trtO, trt ? 1 : 0, (i) => setTrt(i === 1), T.trtL)}
+            {trt && lbl && <p className="fz-hint">{L(fdx === 2 ? T.trtH2 : T.trtH0)}</p>}
+        </div>
+    )
     const feedR = (n: number) => (
         <div className="fz-feedr" role="radiogroup" aria-label={L(T.feedL)}>
             {T.feedO.slice(0, n).map((o, i) => (
@@ -12313,6 +12370,7 @@ export default function FreshysSite(props: Props) {
                                     {feedR(3)}
                                 </>
                             )}
+                            {trtSeg(true)}
                         </div>
                         <div className="fz-res" aria-live="polite">
                             <div className="fz-dlist">
@@ -12917,22 +12975,7 @@ export default function FreshysSite(props: Props) {
     const recPouch = rec.pouch ? POUCHES.find((p) => p.id === rec.pouch) : undefined
     /* Why the amount is small: a topper or treats are 10% of the day, the usual food is the other 90%. */
     /* the 10 % bar and why: shown under "How we worked it out" */
-    const share10Bar = (treat: boolean) => (
-        <>
-            <div className="fz-share" aria-hidden="true">
-                <i />
-            </div>
-            <div className="fz-share-l" aria-hidden="true">
-                <span>
-                    <b>{lang === "en" ? "10%" : "10 %"}</b> {L(treat ? T.shTreat : T.shRec)}
-                </span>
-                <span>
-                    <b>{lang === "en" ? "90%" : "90 %"}</b> {L(T.shFood)}
-                </span>
-            </div>
-        </>
-    )
-    const share10 = (treat: boolean) => <p className="t">{L(treat ? T.treatsAll : T.onTop)}</p>
+    const share10 = (treat: boolean, sh = 0.1) => <p className="t">{L(sh < 0.1 ? (treat ? T.trtTopT : T.trtTopR) : treat ? T.treatsAll : T.onTop)}</p>
     const lowCal = (pc = false) => (
         <>
             <p className="fz-low">{L(T.lowK)}</p>
@@ -12947,9 +12990,9 @@ export default function FreshysSite(props: Props) {
     const partsHr = (n: number) => plHr(n, ["jednak dio", "jednaka dijela", "jednakih dijelova"])
     /* Pieces a day in a form people use. n: pieces allowed (rounded down), perPc: kcal per piece,
        yMax: pieces in the batch (the larger number of a range, so a part is never over the limit; 0 if unknown). */
-    const pcView = (n: number, perPc: number, yMax: number, word: (k: number) => string, gen1: string) => {
+    const pcView = (n: number, perPc: number, yMax: number, word: (k: number) => string, gen1: string, bud: number) => {
         if (n < 1) {
-            const f = Math.ceil(perPc / day10)
+            const f = Math.ceil(perPc / bud)
             return (
                 <>
                     <div className="big">
@@ -13056,31 +13099,47 @@ export default function FreshysSite(props: Props) {
     }
     /* ---- whole meal: the day's food from this recipe, in litres, pieces or parts of the recipe, and how long one recipe lasts ---- */
     const cookOn = cook > 0
-    const feedSeg = (ok: boolean) =>
-        ok ? (
-            <div className="fz-feed">
-                <span>{L(T.feedL)}</span>
-                {seg(T.feedO, pup ? 2 : feed, (i) => setFeed(i), T.feedL)}
-            </div>
-        ) : null
-    const pct = (v: number) => (lang === "en" ? v + "%" : v + " %")
-    const shareBar = (sh: number) => (
+    /* how it is fed (whole-day dishes) and whether treats are given too (not on treats, bland meals and supplements: k "t", "b", "s") */
+    const feedSeg = (ok: boolean, k = "") => (
         <>
-            <div className="fz-share" aria-hidden="true">
-                <i style={{ width: sh * 100 + "%", borderRadius: sh === 1 ? 99 : undefined }} />
-            </div>
-            <div className="fz-share-l" aria-hidden="true">
-                <span>
-                    <b>{pct(sh * 100)}</b> {L(T.shRec)}
-                </span>
-                {sh < 1 && (
-                    <span>
-                        <b>{pct(100 - sh * 100)}</b> {L(T.shFood)}
-                    </span>
-                )}
-            </div>
+            {ok && (
+                <div className="fz-feed">
+                    <span>{L(T.feedL)}</span>
+                    {seg(T.feedO, fdx, (i) => setFeed(i), T.feedL)}
+                </div>
+            )}
+            {k !== "t" && k !== "b" && k !== "s" && trtSeg()}
         </>
     )
+    const pct = (v: number) => (lang === "en" ? Math.round(v) + "%" : Math.round(v) + "\u00a0%")
+    /* the day as a bar: this dish (or the treats), the other extra (treats, or home-cooked food on top of the kibble) and the usual food */
+    const shareBar = (sh: number, k = "") => {
+        const t = trt && k !== "b"
+        const segs: [number, LS, string][] = [[sh, k === "t" ? T.shTreat : T.shRec, "a"]]
+        if (t && k !== "t") segs.push([sh > 0.1 ? 0.1 : 0.05, T.shTreat, "b"])
+        if (k === "t" && sh < 0.1) segs.push([0.05, T.shTop, "b"])
+        const rest = Math.round((1 - segs.reduce((a, x) => a + x[0], 0)) * 100) / 100
+        const fill = segs.slice()
+        if (rest > 0) segs.push([rest, T.shFood, "c"])
+        return (
+            <>
+                <div className="fz-share" aria-hidden="true">
+                    {fill.map((x, i) => {
+                        const l = i === 0 ? 99 : 0
+                        const r = rest <= 0 && i === fill.length - 1 ? 99 : 0
+                        return <i key={i} className={x[2]} style={{ width: x[0] * 100 + "%", borderRadius: `${l}px ${r}px ${r}px ${l}px` }} />
+                    })}
+                </div>
+                <div className={"fz-share-l" + (segs.length > 2 ? " n3" : "")} aria-hidden="true">
+                    {segs.map((x, i) => (
+                        <span key={i} className={x[2]}>
+                            <b>{pct(x[0] * 100)}</b> {L(x[1])}
+                        </span>
+                    ))}
+                </div>
+            </>
+        )
+    }
     const volTxt = (ml: number) => {
         if (ml >= 1000) { const l = Math.round(ml / 100) / 10; return [nf(l, lang, l % 1 ? 1 : 0), "l"] }
         return [nf(ml >= 300 ? Math.round(ml / 50) * 50 : Math.max(10, Math.round(ml / 10) * 10), lang), "ml"]
@@ -13094,7 +13153,7 @@ export default function FreshysSite(props: Props) {
     }
     const mealTail = (sh: number) => (
         <>
-            {sh < 1 && <p className="t">{L(T.halfRest)}</p>}
+            {restTxt(sh) && <p className="t">{L(restTxt(sh)!)}</p>}
             <p className="fz-mnote">
                 {L(T.vetDay)} (
                 <a className="fz-link" href={HOME_URL} target="_blank" rel="noopener noreferrer">
@@ -13128,9 +13187,9 @@ export default function FreshysSite(props: Props) {
         return (
             <>
                 {bigAbout(v, u + " " + L(T.aDay))}
-                {sh === 1 && <p className="t">{twiceTxt(ml, wt)}</p>}
+                {sh >= 0.9 && <p className="t">{twiceTxt(ml, wt)}</p>}
                 {l && <p className="t">{l}</p>}
-                {dd > 0 && dd < SHORT && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + timesDay(1 / dd) + " times the recipe." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + timesDay(1 / dd) + " puta veći recept."}</p>}
+                {dd > 0 && dd < SHORT && <p className="t">{L(T.notDay)}</p>}
                 {mealTail(sh)}
             </>
         )
@@ -13169,23 +13228,24 @@ export default function FreshysSite(props: Props) {
             <>
                 {bigAbout(<Num v={n} lang={lang} />, word(n) + " " + L(T.aDay))}
                 {yMax > 0 && yMax / n >= SHORT && <p className="t">{lastsTxt(yMax / n)}</p>}
-                {yMax > 0 && yMax / n < SHORT && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + timesDay(n / yMax) + " times the recipe." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + timesDay(n / yMax) + " puta veći recept."}</p>}
+                {yMax > 0 && yMax / n < SHORT && <p className="t">{L(T.notDay)}</p>}
                 {mealTail(sh)}
             </>
         )
     }
     const pupNote = (ok: boolean) => (ok && pup ? <p className="t">{L(T.mealPup)}</p> : null)
     /* "How we worked it out", closed: the share of the day, the dog's energy (AAHA), the dish's calories (USDA) and the sum */
-    const howBox = (sh: number, kpg: number, treat: boolean, kcTxt: string, usda: boolean, vet = false) => {
+    const howBox = (sh: number, kpg: number, k: string, kcTxt: string, usda: boolean, vet = false) => {
         const en = lang === "en"
         const need = needDay(sh)
+        const treat = k === "t"
         return (
             <details className="fz-calcd">
                 <summary>
                     {L(T.howK)}
                     <Ico d={I.down} s={16} w={2.2} />
                 </summary>
-                {!vet && (sh > 0.1 ? shareBar(sh) : share10Bar(treat))}
+                {!vet && shareBar(sh, k)}
                 {!vet && (
                     <p className="t">
                         {en ? "Your dog needs " : "Tvom psu dnevno treba "}
@@ -13204,6 +13264,16 @@ export default function FreshysSite(props: Props) {
                         <p className="t">
                             {L(T.kcMid)} {nf(kMid, lang)} kcal
                             {sh < 1 ? (en ? ", " + pct(sh * 100) + " of it from this dish: " : ", od toga iz ovog jela " + pct(sh * 100) + ": ") + nf(need, lang) + " kcal" : ""}.
+                            {trt && k !== "b" && (
+                                <>
+                                    {" "}
+                                    {L(T.trtWhy)} (
+                                    <a className="fz-link" href={AAHA_10_URL} target="_blank" rel="noopener noreferrer">
+                                        {L(T.shSrc)}
+                                    </a>
+                                    ).
+                                </>
+                            )}
                         </p>
                     ) : (
                         <p className="t">
@@ -13211,7 +13281,8 @@ export default function FreshysSite(props: Props) {
                             <a className="fz-link" href={AAHA_10_URL} target="_blank" rel="noopener noreferrer">
                                 {L(T.shSrc)}
                             </a>
-                            ) {en ? `10% of ${nf(kLoD, lang)} kcal ≈ ${nf(day10, lang)} kcal.` : `10 % od ${nf(kLoD, lang)} kcal ≈ ${nf(day10, lang)} kcal.`}
+                            ) {sh < 0.1 ? L(treat ? T.trtShT : T.trtShR) + " " : ""}
+                            {en ? `${pct(sh * 100)} of ${nf(kLoD, lang)} kcal ≈ ${nf(xKc(sh), lang)} kcal.` : `${pct(sh * 100)} od ${nf(kLoD, lang)} kcal ≈ ${nf(xKc(sh), lang)} kcal.`}
                         </p>
                     ))}
                 {kcTxt && (
@@ -13230,16 +13301,16 @@ export default function FreshysSite(props: Props) {
     }
     /* a light dish someone wants to cook as the whole day's food: how much that would be, and a similar whole-day dish */
     const swapBox = (key: string, kpg: number) => {
-        if (pup || feed === 2 || !(kpg > 0)) return null
+        if (fdx === 2 || !(kpg > 0)) return null
         const alt = (DAY_SWAP[key] || []).find(dayOk)
         if (!alt) return null
-        const sh = SHARES[feed]
+        const sh = shareOf(true)
         const [v, u] = gTxt(needDay(sh) / kpg)
         const en = lang === "en"
         return (
             <div className="fz-swap">
                 <p>
-                    {sh === 1
+                    {fdx === 0
                         ? en
                             ? `This dish has fewer calories: as the whole day's food your dog would have to eat about ${v} ${u} of it a day. A dish with more calories is better, for example:`
                             : `Ovo jelo ima manje kalorija: za cijeli dan tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Bolje je jelo s više kalorija, na primjer:`
@@ -13254,41 +13325,28 @@ export default function FreshysSite(props: Props) {
     /* ---- cooking ahead ---- */
     const daysT = (n: number) => (lang === "en" ? n + (n === 1 ? " day" : " days") : n + " " + plHr(n, ["dan", "dana", "dana"]))
     const cookOthOn = cookOth || (cook > 0 && cook !== 7 && cook !== 30)
-    const cookPlan = (info: CookI | null, frTxt: string, fzTxt: string, nDays?: number) => {
+    /* key: the recipe on its page. One batch that isn't enough for one day is not multiplied on its own: the cook box offers a bigger batch (off). */
+    const cookPlan = (info: CookI | null, frTxt: string, fzTxt: string, nDays?: number, key?: string) => {
         const n = nDays || cook
         if (!info || !(n > 0) || !(info.d1 > 0)) return null
         const ds = (frTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fLo = ds[0] || 3
         const fHi = ds[ds.length - 1] || 3
-        const mult = Math.max(1, Math.ceil(n / info.d1 - (1 / SHORT - 1)))
-        const days = Math.max(n, info.ml || info.n ? Math.floor(mult * info.d1 + 0.1) : Math.round(mult * info.d1))
-        return { n, mult, days, fLo, fHi }
-    }
-    /* days, half days below three: "dan i pol", "4 dana" */
-    const daysAbout = (d: number) => {
-        const h = d < 3 ? Math.max(0.5, Math.round(d * 2) / 2) : Math.round(d)
-        if (lang === "en") return h === 0.5 ? "half a day" : h === 1.5 ? "a day and a half" : h === 2.5 ? "two and a half days" : h + (h === 1 ? " day" : " days")
-        return h === 0.5 ? "pola dana" : h === 1.5 ? "dan i pol" : h === 2.5 ? "dva i pol dana" : h + " " + plHr(h, ["dan", "dana", "dana"])
+        const m0 = Math.max(1, Math.ceil(n / info.d1 - (1 / SHORT - 1)))
+        const off = key && n === 1 && m0 > 1 && dblK !== key ? m0 : 0
+        const mult = off ? 1 : m0
+        const days = off ? 1 : Math.max(n, info.ml || info.n ? Math.floor(mult * info.d1 + 0.1) : Math.round(mult * info.d1))
+        return { n, mult, days, fLo, fHi, off }
     }
     /* what cooking ahead gives, as text: the plan line, how much and for how long, fridge and freezer, weighing, a big batch */
-    type CookTx = { head: string; got: string; keep: string; weigh: string; tail: string; tailW: boolean }
+    type CookTx = { head: string; keep: string; tail: string; tailW: boolean }
     const cookTx = (info: CookI, p: { n: number; mult: number; days: number; fLo: number; fHi: number }, frTxt: string, fzTxt: string): CookTx => {
         const en = lang === "en"
         const fr = frTxt || daysT(3)
-        const vt = (ml: number) => (info.wt ? gTxt(ml) : volTxt(ml)).join(" ")
         // days the recipe keeps in the freezer, from its own storage line (months × 30)
         const fzM = (fzTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fzMax = fzM.length ? fzM[fzM.length - 1] * 30 : 0
         const head = p.mult === 1 ? (en ? `One recipe is enough for ${daysT(p.n)}.` : `Za ${daysT(p.n)} dovoljan je jedan recept.`) : en ? `For ${daysT(p.n)}, make ${p.mult} times the recipe.` : `Za ${daysT(p.n)} skuhaj ${p.mult} puta veći recept.`
-        let got = ""
-        if (info.ml && info.tot)
-            got = en
-                ? `You get about ${vt(info.tot * p.mult)}, enough for about ${daysAbout(p.mult * info.d1)} at about ${vt(info.ml)} a day.`
-                : `Dobiješ oko ${vt(info.tot * p.mult)}, dovoljno za oko ${daysAbout(p.mult * info.d1)} uz oko ${vt(info.ml)} dnevno.`
-        else if (info.n && info.pcs && info.word) {
-            const all = Math.round(info.pcs * p.mult)
-            got = en ? `You get about ${all} ${info.word(all)}: ${info.n} a day, for ${daysT(p.days)}.` : `Dobiješ oko ${all} ${info.word(all)}: ${info.n} na dan, za ${daysT(p.days)}.`
-        } else got = en ? `Split it all into ${p.days} equal daily ${p.days === 1 ? "portion" : "portions"}.` : `Sve podijeli na ${p.days} ${plHr(p.days, ["dnevnu porciju", "jednake dnevne porcije", "jednakih dnevnih porcija"])}.`
         const keep =
             p.days <= p.fLo
                 ? en
@@ -13297,12 +13355,6 @@ export default function FreshysSite(props: Props) {
                 : en
                   ? `Put ${p.fLo} ${p.fLo === 1 ? "portion" : "portions"} in the fridge and freeze the rest${fzTxt ? ` (they keep ${fzTxt})` : ""}. Thaw each one in the fridge overnight.`
                   : `${p.fLo} ${plHr(p.fLo, ["porciju", "porcije", "porcija"])} stavi u hladnjak, a ostale zamrzni${fzTxt ? ` (stoje ${fzTxt})` : ""}. Svaku odmrzni preko noći u hladnjaku.`
-        const weigh =
-            p.days > 1 && (info.wt || !info.n) && Math.abs(p.mult * info.d1 - p.days) < 0.15
-                ? en
-                    ? `To be exact, weigh the whole cooked dish and divide by ${p.days}.`
-                    : `Najtočnije: izvaži cijelo skuhano jelo i podijeli s ${p.days}.`
-                : ""
         const tailW = fzMax > 0 && p.days > fzMax
         const tail = tailW
             ? en
@@ -13313,11 +13365,11 @@ export default function FreshysSite(props: Props) {
                   ? "That's a big batch: make it in more than one go."
                   : "To je velika količina: radi je u više navrata."
               : ""
-        return { head, got, keep, weigh, tail, tailW }
+        return { head, keep, tail, tailW }
     }
-    const cookBox = (info: CookI | null, frTxt: string, fzTxt: string) => {
+    const cookBox = (info: CookI | null, frTxt: string, fzTxt: string, key: string) => {
         if (!info) return null
-        const p = cookPlan(info, frTxt, fzTxt)
+        const p = cookPlan(info, frTxt, fzTxt, undefined, key)
         const tx = p ? cookTx(info, p, frTxt, fzTxt) : null
         const en = lang === "en"
         return (
@@ -13344,16 +13396,36 @@ export default function FreshysSite(props: Props) {
                     style={{ ["--p" as any]: ((cook - 1) / (COOK_MAX - 1)) * 100 + "%" } as React.CSSProperties}
                     onChange={(e) => setCook(+e.target.value)}
                 />
-                {p && tx && (
+                {p && tx && p.off > 0 && (
                     <div className="fz-cook-p" aria-live="polite">
                         <p>
-                            <b>{tx.head}</b>
-                            {p.mult > 1 ? (en ? " The ingredients below are already multiplied." : " Sastojci ispod su već pomnoženi.") : ""}
+                            <b>{p.off === 2 ? (en ? "Make twice as much?" : "Hoćeš li skuhati duplo više?") : en ? `Make ${p.off} times as much?` : `Hoćeš li skuhati ${p.off} puta više?`}</b>
                         </p>
-                        <p>{tx.got}</p>
+                        <button type="button" className="fz-btn fz-btn--g fz-btn--sm fz-dbl" onClick={() => setDblK(key)}>
+                            {p.off === 2 ? (en ? "Yes, twice as much" : "Da, skuhaj duplo") : en ? `Yes, ${p.off} times as much` : `Da, ${p.off} puta više`}
+                        </button>
+                    </div>
+                )}
+                {p && tx && !p.off && (
+                    <div className="fz-cook-p" aria-live="polite">
+                        {p.n === 1 && p.mult > 1 ? (
+                            <p>
+                                <b>{p.mult === 2 ? (en ? "Twice as much." : "Kuhaš duplo više.") : en ? `${p.mult} times as much.` : `Kuhaš ${p.mult} puta više.`}</b>
+                                {en ? " The ingredients below are already multiplied." : " Sastojci ispod su već pomnoženi."}
+                            </p>
+                        ) : (
+                            <p>
+                                <b>{tx.head}</b>
+                                {p.mult > 1 ? (en ? " The ingredients below are already multiplied." : " Sastojci ispod su već pomnoženi.") : ""}
+                            </p>
+                        )}
                         <p>{tx.keep}</p>
-                        {tx.weigh && <p>{tx.weigh}</p>}
                         {tx.tail && <p className={tx.tailW ? "w" : undefined}>{tx.tail}</p>}
+                        {p.n === 1 && p.mult > 1 && dblK === key && (
+                            <button type="button" className="fz-link" onClick={() => setDblK("")}>
+                                {en ? "Back to the usual amount" : "Vrati na običnu količinu"}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -13374,14 +13446,14 @@ export default function FreshysSite(props: Props) {
     const vnEnd = vn ? new Date(new Date(vn.t).getFullYear(), new Date(vn.t).getMonth(), new Date(vn.t).getDate() + vn.d) : null
     const vnOn = rec.kind === "bland" && !!vn && !!vnEnd && Date.now() < vnEnd.getTime()
     const rInfo: CookI | null = (() => {
-        const sh = shareOf(recMealOk(rec))
+        const sh = shareOf(recMealOk(rec), recK(rec))
         if (!recMealOk(rec) || sh <= 0.1 || !rec.batch || vnOn) return null
         const kpg = kpgR(rec)
         if (kpg) return { d1: rec.fw! / (needDay(sh) / kpg), ml: needDay(sh) / kpg, tot: rec.fw!, wt: true }
         const ml = needDay(sh) / (rec.kc.g || 0.75)
         return { d1: rec.batch / ml, ml, tot: rec.batch }
     })()
-    const rPlan = cookPlan(rInfo, rStore[0], rStore[1])
+    const rPlan = cookPlan(rInfo, rStore[0], rStore[1], undefined, "r:" + rec.id)
     const bk = rPlan ? rPlan.mult : batch
     const dShort = (t: number) => new Date(t).toLocaleDateString(lang === "en" ? "en-GB" : "hr-HR", lang === "en" ? { day: "numeric", month: "short" } : { day: "numeric", month: "numeric" })
     const vetBox =
@@ -13448,32 +13520,35 @@ export default function FreshysSite(props: Props) {
     const portion = () => {
         if (vnOn) return null
         if (rec.kind === "treat") {
+            const tsh = shareOf(false, "t")
             const per = rec.kc.pc || 1
-            const n = Math.floor(day10 / per)
+            const n = Math.floor(xKc(tsh) / per)
             const w = (k: number) => pl(lang, k, rec.pcw!.en, rec.pcw!.hr)
             return (
                 <>
-                    {pcView(n, per, maxNum(rec.makes.en) * bk, w, rec.pcw!.hr[1])}
-                    {share10(true)}
+                    {pcView(n, per, maxNum(rec.makes.en) * bk, w, rec.pcw!.hr[1], xKc(tsh))}
+                    {share10(true, tsh)}
                 </>
             )
         }
-        const sh = shareOf(recMealOk(rec))
+        const sh = shareOf(recMealOk(rec), recK(rec))
         const kpg = kpgR(rec)
-        if (sh > 0.1 && kpg) return mealVol(needDay(sh) / kpg, rec.fw! * bk, sh, 0, true)
-        if (sh > 0.1) return mealVol(needDay(sh) / (rec.kc.g || 0.75), rec.batch ? rec.batch * bk : 0, sh)
+        // "one recipe lasts …": one batch, not the batch multiplied for cooking ahead
+        const b1 = rPlan ? 1 : bk
+        if (sh > 0.1 && kpg) return mealVol(needDay(sh) / kpg, rec.fw! * b1, sh, 0, true)
+        if (sh > 0.1) return mealVol(needDay(sh) / (rec.kc.g || 0.75), rec.batch ? rec.batch * b1 : 0, sh)
         if (kpg)
             return (
                 <>
                     {pupNote(recMealOk(rec))}
-                    {gView(Math.max(5, fl5(day10 / kpg)), rec.fw! * bk, share10(false))}
+                    {gView(Math.max(5, fl5(xKc(sh) / kpg)), rec.fw! * bk, share10(false, sh))}
                 </>
             )
-        const ml = Math.max(5, fl5(day10 / (rec.kc.g || 0.75)))
+        const ml = Math.max(5, fl5(xKc(sh) / (rec.kc.g || 0.75)))
         return (
             <>
                 {pupNote(recMealOk(rec))}
-                {mlView(ml, rec.batch ? rec.batch * bk : 0, share10(false))}
+                {mlView(ml, rec.batch ? rec.batch * bk : 0, share10(false, sh))}
             </>
         )
     }
@@ -13498,10 +13573,6 @@ export default function FreshysSite(props: Props) {
                         <span className="fz-ch">
                             <Ico d={I.list} s={16} />
                             {ingCount(rec, lang)}
-                        </span>
-                        <span className="fz-ch">
-                            <Ico d={I.scale} s={16} />
-                            {tok(L(rec.makes), bk, lang)}
                         </span>
                         {kindTag(rec)}
                         {rec.tex && rec.tex !== "frozen" && <span className="fz-tag fz-tag--x">{L(T.tex[rec.tex])}</span>}
@@ -13530,15 +13601,15 @@ export default function FreshysSite(props: Props) {
                                     <span>{kgTxt} kg</span>
                                 </div>
                                 {dogLine}
-                                {!vnOn && feedSeg(recMealOk(rec))}
+                                {!vnOn && feedSeg(recMealOk(rec), recK(rec))}
                                 <div style={{ marginTop: 14 }} aria-live="polite">
                                     {portion()}
                                 </div>
                                 {!vnOn && recLight(rec) && swapBox(rec.id, kpgR(rec))}
-                                {cookBox(rInfo, rStore[0], rStore[1])}
+                                {cookBox(rInfo, rStore[0], rStore[1], "r:" + rec.id)}
                                 {vetBox}
-                                {kitchenBtn(() => logMeal("r:" + rec.id, rec.kind === "bland" && vnOn ? 0 : rec.kc.pc ? 1 : kpgR(rec) ? (shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec))) / kpgR(rec) / 10) * 10) : Math.max(5, fl5(day10 / kpgR(rec)))) : shareOf(recMealOk(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec))) / (rec.kc.g || 0.75) / 10) * 10) : Math.max(5, fl5(day10 / (rec.kc.g || 0.75)))))}
-                                {howBox(shareOf(recMealOk(rec)), rec.kc.pc ? 0 : kpgR(rec), rec.kind === "treat", kpgR(rec) ? "100 g ≈ " + nf(Math.round(kpgR(rec) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(rec.tk!, lang) + " kcal" : L(rec.kc.per) + " ≈ " + rec.kc.v + " kcal", true, vnOn)}
+                                {kitchenBtn(() => logMeal("r:" + rec.id, rec.kind === "bland" && vnOn ? 0 : rec.kc.pc ? 1 : kpgR(rec) ? (shareOf(recMealOk(rec), recK(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec), recK(rec))) / kpgR(rec) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(recMealOk(rec), recK(rec))) / kpgR(rec)))) : shareOf(recMealOk(rec), recK(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec), recK(rec))) / (rec.kc.g || 0.75) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(recMealOk(rec), recK(rec))) / (rec.kc.g || 0.75)))))}
+                                {howBox(shareOf(recMealOk(rec), recK(rec)), rec.kc.pc ? 0 : kpgR(rec), recK(rec), kpgR(rec) ? "100 g ≈ " + nf(Math.round(kpgR(rec) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(rec.tk!, lang) + " kcal" : L(rec.kc.per) + " ≈ " + rec.kc.v + " kcal", true, vnOn)}
                             </div>
                             <div className="fz-box">
                                 <div className="k">{L(T.keeps)}</div>
@@ -13695,7 +13766,7 @@ export default function FreshysSite(props: Props) {
     }
     const cCook = (r: CRec): CookI | null => {
         const kc = r.kc
-        const sh = shareOf(cMealOk(r))
+        const sh = shareOf(cMealOk(r), catK(r))
         if (!kc || sh <= 0.1) return null
         const need = needDay(sh)
         const vr = volRange(r.y || "")
@@ -13725,10 +13796,10 @@ export default function FreshysSite(props: Props) {
                 </>
             )
         const kc = r.kc
-        const budget = day10
-        const tail = share10(r.k === "t")
+        const sh = shareOf(cMealOk(r), catK(r))
+        const budget = xKc(sh)
+        const tail = share10(r.k === "t", sh)
         const vr = volRange(r.y || "")
-        const sh = shareOf(cMealOk(r))
         const kpg = kpgC(r)
         if (kc && sh > 0.1 && kpg && kc.p !== "pc") return mealVol(needDay(sh) / kpg, r.fw!, sh, 0, true)
         if (kc && kpg && kc.p !== "pc" && kpg < LIGHT_KCAL_ML) return lowCal()
@@ -13736,7 +13807,7 @@ export default function FreshysSite(props: Props) {
             return (
                 <>
                     {pupNote(cMealOk(r))}
-                    {gView(Math.max(5, fl5(day10 / kpg)), r.fw!, tail)}
+                    {gView(Math.max(5, fl5(budget / kpg)), r.fw!, tail)}
                 </>
             )
         if (kc && sh > 0.1) {
@@ -13764,7 +13835,7 @@ export default function FreshysSite(props: Props) {
             return (
                 <>
                     {pupNote(cMealOk(r))}
-                    {pcView(n, per, volOf(r.y || "") || /cup/i.test(r.y || "") ? 0 : maxNum(r.y || ""), (k) => pcWord(kc, k), forms[1])}
+                    {pcView(n, per, volOf(r.y || "") || /cup/i.test(r.y || "") ? 0 : maxNum(r.y || ""), (k) => pcWord(kc, k), forms[1], budget)}
                     {tail}
                 </>
             )
@@ -13878,7 +13949,7 @@ export default function FreshysSite(props: Props) {
             const warnAt = (i: number) => (r.w ? Object.keys(r.w).filter((k) => r.w![k].includes(i)) : [])
             const [cFr, cFz] = cStore(r)
             const cInfo = cCook(r)
-            const cPl = cookPlan(cInfo, cFr, cFz)
+            const cPl = cookPlan(cInfo, cFr, cFz, undefined, "c:" + cId(r))
             const km = cPl ? cPl.mult : 1
             return (
                 <div className="fz-page" key={"c-" + r.id}>
@@ -13897,12 +13968,6 @@ export default function FreshysSite(props: Props) {
                                     <Ico d={I.list} s={16} />
                                     {r.i.length} {pl(lang, r.i.length, ["ingredient", "ingredients"], ["sastojak", "sastojka", "sastojaka"])}
                                 </span>
-                                {r.y && (
-                                    <span className="fz-ch">
-                                        <Ico d={I.scale} s={16} />
-                                        {r.fw ? (lang === "en" ? "About " : "Oko ") + gTxt(r.fw).join(" ") : lang === "hr" && r.yh ? r.yh : r.y}
-                                    </span>
-                                )}
                                 {cKind(r)}
                                 {methodChip(cMeta.get(r.id))}
                                 {listBtn(cId(r), km)}
@@ -13927,14 +13992,14 @@ export default function FreshysSite(props: Props) {
                                             <span>{kgTxt} kg</span>
                                         </div>
                                         {dogLine}
-                                        {feedSeg(cMealOk(r))}
+                                        {feedSeg(cMealOk(r), SUPP.has(r.id) ? "s" : catK(r))}
                                         <div style={{ marginTop: 14 }} aria-live="polite">
                                             {cPortion(r)}
                                         </div>
                                         {cLight(r) && swapBox(String(r.id), kpgC(r))}
-                                        {cookBox(cInfo, cFr, cFz)}
-                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc || SUPP.has(r.id) ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(day10 / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(day10 / (r.kc.k / r.kc.a)))) : 1))}
-                                        {r.kc && howBox(shareOf(cMealOk(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), r.k === "t", kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r), SUPP.has(r.id))}
+                                        {cookBox(cInfo, cFr, cFz, "c:" + cId(r))}
+                                        {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc || SUPP.has(r.id) ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r), catK(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r), catK(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(cMealOk(r), catK(r))) / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r), catK(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r), catK(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(cMealOk(r), catK(r))) / (r.kc.k / r.kc.a)))) : 1))}
+                                        {r.kc && howBox(shareOf(cMealOk(r), catK(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), catK(r), kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r), SUPP.has(r.id))}
                                     </div>
                                     {st.length > 0 && (
                                         <div className="fz-box">
@@ -14055,11 +14120,22 @@ export default function FreshysSite(props: Props) {
     const selC = bc && !bNo(bc) ? bc : null
     const selV = bv.filter((k) => !bNo(k))
     const bKeys = selP ? [selP, ...(selC ? [selC] : []), ...selV] : []
-    const bShare = dog.age < 2 ? 0.1 : [1, 0.5, 0.1][feed]
-    const bBudget = bShare > 0.1 ? Math.max(10, Math.round((kMid * bShare) / 10) * 10) : Math.max(5, fl5(day10))
+    const bShare = shareOf(true)
+    const bBudget = bShare > 0.1 ? Math.max(10, Math.round((kMid * bShare) / 10) * 10) : Math.max(5, fl5(xKc(bShare)))
     const bg = bKeys.length ? buildGrams(bKeys, bdays, bBudget) : null
     /* how the portion sits in the day, by the choice above */
-    const bWith = bShare === 1 ? { en: "", hr: "" } : bShare === 0.5 ? { en: ", with half of the usual food", hr: ", uz pola uobičajene hrane" } : { en: ", on top of the usual food", hr: ", uz uobičajenu hranu" }
+    const bWith =
+        bShare === 1
+            ? { en: "", hr: "" }
+            : bShare === 0.9
+              ? { en: ", leaving 10% of the day for treats", hr: ", uz 10 % dana za poslastice" }
+              : bShare === 0.5
+                ? { en: ", with half of the usual food", hr: ", uz pola uobičajene hrane" }
+                : bShare === 0.45
+                  ? { en: ", with the usual food and treats", hr: ", uz uobičajenu hranu i poslastice" }
+                  : trt
+                    ? { en: ", on top of the usual food, next to treats", hr: ", uz uobičajenu hranu i poslastice" }
+                    : { en: ", on top of the usual food", hr: ", uz uobičajenu hranu" }
     const bTitle = (keys: string[]) => andList(keys.map((k, i) => (i === 0 ? L(ING[k].n) : L(ING[k].n).toLowerCase())), lang)
     const bOnList = lst.items.find((it) => it.t === "b" && it.keys.join() === bKeys.join() && it.days === bdays)
     const bSame = !!(bg && bOnList && bOnList.t === "b" && bOnList.g.join() === bg.g.join())
@@ -14174,9 +14250,10 @@ export default function FreshysSite(props: Props) {
                         {bmode === 0 && (
                             <div className="fz-feed">
                                 <span>{L(T.feedL)}</span>
-                                {seg(T.feedO, dog.age < 2 ? 2 : feed, (i) => setFeed(i), T.feedL)}
+                                {seg(T.feedO, fdx, (i) => setFeed(i), T.feedL)}
                             </div>
                         )}
+                        {bmode === 0 && trtSeg()}
                         {bmode === 1 ? (
                             <>
                                 <p className="fz-res-p">{L(T.bBland)}</p>
@@ -14485,6 +14562,7 @@ export default function FreshysSite(props: Props) {
                                 <span className="fz-lbl">{L(T.feedL)}</span>
                                 {feed === 2 && <p className="fz-hint fz-wk-q">{L(T.planFeedQ)}</p>}
                                 {feedR(2)}
+                                {trtSeg(true)}
                             </>
                         )}
                     </section>
@@ -14497,7 +14575,7 @@ export default function FreshysSite(props: Props) {
                             <div className="fz-ppick" role="radiogroup" aria-labelledby="fz-ps2">
                                 {planIds.map((id) => planPick(id))}
                             </div>
-                            {shareOf(true) < 1 && <p className="fz-wk-p fz-wk-half">{L(T.halfRest)}</p>}
+                            {restTxt(shareOf(true)) && <p className="fz-wk-p fz-wk-half">{L(restTxt(shareOf(true))!)}</p>}
                             <p className="fz-mnote">
                                 {L(T.planVet)} (
                                 <a className="fz-link" href={HOME_URL} target="_blank" rel="noopener noreferrer">
@@ -14555,9 +14633,7 @@ export default function FreshysSite(props: Props) {
                                 <p className="fz-wk-p">
                                     <b>{L(T.planWhen)}</b>
                                 </p>
-                                <p className="fz-wk-p">{planTx.got}</p>
                                 <p className="fz-wk-p">{planTx.keep}</p>
-                                {planTx.weigh && <p className="fz-wk-p">{planTx.weigh}</p>}
                                 {planTx.tail && <p className={"fz-wk-p" + (planTx.tailW ? " w" : "")}>{planTx.tail}</p>}
                                 <div className="fz-btns">
                                     <button
