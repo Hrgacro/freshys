@@ -722,7 +722,7 @@ const T = {
     cookO: [X("1 recipe", "1 recept"), X("7 days", "7 dana"), X("30 days", "30 dana"), X("Other", "Drugo")],
     cookAny: X("Type any number of days.", "Upiši bilo koji broj dana."),
     cookSteps: X("The amounts in the steps are for one recipe.", "Količine u koracima vrijede za jedan recept."),
-    dailyHint: X("Dishes filling enough for the whole day. Dishes with fewer calories, such as soups, are under Toppers: a dog would have to eat more of them for the whole day. Cook for a week, split it into daily portions and freeze them. On a recipe, pick how many days you're cooking for and the amounts are worked out for your dog.", "Jela dovoljno izdašna za cijeli dan. Jela s manje kalorija, poput juha, su u Dodacima: od njih bi pas za cijeli dan morao pojesti više. Skuhaj za tjedan, podijeli na dnevne porcije i zamrzni. Na receptu odaberi za koliko dana kuhaš i količine se izračunaju za tvog psa."),
+    dailyHint: X("Dishes with enough calories for the whole day. Dishes with fewer calories, such as soups, are under Toppers: a dog would have to eat more of them for the whole day. Cook for a week, split it into daily portions and freeze them. On a recipe, pick how many days you're cooking for and the amounts are worked out for your dog.", "Jela s dovoljno kalorija za cijeli dan. Jela s manje kalorija, poput juha, su u Dodacima: od njih bi pas za cijeli dan morao pojesti više. Skuhaj za tjedan, podijeli na dnevne porcije i zamrzni. Na receptu odaberi za koliko dana kuhaš i količine se izračunaju za tvog psa."),
     batch3: [X("Normal", "Obična"), X("Double", "Dvostruka"), X("More", "Više")],
     batchN: X("How many times the recipe", "Koliko puta recept"),
     vnK: X("Because of an upset stomach?", "Zbog želuca?"),
@@ -3108,7 +3108,7 @@ const DAYC: Record<number, [string, string, string, number, number, string[], nu
     2560: ["Beef, Apple, and Veggie Bowl", "Zdjela govedine, jabuke i povrća", "H6xZ8jD9fOAAw3jgELexNLagIXw.webp", 1027, 830, ["beef"], 20, 6, 0],
     2836: ["Batch-Prep Meal with Poultry, Beef & Fish", "Velika tura hrane od peradi, govedine i ribe", "FXcWrt0PtDjTmSApJau5rHC9lM.webp", 23164, 16150, ["chicken", "turkey", "fish", "eggs"], 90, 33, 1],
     2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5938, 4070, ["turkey"], 40, 9, 0],
-    3091: ["Hearty Beef & Veggie Meal", "Izdašna govedina s povrćem", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 10370, 6980, ["beef", "grains"], 60, 8, 0],
+    3091: ["Hearty Beef & Veggie Meal", "Velika tura govedine i povrća", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 10370, 6980, ["beef", "grains"], 60, 8, 0],
     3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1136, 850, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
     3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 1040, ["beef", "eggs", "grains"], 30, 6, 0],
     3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1889, 1340, ["chicken", "grains"], 50, 5, 0],
@@ -3121,30 +3121,32 @@ const DAY_HOME = [4941, 3091, 3628, 669, 2852, 813]
    when the dog can't have one, the next from the list */
 const WPLAN_POOL = [3628, 813, 4941, 2852, 3091, 501, 4927, 2352, 1033, 2560, 2189, 1306, 669, 533, 284]
 const WPLAN_DAYS = 7
-/* Light dishes: similar whole-day dishes, best first (same meat, same vegetables, then the same kind of dish) */
+/* Lighter dishes (soups, stews, mashes): whole-day dishes to cook instead, best first. The kind of dish comes first, then the meat and
+   vegetables: soups and stews point to dishes cooked in one pot (stews, rice or quinoa simmered with meat and vegetables), mashes to the
+   mash, never to a loaf, roll or bake (a soup and a meatloaf are not alike even with the same ingredients). */
 const DAY_SWAP: Record<string, number[]> = {
     "turkey-apple": [501, 533, 4941, 1033],
-    "salmon-sweet-potato": [1306, 669, 2836],
-    "beef-sweet-potato": [2189, 2352, 1639, 813],
-    "turkey-spinach": [1033, 2181, 3815],
-    "chicken-oat": [284, 3628, 4927],
-    3859: [813, 2852, 501, 3102],
-    3805: [1033, 3815, 533],
-    3385: [2560, 3535, 669, 1639],
-    3045: [1219, 284, 3628, 4927],
-    2997: [3628, 284, 4927],
-    2672: [2852, 501, 3102, 533],
-    2635: [1219, 284, 3628],
-    1567: [2189, 1639, 813, 3091],
-    1435: [1639, 813, 2189, 3091],
-    1351: [1639, 813, 3091, 2836],
-    1086: [284, 3628, 4927],
-    925: [813, 1639, 3091, 2836],
-    877: [284, 3628, 4927],
-    860: [284, 3628, 4927],
-    490: [1219, 284, 3628, 4927],
-    384: [284, 3628, 4927],
-    2653: [669, 1306, 2836],
+    "salmon-sweet-potato": [669, 2836],
+    "beef-sweet-potato": [2189, 2352, 813],
+    "turkey-spinach": [3815, 2852, 1033],
+    "chicken-oat": [3628, 4927, 284],
+    3859: [2852, 501, 813],
+    3805: [3815, 2852, 1033],
+    3385: [2560, 669, 3628],
+    3045: [1033, 3628, 4927],
+    2997: [1033, 3628, 4927],
+    2672: [2852, 501, 533],
+    2635: [3628, 4927, 284],
+    1567: [2189, 2352, 813, 3091],
+    1435: [1033, 813, 2189],
+    1351: [2189, 2352, 813],
+    1086: [3628, 4927, 284],
+    925: [2189, 813, 2352],
+    877: [3628, 284, 1639],
+    860: [3628, 2852, 4927],
+    490: [3628, 2852, 4927],
+    384: [3628, 4927, 284],
+    2653: [669, 2836],
 }
 /* Recipes a day in words people use: ¼, ⅓, ½, ⅔, ¾, then 1, 1½, 2… */
 const FRACS: [number, string][] = [[0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, "1"]]
@@ -3176,7 +3178,7 @@ const fl5 = (v: number) => Math.floor(v / 5) * 5
 
 /* All other recipes from mydogrecipe.com (used with permission), amounts converted to metric.
    Loaded only when the recipes page or one of these recipes is opened. */
-const CAT_URL = "https://framerusercontent.com/assets/V9jCFumOsZneUWPTQxBVhvsa60Q.json"
+const CAT_URL = "https://framerusercontent.com/assets/z9XCcHe2cNTUqWF0m7JZtSOSlJU.json"
 const IMG_BASE = "https://framerusercontent.com/images/"
 type CKc = { p: "ml" | "pc" | "batch"; a: number; k: number; w?: string; we?: [string, string]; s?: "u" }
 type CRec = {
@@ -13133,11 +13135,11 @@ export default function FreshysSite(props: Props) {
                 <p>
                     {sh === 1
                         ? en
-                            ? `This dish has fewer calories: as the whole day's food your dog would have to eat about ${v} ${u} of it a day. Similar, but more filling:`
-                            : `Ovo jelo ima manje kalorija: za cijeli dan tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Slično, a izdašnije:`
+                            ? `This dish has fewer calories: as the whole day's food your dog would have to eat about ${v} ${u} of it a day. A dish with more calories is better, for example:`
+                            : `Ovo jelo ima manje kalorija: za cijeli dan tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Bolje je jelo s više kalorija, na primjer:`
                         : en
-                          ? `This dish has fewer calories: for half and half your dog would have to eat about ${v} ${u} of it a day. Similar, but more filling:`
-                          : `Ovo jelo ima manje kalorija: za pola-pola tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Slično, a izdašnije:`}
+                          ? `This dish has fewer calories: for half and half your dog would have to eat about ${v} ${u} of it a day. A dish with more calories is better, for example:`
+                          : `Ovo jelo ima manje kalorija: za pola-pola tvoj pas bi ga morao pojesti oko ${v} ${u} dnevno. Bolje je jelo s više kalorija, na primjer:`}
                 </p>
                 {dayRow(alt, sh, false)}
             </div>
