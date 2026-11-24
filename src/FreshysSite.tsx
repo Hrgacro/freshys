@@ -711,6 +711,50 @@ const T = {
     makes: X("Makes", "Količina"),
     ingH: X("Ingredients", "Sastojci"),
     tick: X("Tick them off as you go.", "Označi sastojak kad ga pripremiš."),
+    stoNote: X("Green tags: what the ingredient gives, from the USDA food composition tables (per 100 g). Grey: what it does in the recipe.", "Zelene oznake: što sastojak daje, prema USDA tablicama sastava hrane (na 100 g). Sivo: čemu služi u receptu."),
+    stoGive: X("Gives:", "Daje:"),
+    stoRole: X("In the recipe:", "U receptu:"),
+    giveC: {
+        p: X("protein", "bjelančevine"),
+        f: X("fat", "masti"),
+        s: X("starch", "škrob"),
+        u: X("natural sugar", "prirodni šećer"),
+        b: X("fibre", "vlakna"),
+        l: X("few calories", "malo kalorija"),
+        a: X("vitamin A", "vitamin A"),
+        cu: X("copper", "bakar"),
+        ca: X("calcium", "kalcij"),
+        i: X("iodine", "jod"),
+        o3: X("omega-3", "omega-3"),
+    } as Record<string, LS>,
+    roleC: {
+        meat: X("main meat", "glavno meso"),
+        meat2: X("meat", "meso"),
+        fish: X("fish", "riba"),
+        organ: X("organ meat", "iznutrice"),
+        egg: X("egg, holds it together", "jaje, veže smjesu"),
+        egg2: X("egg", "jaje"),
+        grain: X("grain", "žitarica"),
+        flour: X("base of the dough", "osnova tijesta"),
+        veg: X("vegetable", "povrće"),
+        legume: X("legume", "mahunarka"),
+        fruit: X("fruit", "voće"),
+        fat: X("fat", "masnoća"),
+        herb: X("herb or spice", "začin"),
+        dairy: X("dairy", "mliječno"),
+        liquid: X("liquid", "tekućina"),
+        sweet: X("sweetener", "zaslađivač"),
+        supp: X("supplement", "dodatak"),
+        nut: X("flavour, holds it together", "okus, veže smjesu"),
+        seed: X("seeds", "sjemenke"),
+        leaven: X("raising agent", "rahli tijesto"),
+        flavor: X("flavour", "okus"),
+        bones: X("bones for the broth", "kosti za temeljac"),
+        gel: X("sets it", "zgušnjava"),
+        thick: X("thickens it", "zgušnjava"),
+        colour: X("colour", "boja"),
+        top: X("topping", "za ukras"),
+    } as Record<string, LS>,
     batch: [X("Normal", "Obična"), X("Double", "Dvostruka")],
     batchL: X("Batch", "Količina"),
     method: X("Method", "Priprema"),
@@ -742,6 +786,32 @@ const T = {
     vnWhile: X("While the vet's recommendation lasts, the vet's amount is the one that counts.", "Dok traje preporuka veterinara, vrijedi količina koju je on rekao."),
     feedL: X("How will you feed it?", "Kako ga želiš hraniti?"),
     trtL: X("Do you give treats too?", "Daješ li i poslastice?"),
+    kitGo: X("Start cooking", "Kreni kuhati"),
+    ahH: X("What are you cooking today?", "Što danas kuhaš?"),
+    ahPlan: X("From the plan for the week", "Iz plana za tjedan"),
+    ahPick: X("Recipe of the week", "Recept tjedna"),
+    ahWeek: X("This week's recipes", "Recepti ovog tjedna"),
+    ahDog: X("Your dog", "Tvoj pas"),
+    tabToday: X("Today", "Danas"),
+    tabCook: X("Cook", "Kuhaj"),
+    tabPlan: X("Plan", "Plan"),
+    tabPets: X("Pets", "Ljubimci"),
+    kitIng: X("Ingredients", "Sastojci"),
+    kitToSteps: X("Next: the steps", "Dalje: postupak"),
+    kitBack: X("Back", "Natrag"),
+    kitNext: X("Next", "Dalje"),
+    kitFin: X("Done", "Gotovo"),
+    kitAwake: X("Screen stays on", "Zaslon ostaje upaljen"),
+    kitDoneH: X("Done!", "Gotovo!"),
+    kitDaily: X("A day", "Dnevno"),
+    kitToRec: X("Back to the recipe", "Natrag na recept"),
+    kitNote: X("enjoy! – B.", "dobar tek! – B."),
+    tmrK: X("Timer", "Timer"),
+    tmrGo: X("Start timer", "Pokreni timer"),
+    tmrStop: X("Stop", "Zaustavi"),
+    tmrEnd: X("Time's up", "Vrijeme je isteklo"),
+    tmrOff: X("Turn off", "Isključi"),
+    tmrBg: X("Timers keep running while you do something else, and ring when the time is up.", "Timeri teku i dok radiš nešto drugo, a zazvone kad vrijeme istekne."),
     notDay: X("One batch isn't enough for a whole day.", "Jedan recept nije dovoljan za cijeli dan."),
     trtO: [X("No", "Ne"), X("Yes", "Da")],
     trtH2: X("The home-cooked food on top of the kibble and the treats share the 10% for extras: 5% each.", "Domaća hrana na granule i poslastice dijele 10 % za dodatke: svako po 5 %."),
@@ -1258,6 +1328,7 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
     ptMlOtherPh: X("e.g. A piece of carrot", "npr. Komadić mrkve"),
     ptFdAdd: X("+ Add a food", "+ Dodaj hranu"),
     ptFdNamePh: X("e.g. Dry food for adult dogs", "npr. Suha hrana za odrasle pse"),
+    ptFdNamePhC: X("e.g. Wet food for adult cats", "npr. Mokra hrana za odrasle mačke"),
     ptFdKc: X("kcal per 100 g, from the pack", "kcal na 100 g, s pakiranja"),
     ptFdT: [X("Dry", "Suha"), X("Wet", "Mokra"), X("Fresh", "Svježa"), X("Treat", "Poslastica"), X("From Build a meal", "Iz Složi obrok")],
     ptFdTK: X("Kind", "Vrsta"),
@@ -1512,6 +1583,30 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
         vanilla: X("Vanilla extract usually contains alcohol, which isn't safe for dogs. Leave it out or use an alcohol-free one.", "Ekstrakt vanilije obično sadrži alkohol, koji nije siguran za pse. Izostavi ga ili uzmi onaj bez alkohola."),
         xylitol: X("Use peanut butter without xylitol. It's poisonous to dogs and can also be listed as E967 or birch sugar.", "Uzmi maslac od kikirikija bez ksilitola. Psima je otrovan, a na sastavu može pisati i kao E967 ili brezov šećer."),
         salt: X("Dogs don't need added salt. Leave it out.", "Psu ne treba dodana sol. Izostavi je."),
+        liver: X("Liver is very rich in vitamin A and copper. Too much vitamin A over weeks or months can harm a dog, and some dogs (more often in certain breeds, such as Bedlington Terriers and Labradors) are also harmed by copper. Ask your vet before you give dishes with liver often, and don't give them to puppies every day without your vet's agreement.", "Jetra je vrlo bogata vitaminom A i bakrom. Previše vitamina A kroz više tjedana ili mjeseci može psu naštetiti, a nekim psima (češće kod nekih pasmina, npr. bedlington terijera i labradora) šteti i bakar. Prije nego što jela s jetrom daješ često, pitaj veterinara, a štencima ih ne daji svaki dan bez dogovora s veterinarom."),
+        bones: X("Never give your dog cooked bones: they break into sharp pieces that can hurt the mouth, throat and gut. Strain the broth and take out every bone before serving.", "Kuhane kosti psu nikad ne daji: lome se u oštre komadiće koji mogu ozlijediti usta, grlo i crijeva. Procijedi temeljac i izvadi sve kosti prije posluživanja."),
+        broth: X("Shop-bought broth often contains onion or garlic, which are poisonous to dogs, and a lot of salt. Use one without onion and garlic and with little salt, or water.", "Kupovni temeljac često sadrži luk ili češnjak, koji su psima otrovni, i puno soli. Uzmi temeljac bez luka i češnjaka, s malo soli, ili vodu."),
+        apple: X("Take out the core and the seeds. The seeds contain a substance that turns into cyanide, and the core can get stuck in the throat or gut.", "Izvadi sredinu i sjemenke. Sjemenke sadrže tvar iz koje nastaje cijanid, a sredina može zapeti u grlu ili crijevima."),
+        mango: X("Use only the flesh: the stone can get stuck in the throat or gut.", "Samo meso ploda: koštica može zapeti u grlu ili crijevima."),
+        xylitol2: X("Use a nut or seed butter without xylitol. It's poisonous to dogs and can also be listed as E967 or birch sugar.", "Uzmi maslac od orašastih plodova ili sjemenki bez ksilitola. Psima je otrovan, a na sastavu može pisati i kao E967 ili brezov šećer."),
+        carob: X("Carob, not chocolate: chocolate is poisonous to dogs. Check that the chips are made of carob.", "Rogač, ne čokolada: čokolada je psima otrovna. Provjeri da su kapljice od rogača."),
+        kelp: X("Kelp has a lot of iodine, and too much iodine can upset the thyroid. Give it only if your vet agrees.", "Alga kelp ima jako puno joda, a previše joda može poremetiti rad štitnjače. Daj je samo ako se veterinar slaže."),
+        calcium: X("Don't add more than the recipe says. Too much calcium is harmful, especially for puppies of large breeds.", "Ne stavljaj više nego što piše. Previše kalcija šteti, osobito štencima velikih pasmina."),
+        spinach: X("Spinach is high in oxalates. If your dog has had urinary stones or has kidney disease, ask your vet first.", "Špinat ima puno oksalata. Ako je pas imao kamence u mokraćnom sustavu ili ima bolest bubrega, prije pitaj veterinara."),
+        tuna: X("Tuna has more mercury than smaller fish. Give it only now and then and in small amounts, and not to puppies.", "Tuna ima više žive od manjih riba. Daj je samo povremeno i malo, a štencima je ne daji."),
+        cheese: X("Use plain cheese without herbs, onion or garlic, and only a little: some dogs don't digest lactose well.", "Uzmi običan sir bez začina, luka i češnjaka, i samo malo: neki psi slabo podnose laktozu."),
+        honey: X("Don't give raw honey to puppies under a year old or to dogs with a weak immune system: it can contain botulism spores. Honey is sugar, so use only a little.", "Sirovi med ne daji štencima mlađima od godinu dana ni psima slabog imuniteta: može sadržavati spore botulizma. Med je šećer, pa ga stavi samo malo."),
+        pumpkin: X("Use plain pumpkin purée, not pie filling: pie filling has sugar and spices, and nutmeg is harmful to dogs.", "Uzmi čisti pire od bundeve, ne nadjev za pitu: on ima šećer i začine, a muškatni oraščić psima šteti."),
+        dried: X("Choose cranberries without added sugar and check the pack has no raisins: raisins and grapes are poisonous to dogs.", "Uzmi brusnice bez dodanog šećera i provjeri da u pakiranju nema grožđica: grožđice i grožđe psima su otrovni."),
+        mint: X("Only fresh garden mint, and only a little. Never pennyroyal or mint essential oil: they are poisonous to dogs.", "Samo svježa obična metvica i samo malo. Nikad metvica poleg ni eterično ulje metvice: psima su otrovni."),
+        potato: X("Always cook potatoes and throw away green parts and sprouts: they contain solanine, which is poisonous.", "Krumpir uvijek skuhaj, a zelene dijelove i klice baci: u njima je solanin, koji je otrovan."),
+        coconut: X("Coconut oil is very fatty. If your dog has had pancreatitis or must eat little fat, ask your vet first.", "Kokosovo ulje je jako masno. Ako je pas imao upalu gušterače ili mora jesti malo masti, prije pitaj veterinara."),
+        cinnamon: X("Use Ceylon cinnamon if you can: it has far less coumarin than ordinary (cassia) cinnamon. Use only as much as the recipe says.", "Ako možeš, uzmi cejlonski cimet: ima puno manje kumarina od običnog (kasije). Stavi samo onoliko koliko piše."),
+        parsley: X("Only a little parsley: in large amounts it can make a dog's skin overly sensitive to the sun.", "Peršina samo malo: u velikim količinama psu može izazvati preosjetljivost kože na sunce."),
+        chamomile: X("Chamomile can cause vomiting, diarrhoea and allergic reactions in dogs, and long-term use can cause bleeding problems. Ask your vet before you give it.", "Kamilica psu može izazvati povraćanje, proljev i alergijske reakcije, a dugotrajno davanje i sklonost krvarenju. Prije nego što je daš, pitaj veterinara."),
+        cbd: X("The safety and dose of CBD for dogs are not well studied, shop products often don't say clearly how much they contain, and some contain THC, which is poisonous to dogs. Don't add it without your vet's agreement.", "Sigurnost i doza CBD-a za pse nisu dovoljno istražene, na kupovnim proizvodima često nije jasno koliko ga ima, a neki sadrže i THC, koji je psima otrovan. Ne dodaji ga bez dogovora s veterinarom."),
+        mushroom: X("Only shop-bought edible mushrooms, never wild ones: some wild mushrooms can kill a dog.", "Samo kupovne jestive gljive, nikad samonikle: neke divlje gljive psu mogu biti smrtonosne."),
+        chew: X("Stay with your dog while it chews. When a piece is small enough to swallow whole, take it away.", "Dok pas žvače, budi uz njega. Kad komad postane toliko malen da ga može progutati cijelog, uzmi mu ga."),
         bacon: X("Bacon is salty and fatty. Leave it out, or use a little plain cooked lean meat.", "Slanina je slana i masna. Izostavi je ili stavi malo kuhanog nemasnog mesa bez začina."),
     } as Record<string, LS>,
     suppH: X("This is a supplement, not a meal or a treat.", "Ovo je dodatak, a ne obrok ni poslastica."),
@@ -1843,11 +1938,11 @@ type Ck = { pet: string; d: string; a: number; e: number; p: number; at: number 
 /* Plus, second build. Meals and walks are what the owner writes down: nothing is tracked and no calories are estimated for walks.
    Medicines are written exactly as the vet prescribed them (Freshy's never suggests a dose); a Dose is one time a dose was given.
    k (meal): 0 current food, 1 a Freshy's recipe, 2 other food, 3 treat; kc: kcal, 0 = not known.
-   A meal comes from src: "cur" (the profile's food), "fd:<id>" (a saved food), "r:<id>" (a Freshy's recipe) or "c:mdr-<n>" (the full list);
+   A meal comes from src: "cur" (the profile's food), "fd:<id>" (a saved food), "r:<id>" (a Freshy's recipe) or "c:<recipe address>" (the full list; older data has "c:mdr-<n>");
    u is the unit of q: g, pc (pieces), ml or por (portions); g is the weight when u is g. kcal are worked out from the source, never guessed. */
 type Meal = { id: string; pet: string; d: string; tm: string; at: number; k: number; ti: string; g: number; kc: number; u: string; q: number; src: string }
 /* a food the owner gives often. t: 0 dry, 1 wet, 2 fresh, 3 treat, 4 a portion from the meal builder; kc: kcal per 100 g (u "g") or per portion (u "por"), 0 = not known */
-type Food = { id: string; n: string; t: number; kc: number; u: string; at: number }
+type Food = { id: string; n: string; t: number; kc: number; u: string; at: number; sp?: number }
 type Walk = { id: string; pet: string; d: string; at: number; km: number; min: number }
 type Med = { id: string; pet: string; ti: string; rx: string; d0: string; d1: string; tms: string[]; at: number; vi: string }
 /* what the vet wrote at a visit, on the owner's phone. Freshy's only keeps and shows it; it never advises.
@@ -1863,7 +1958,7 @@ type PV = "dash" | "log" | "vet" | "meal" | "walk" | "med" | "day"
 type MdForm = { id: string; isNew: boolean; ti: string; rx: string; d0: string; d1: string; tms: string[] }
 type VForm = { d: string; by: string; kg: string; goal: string; fq: string; fu: number; fn: string; diet: string; dto: string; md: { ti: string; rx: string; d0: string; d1: string; tms: string[] }[]; nx: string; nxr: string; watch: string; note: string }
 /* pt: the day a free 30-day Plus trial started ("" = never); pg: 1 when the trial was a thank-you to someone who used the dashboard before Plus existed */
-type PStore = { v: 1; pets: Pet[]; cur: string; log: Ent[]; ck: Ck[]; rem: number; pt: string; pg: number; ml?: Meal[]; wk?: Walk[]; md?: Med[]; dz?: Dose[]; dy?: Day[]; fd?: Food[]; vi?: VetIns[]; vz?: Visit[] }
+type PStore = { v: 1; pets: Pet[]; cur: string; log: Ent[]; ck: Ck[]; rem: number; pt: string; pg: number; ml?: Meal[]; wk?: Walk[]; md?: Med[]; dz?: Dose[]; dy?: Day[]; fd?: Food[]; vi?: VetIns[]; vz?: Visit[]; dm?: Lang }
 type EForm = { id: string; isNew: boolean; t: string; d: string; kg: string; wh: number; body: number; ti: string; tx: string; st: number; nx: string; ph: string[]; ph0: string[] }
 type Pt = { d: string; kg: number; at: number; v?: boolean }
 const PETS_KEY = "fz-pets"
@@ -2009,7 +2104,7 @@ const mealClean = (v: any): Meal | null =>
         : null
 const foodClean = (v: any): Food | null =>
     v && typeof v === "object" && typeof v.id === "string" && v.id && typeof v.n === "string" && v.n.trim()
-        ? { id: v.id.slice(0, 24), n: strIn(v.n, 60), t: numIn(v.t, 0, 4, 0), kc: numIn(v.kc, 0, 5000, 0), u: v.u === "por" ? "por" : "g", at: numIn(v.at, 0, 1e14, 0) }
+        ? { id: v.id.slice(0, 24), n: strIn(v.n, 60), t: numIn(v.t, 0, 4, 0), kc: numIn(v.kc, 0, 5000, 0), u: v.u === "por" ? "por" : "g", at: numIn(v.at, 0, 1e14, 0), ...(v.sp === 0 || v.sp === 1 || v.sp === 2 ? { sp: v.sp } : {}) }
         : null
 const walkClean = (v: any): Walk | null => (idOk(v) && isYmd(v.d) ? { id: v.id.slice(0, 24), pet: v.pet.slice(0, 24), d: v.d, at: numIn(v.at, 0, 1e14, 0), km: numIn(v.km, 0, 100, 0), min: numIn(v.min, 0, 600, 0) } : null)
 const medClean = (v: any): Med | null =>
@@ -2071,6 +2166,8 @@ const storeClean = (v: any): PStore | null => {
         fd: (Array.isArray(v.fd) ? v.fd.map(foodClean) : []).filter((x: Food | null): x is Food => !!x).slice(-60),
         vi: arr(v.vi, vetInsClean, 100),
         vz: arr(v.vz, visitClean, 100),
+        /* the portfolio's sample pets: written in this language, written again when the language changes */
+        ...(v.dm === "en" || v.dm === "hr" ? { dm: v.dm as Lang } : {}),
     }
 }
 /* a target weight is set once, when the pet is first marked as overweight, so it does not slide down as the pet loses weight */
@@ -2268,10 +2365,10 @@ const demoStore = (now: Date, en: boolean): PStore => {
     const CUR = (k: number, tm: string, g: number) => M(k, tm, 0, "", "cur", "g", g, Math.round(g * 3.5))
     const W = (k: number, km: number, min: number) => ({ id: "dm" + ++n, pet: "rex", d: d(k), at: at(k) + n, km, min })
     const raw = {
-        v: 1, cur: "rex", pets: [rex, mici], log, ck, rem: 3, pt: d(0), pg: 0,
+        v: 1, cur: "rex", pets: [rex, mici], log, ck, rem: 3, pt: d(0), pg: 0, dm: en ? "en" : "hr",
         fd: [
-            { id: "f1", n: tx("Dry food for adult dogs", "Suha hrana za odrasle pse"), t: 0, kc: 360, u: "g", at: at(-60) },
-            { id: "f2", n: tx("Wet food, chicken", "Mokra hrana, piletina"), t: 1, kc: 95, u: "g", at: at(-60) + 1 },
+            { id: "f1", n: tx("Dry food for adult dogs", "Suha hrana za odrasle pse"), t: 0, kc: 360, u: "g", at: at(-60), sp: 0 },
+            { id: "f2", n: tx("Wet food, chicken", "Mokra hrana, piletina"), t: 1, kc: 95, u: "g", at: at(-60) + 1, sp: 0 },
         ],
         ml: [
             CUR(0, "07:30", 160), M(0, "12:10", 3, tx("Fruit rings", "Voćni kolutići"), "r:fruit-rings", "pc", 1, 48),
@@ -3051,6 +3148,22 @@ const qNum = (v: string) => {
 }
 const hasAmt = (t: string) => /\d|[¼½¾⅓⅔⅛]/.test(t.replace(/\d+(?:[.,]\d+)?\s?%/g, ""))
 const trimNum = (v: string) => v.replace(/([.,]\d*?)0+$/, "$1").replace(/[.,]$/, "")
+/* how long a step takes, from its own text: the first number with minutes or hours (the lower one of a range) */
+const DUR_RE = /(\d+)(?:\s*(?:–|-|do|to)\s*(\d+))?\s*(minut[a-z]*|mins?\b|sat[ai]?\b|hours?\b|h\b)/i
+const stepDur = (s: string): { m: number; txt: string } | null => {
+    const m = DUR_RE.exec(s)
+    if (!m) return null
+    const a = parseInt(m[1], 10) * (/^(sat|hour|h)/i.test(m[3]) ? 60 : 1)
+    return a > 0 && a <= 24 * 60 ? { m: a, txt: m[0] } : null
+}
+const clockTxt = (sec: number) => {
+    const t = Math.max(0, Math.round(sec))
+    const h = Math.floor(t / 3600),
+        m = Math.floor((t % 3600) / 60),
+        x = t % 60
+    return (h ? h + ":" + String(m).padStart(2, "0") : String(m).padStart(2, "0")) + ":" + String(x).padStart(2, "0")
+}
+type Tmr = { k: string; id: string; st: number; ti: string; end: number; tot: number; done?: boolean }
 const scaleLine = (s: string, k: number, lang: Lang): string => {
     if (k === 1) return s
     const m = SC_RE.exec(s)
@@ -3161,27 +3274,27 @@ const recLight = (r: Rec) => r.kind === "topper" && !r.kc.pc && kpgR(r) > 0 && !
    minutes, number of ingredients, 1 when it goes in the oven] */
 const DAYC: Record<number, [string, string, string, number, number, string[], number, number, number]> = {
     284: ["Chicken, Brown Rice & Egg Fried Rice", "Pržena riža s piletinom i jajetom", "09EMgjNzAIK8z7OMfr04jRpqLc.webp", 586, 370, ["chicken", "eggs", "grains"], 20, 5, 0],
-    501: ["Turkey, Pumpkin & Brown Rice Meal", "Puretina s bundevom i smeđom rižom", "fE2nIXfHuMp3ESBiucoHxPjRhzU.webp", 1242, 930, ["turkey", "grains"], 40, 7, 0],
-    533: ["Turkey & Green Bean Bowl", "Zdjela puretine i mahuna", "AhRPW2pp0xM9EGMedhUhDPHPHlc.webp", 704, 430, ["turkey"], 30, 2, 0],
+    501: ["Turkey, Pumpkin & Brown Rice Meal", "Puretina s bundevom i smeđom rižom", "fE2nIXfHuMp3ESBiucoHxPjRhzU.webp", 1228, 920, ["turkey", "grains"], 40, 7, 0],
+    533: ["Turkey & Green Bean Bowl", "Zdjela puretine i mahuna", "AhRPW2pp0xM9EGMedhUhDPHPHlc.webp", 696, 425, ["turkey"], 30, 2, 0],
     669: ["Salmon, Brown Rice & Veggie Meal", "Losos sa smeđom rižom i povrćem", "c4pkTFseyvqtZ5iZcqcjNe9jo.webp", 779, 420, ["fish", "grains"], 30, 5, 0],
-    813: ["Beef, Pumpkin & Green Bean Bowl", "Zdjela govedine, bundeve i mahuna", "osAtgUArURNEff25FtGG0WHSQ7M.webp", 1926, 1220, ["beef"], 25, 6, 0],
-    1033: ["Turkey, Sweet Potato & Pea Mash", "Pire od puretine, batata i graška", "2jeluUZ40M83wKwrHSNe48ZFM.webp", 1035, 660, ["turkey"], 30, 4, 0],
-    1219: ["Sweet Potato & Chicken Meatloaf", "Mesna štruca od batata i piletine", "lrCxZnbfl2MCHraAVk0C8Zs.webp", 1484, 920, ["chicken", "turkey", "eggs", "grains"], 65, 7, 1],
-    1306: ["Salmon & Sweet Potato Loaf", "Štruca od lososa i batata", "qvtIEfJ8TGtzCBSW2C1SO0NICM.png", 1347, 730, ["fish", "eggs", "grains"], 45, 7, 1],
-    1639: ["Beef, Rice & Green Bean Casserole", "Složenac od govedine, riže i mahuna", "yQBESSfvxCRwqtP5JLRccsqNqU4.webp", 1506, 860, ["beef", "grains"], 60, 6, 1],
-    2181: ["Turkey, Spinach, and Rice Loaf", "Štruca od puretine, špinata i riže", "iBf9RFqnaiEzSwPtuPEt38CKS9Y.webp", 1249, 820, ["turkey", "eggs", "grains", "dairy"], 65, 6, 1],
-    2189: ["Beef, Spinach, and Sweet Potato Stew", "Varivo od govedine, špinata i batata", "dw99xAo8YrljJ9JUcDbwChq1Q.webp", 1099, 1000, ["beef"], 35, 6, 0],
-    2352: ["Beef, Carrot & Brown Rice Meal", "Govedina s mrkvom i smeđom rižom", "drjCoYQHW6VFLPfyjtcCkMmb1Wc.webp", 1410, 1190, ["beef", "grains"], 30, 7, 0],
-    2560: ["Beef, Apple, and Veggie Bowl", "Zdjela govedine, jabuke i povrća", "H6xZ8jD9fOAAw3jgELexNLagIXw.webp", 1027, 830, ["beef"], 20, 6, 0],
+    813: ["Beef, Pumpkin & Green Bean Bowl", "Zdjela govedine, bundeve i mahuna", "osAtgUArURNEff25FtGG0WHSQ7M.webp", 1915, 1213, ["beef"], 25, 6, 0],
+    1033: ["Turkey, Sweet Potato & Pea Mash", "Pire od puretine, batata i graška", "2jeluUZ40M83wKwrHSNe48ZFM.webp", 1024, 653, ["turkey"], 30, 4, 0],
+    1219: ["Sweet Potato & Chicken Meatloaf", "Mesna štruca od batata i piletine", "lrCxZnbfl2MCHraAVk0C8Zs.webp", 1468, 910, ["chicken", "turkey", "eggs", "grains"], 65, 7, 1],
+    1306: ["Salmon & Sweet Potato Loaf", "Štruca od lososa i batata", "qvtIEfJ8TGtzCBSW2C1SO0NICM.png", 1332, 722, ["fish", "eggs", "grains"], 45, 7, 1],
+    1639: ["Beef, Rice & Green Bean Casserole", "Složenac od govedine, riže i mahuna", "yQBESSfvxCRwqtP5JLRccsqNqU4.webp", 1489, 851, ["beef", "grains"], 60, 6, 1],
+    2181: ["Turkey, Spinach, and Rice Loaf", "Štruca od puretine, špinata i riže", "iBf9RFqnaiEzSwPtuPEt38CKS9Y.webp", 1235, 811, ["turkey", "eggs", "grains", "dairy"], 65, 6, 1],
+    2189: ["Beef, Spinach, and Sweet Potato Stew", "Varivo od govedine, špinata i batata", "dw99xAo8YrljJ9JUcDbwChq1Q.webp", 1087, 989, ["beef"], 35, 6, 0],
+    2352: ["Beef, Carrot & Brown Rice Meal", "Govedina s mrkvom i smeđom rižom", "drjCoYQHW6VFLPfyjtcCkMmb1Wc.webp", 1395, 1177, ["beef", "grains"], 30, 7, 0],
+    2560: ["Beef, Apple, and Veggie Bowl", "Zdjela govedine, jabuke i povrća", "H6xZ8jD9fOAAw3jgELexNLagIXw.webp", 1016, 821, ["beef"], 20, 6, 0],
     2836: ["Batch-Prep Meal with Poultry, Beef & Fish", "Velika tura hrane od peradi, govedine i ribe", "FXcWrt0PtDjTmSApJau5rHC9lM.webp", 23164, 16150, ["chicken", "turkey", "fish", "eggs"], 90, 33, 1],
-    2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5938, 4070, ["turkey"], 40, 9, 0],
-    3091: ["Hearty Beef & Veggie Meal", "Velika tura govedine i povrća", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 10370, 6980, ["beef", "grains"], 60, 8, 0],
-    3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1136, 850, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
+    2852: ["Turkey, Quinoa & Pumpkin Meal", "Puretina s kvinojom i bundevom", "XgGAYUgnpAb5P0DECuLkPgrl4.webp", 5894, 4040, ["turkey"], 40, 9, 0],
+    3091: ["Hearty Beef & Veggie Meal", "Velika tura govedine i povrća", "Z6gxQ4rG3OwVPybFpcKh0gtgRvI.webp", 9137, 6150, ["beef", "grains"], 60, 8, 0],
+    3102: ["Turkey, Pumpkin & Veggie Meatloaf", "Mesna štruca od puretine, bundeve i povrća", "Wgi7FDuD5yVlJpj959rcArAlBxo.webp", 1124, 841, ["turkey", "beef", "eggs", "grains"], 65, 10, 1],
     3535: ["Beef, Carrot & Oat Roll", "Rolada od govedine, mrkve i zobi", "0z1bPszABEjT8K4QCZEMq5xs9g.webp", 1399, 1040, ["beef", "eggs", "grains"], 30, 6, 0],
-    3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1889, 1340, ["chicken", "grains"], 50, 5, 0],
-    3815: ["Turkey, Sweet Potato & Quinoa Meal Prep", "Puretina, batat i kvinoja za cijeli tjedan", "T8XGqa1Mm09DPI3juTa4ZpdDOMU.jpg", 5311, 4460, ["chicken", "turkey", "fish"], 50, 9, 0],
+    3628: ["Chicken, Rice & Veggie Meal", "Piletina s rižom i povrćem", "7Xx8MQQIu3B16Ifh1SR26lhK2bE.jpg", 1879, 1333, ["chicken", "grains"], 50, 5, 0],
+    3815: ["Turkey, Sweet Potato & Quinoa Meal Prep", "Puretina, batat i kvinoja za cijeli tjedan", "T8XGqa1Mm09DPI3juTa4ZpdDOMU.jpg", 5282, 4435, ["chicken", "turkey", "fish"], 50, 9, 0],
     4927: ["Chicken & Green Beans", "Piletina s mahunama", "YeByN39ky4UUpWa56MHsAxejk.jpg", 1438, 1170, ["chicken", "eggs", "grains"], 50, 7, 0],
-    4941: ["Turkey, Rice & Liver Meal", "Puretina s rižom, jetrom i ljuskama jaja", "rnloYrEXSNaMW7058rINCRFcY0.jpg", 2375, 1540, ["turkey", "beef", "fish", "eggs", "grains"], 60, 8, 0],
+    4941: ["Turkey, Rice & Liver Meal", "Puretina s rižom, jetrom i ljuskama jaja", "rnloYrEXSNaMW7058rINCRFcY0.jpg", 2362, 1531, ["turkey", "beef", "fish", "eggs", "grains"], 60, 8, 0],
 }
 const DAY_HOME = [4941, 3091, 3628, 669, 2852, 813]
 /* the week's plan: five whole-day dishes without the oven (chicken, beef, turkey with liver, and two big batches: turkey and beef);
@@ -3255,10 +3368,28 @@ const fl5 = (v: number) => Math.floor(v / 5) * 5
 
 /* All other recipes from mydogrecipe.com (used with permission), amounts converted to metric.
    Loaded only when the recipes page or one of these recipes is opened. */
-const CAT_URL = "https://framerusercontent.com/assets/Rd5VKFRzvKCCiW94Gyl6AleXeY.json"
+const CAT_URL = "https://framerusercontent.com/assets/14tOPuEvKzdgHO3LbZwpQlFKDpA.json"
 const IMG_BASE = "https://framerusercontent.com/images/"
 type CKc = { p: "ml" | "pc" | "batch"; a: number; k: number; w?: string; we?: [string, string]; s?: "u" }
+/* what each ingredient of Freshy's own recipes gives and its role, aligned with rec.ing (same rules as the catalogue) */
+const OWN_D: Record<string, string[]> = {
+    "turkey-apple": ["p|meat", "s|grain", "|veg", "u|fruit", "|liquid", "|fat", "|herb", "l|veg"],
+    "salmon-sweet-potato": ["p|fish", "s.b|veg", "l|veg", "l|veg", "|fat", "|liquid", "ca|supp"],
+    "beef-sweet-potato": ["|liquid", "p|meat", "s.b|veg", "l|veg"],
+    "turkey-spinach": ["p|meat", "s.b|veg", "|veg", "|veg", "l|veg", "l|veg", "l|veg", "p.s.b|legume", "p.s.b|legume", "p.s.b|legume", "|liquid", "ca|supp", "|supp"],
+    "chicken-rice": ["p|meat", "s|grain", "|liquid"],
+    "chicken-oat": ["|liquid", "p|meat", "s.b|grain", "|veg"],
+    "fruit-rings": ["l|fruit", "u|fruit", "u|fruit", "u|fruit", "u|fruit", "p|dairy", "|seed", "|liquid"],
+    "pb-banana": ["u|fruit", "s.b|grain", "f.b|nut", "u|fruit", "p|egg", "|seed", "|fat", "|herb"],
+    "blueberry-carrot": ["u|fruit", "|veg", "l|veg", "s.b|flour", "|seed", "|gel", "|fat", "|nut", "|liquid", "ca|supp", "|supp"],
+    "watermelon": ["p|dairy", "l|fruit", "u|fruit", "l|veg", "u|fruit", "u|sweet", "|herb", "|liquid"],
+    "carrot-chips": ["|veg", "|fat", "|herb"],
+    "christmas": ["u|fruit", "f.b|nut", "p|egg", "|colour", "|colour", "s|flour", "s.b|grain"],
+}
+
 type CRec = {
+    /* what each ingredient line gives and its role ("p.f|meat"), aligned with i (USDA SR28, see sto_daje) */
+    d?: string[]
     id: number
     s: string
     t: string
@@ -3284,6 +3415,8 @@ type CRec = {
     /* finished weight of the whole recipe in grams (USDA cooked yields) and its kcal (USDA SR28) */
     fw?: number
     tk?: number
+    /* the recipe's address on the site, made from its English title (set when the list loads) */
+    u?: string
 }
 let catCache: CRec[] | null = null
 let catLoad: Promise<CRec[]> | null = null
@@ -3294,13 +3427,39 @@ const loadCatalog = () =>
             if (!r.ok) throw new Error("HTTP " + r.status)
             return r.json()
         })
-        .then((d: CRec[]) => (catCache = d))
+        .then((d: CRec[]) => (catCache = catSlugs(d)))
         .catch((e) => {
             catLoad = null
             throw e
         }))
 const cImg = (r: { img: string }, w = 512) => IMG_BASE + r.img + "?scale-down-to=" + w
-const cId = (r: CRec) => "mdr-" + r.id
+/* a recipe's address: words from its title ("hearty-beef-and-veggie-meal"); older links and saved data used "mdr-<n>" and still work */
+const slugOf = (t: string) =>
+    t
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+const catSlugs = (d: CRec[]) => {
+    const seen = new Set(RECIPES.map((r) => r.id))
+    d.forEach((r) => {
+        let u = slugOf(r.t) || "recipe-" + r.id
+        while (seen.has(u)) u += "-2"
+        seen.add(u)
+        r.u = u
+    })
+    return d
+}
+const cId = (r: CRec) => r.u || slugOf(r.t)
+const OLD_ID = /^mdr-(\d+)$/
+const catIs = (r: CRec, id: string) => cId(r) === id || "mdr-" + r.id === id
+/* a whole-day dish (DAYC) by its number: the same address as its recipe page */
+const dayId = (n: number) => {
+    const r = catCache ? catCache.find((x) => x.id === n) : undefined
+    return r ? cId(r) : DAYC[n] ? slugOf(DAYC[n][0]) : "recipe-" + n
+}
 const PC_HR: Record<string, [string, string, string]> = {
     treat: ["poslastica", "poslastice", "poslastica"],
     chew: ["žvakalica", "žvakalice", "žvakalica"],
@@ -3390,7 +3549,7 @@ const parseHash = (h: string): Page | null => {
     if (s === "privatnost" || s === "privacy") return { p: "privacy" }
     if (s.startsWith("recipe/")) {
         const id = s.slice(7)
-        return RECIPES.some((r) => r.id === id) || /^mdr-\d+$/.test(id) ? { p: "recipe", id } : { p: "recipes" }
+        return id && /^[a-z0-9-]+$/.test(id) ? { p: "recipe", id } : { p: "recipes" }
     }
     return null
 }
@@ -3773,6 +3932,8 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 /* nav */
 .fz-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.84);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid var(--line)}
 .fz-nav .fz-wrap{height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.fz-nav.fz-nav--dash .fz-wrap{max-width:1480px;padding:0 24px}
+.fz-nav--dash+main .fz-sec.fz-pt{padding-top:32px}
 .fz-nl{display:flex;align-items:center;gap:40px;min-width:0}
 .fz-logo{display:block;flex:none}
 .fz-logo img{height:34px;width:auto}
@@ -4100,6 +4261,88 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-trt--l .fz-seg{margin-top:8px}
 .fz-trt--l .fz-hint{margin-top:8px}
 .fz-cook-p .fz-dbl{margin-top:12px}
+.fz-kitgo{width:100%;justify-content:center;margin-top:16px;height:52px;font-size:17px}
+.fz.is-app{--fz-tabh:86px}
+.fz.is-app main{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+.fz.is-app .fz-nav{padding-top:env(safe-area-inset-top)}
+.fz-tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:75;max-width:560px;margin:0 auto;height:72px;border-radius:36px;background:rgba(255,254,250,.9);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 10px 30px -12px rgba(40,30,20,.35),inset 0 0 0 1px var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
+.fz-tabs button{display:grid;justify-items:center;gap:3px;padding:6px 0;font-size:11.5px;font-weight:600;line-height:1.1;color:var(--ink2)}
+.fz-tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fz-tabs button[aria-current="page"]{color:var(--g)}
+.fz-tabs .mid{margin-top:-30px;color:var(--g)}
+.fz-tabs .mid .c{width:64px;height:64px;border-radius:50%;background:var(--g);display:grid;place-items:center;color:#fff;box-shadow:0 10px 22px -8px rgba(47,93,58,.7),0 0 0 5px var(--bg)}
+.fz-tabs .mid .c svg{width:30px;height:30px}
+.fz-ah{padding:22px 0 0}
+.fz-ah h1{font-size:34px;line-height:1.08;letter-spacing:-.035em}
+.fz-ah-today{margin-top:18px;border-radius:26px;overflow:hidden;background:var(--card);box-shadow:var(--sh)}
+.fz-ah-today .im{display:block;width:100%}
+.fz-ah-today img{width:100%;height:190px;object-fit:cover;display:block}
+.fz-ah-today .b{display:grid;padding:16px 18px 18px}
+.fz-ah-today .k,.fz-ah-k{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.fz-ah-today b{font-size:21px;letter-spacing:-.02em;margin-top:6px}
+.fz-ah-today .m{font-size:15px;color:var(--ink2);margin-top:4px}
+.fz-ah-today .fz-btn{justify-content:center;margin-top:14px;height:48px}
+.fz-ah-k{margin-top:26px}
+.fz-ah-row{display:flex;gap:12px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 8px;scroll-snap-type:x mandatory}
+.fz-ah-mini{flex:none;width:156px;border-radius:20px;overflow:hidden;background:var(--card);box-shadow:var(--sh);text-align:left;scroll-snap-align:start}
+.fz-ah-mini img{width:100%;height:104px;object-fit:cover;display:block}
+.fz-ah-mini span{display:block;padding:9px 11px 11px;font-size:14px;font-weight:650;line-height:1.25;color:var(--ink)}
+.fz-ah-mini small{display:block;font-weight:500;color:var(--ink2);margin-top:3px}
+.fz-ah-dog{margin-top:12px;padding:18px;border-radius:26px;background:var(--card);box-shadow:var(--sh)}
+.fz-kit{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.fz-kit>*{width:100%;max-width:720px;margin-left:auto;margin-right:auto}
+.fz-kit-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px 0}
+.fz-kit-x{width:44px;height:44px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;color:var(--ink)}
+.fz-kit-awake{display:inline-flex;align-items:center;padding:7px 12px;border-radius:99px;background:var(--or0);color:var(--orInk);font-size:13px;font-weight:700}
+.fz-kit-ti{padding:12px 22px 0;font-size:14px;font-weight:600;color:var(--ink2)}
+.fz-kit-prog{display:flex;gap:5px;padding:10px 22px 0}
+.fz-kit-prog i{flex:1;height:6px;border-radius:3px;background:var(--bg2)}
+.fz-kit-prog i.on{background:var(--g)}
+.fz-kit-tms{display:flex;gap:8px;flex-wrap:wrap;padding:12px 22px 0}
+.fz-kit-tms button,.fz-tmrs button{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:99px;background:var(--g0);color:var(--g);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fz-kit-tms button.end,.fz-tmrs button.end{background:var(--or);color:#1D1D1F}
+.fz-kit-body{flex:1;overflow:auto;padding:18px 22px 24px;-webkit-overflow-scrolling:touch}
+.fz-kit-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.fz-kit-h h2{font-size:28px;letter-spacing:-.03em}
+.fz-kit-h span{font-size:16px;font-weight:650;color:var(--g)}
+.fz-kit-ing{list-style:none;margin:8px 0 0;padding:0}
+.fz-kit-ing li{border-bottom:1px solid var(--line)}
+.fz-kit-ing label{position:relative;display:flex;gap:14px;align-items:flex-start;padding:14px 0;font-size:18px;line-height:1.35;cursor:pointer}
+.fz-kit-ing input{position:absolute;opacity:0;width:1px;height:1px}
+.fz-kit-ing .t small.w{display:block;margin-top:6px;font-size:15px;line-height:1.4;color:#9A3412}
+.fz-kit-ing .bx{flex:none;width:30px;height:30px;margin-top:-2px;border-radius:50%;box-shadow:inset 0 0 0 2px #B9B2A4;display:grid;place-items:center;color:#fff}
+.fz-kit-ing .bx svg{opacity:0}
+.fz-kit-ing input:checked+.bx{background:var(--g);box-shadow:none}
+.fz-kit-ing input:checked+.bx svg{opacity:1}
+.fz-kit-ing input:checked~.t{color:#9a968e;text-decoration:line-through}
+.fz-kit-ing input:focus-visible+.bx{outline:3px solid var(--sky);outline-offset:2px}
+.fz-kit-n{font-size:15px;font-weight:700;color:var(--g)}
+.fz-kit-st{font-size:clamp(22px,6.2vw,30px);line-height:1.32;letter-spacing:-.02em;font-weight:600;margin-top:12px;color:var(--ink)}
+.fz-kit-tc{margin-top:24px;padding:20px;border-radius:24px;background:var(--card);box-shadow:var(--sh);text-align:center}
+.fz-kit-tc .k{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.fz-kit-tc .tm{font-size:60px;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;margin-top:10px;color:var(--ink)}
+.fz-kit-tc.on .tm{color:var(--g)}
+.fz-kit-tc.end{background:var(--or0)}
+.fz-kit-tc.end .tm{color:var(--orInk)}
+.fz-kit-tc p{font-size:15px;color:var(--ink2);margin-top:8px}
+.fz-kit-tc .fz-btn{margin-top:14px;width:100%;justify-content:center;height:50px}
+.fz-kit-tc .fz-kit-tcs{font-size:13.5px;margin-top:10px}
+.fz-kit-dock{display:grid;gap:12px;padding:12px 22px 18px}
+.fz-kit-dock.two{grid-template-columns:1fr 1.6fr}
+.fz-kit-dock .fz-btn{height:56px;font-size:18px;justify-content:center}
+.fz-kit-done{text-align:center;padding-top:36px}
+.fz-kit-ok{width:96px;height:96px;border-radius:50%;background:var(--g0);display:grid;place-items:center;margin:0 auto;color:var(--g)}
+.fz-kit-done h2{font-size:36px;letter-spacing:-.035em;margin-top:20px}
+.fz-kit-facts{margin-top:24px;padding:4px 18px;border-radius:24px;background:var(--card);box-shadow:var(--sh);text-align:left}
+.fz-kit-facts div{display:flex;justify-content:space-between;gap:12px;padding:13px 0;font-size:16px;border-bottom:1px solid var(--line)}
+.fz-kit-facts div:last-child{border-bottom:0}
+.fz-kit-facts span{color:var(--ink2)}
+.fz-kit-facts b{text-align:right}
+.fz-kit-hand{font-family:FzHand,"Segoe Print","Bradley Hand",cursive;font-weight:700;color:var(--g);font-size:28px;transform:rotate(-4deg);display:inline-block;margin-top:22px}
+.fz-tmrs{position:fixed;left:16px;right:16px;bottom:calc(16px + var(--fz-tabh, 0px) + env(safe-area-inset-bottom));z-index:85;display:grid;justify-items:start;gap:8px;pointer-events:none}
+.fz-tmrs button{pointer-events:auto;padding:11px 15px;font-size:15px;background:var(--g);color:#fff;box-shadow:0 12px 26px -12px rgba(0,0,0,.45)}
+@media (prefers-reduced-motion:no-preference){.fz-tmrs button.end,.fz-kit-tms button.end{animation:fz-ring 1s ease-in-out infinite}}
+@keyframes fz-ring{50%{transform:scale(1.04)}}
 .fz-cook-p .fz-link{font-size:15px;margin-top:2px}
 .fz-box .ln{display:flex;align-items:center;gap:10px;font-size:15px;padding:9px 0;border-bottom:1px solid var(--line)}
 .fz-box .ln:last-child{border-bottom:0;padding-bottom:0}
@@ -4281,6 +4524,11 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 /* ingredient pictures and filters */
 .fz-em{display:inline-flex;flex:none;width:20px;height:20px}
 .fz-em svg{display:block;width:100%;height:100%}
+.fz-sd{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.fz-sd i{font-style:normal;font-size:12.5px;line-height:1;padding:6px 9px;border-radius:999px;background:var(--g0);color:var(--g);font-weight:600}
+.fz-sd em{font-style:normal;font-size:12.5px;line-height:1.3;color:var(--ink2)}
+.fz-sdn{margin:14px 0 0;font-size:13px;line-height:1.45;color:var(--ink2)}
+@media print{.fz-sd i{background:none;border:1px solid currentColor;padding:3px 7px}}
 .fz-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 .fz-k{font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
 .fz-seg button{display:inline-flex;align-items:center;gap:7px}
@@ -4494,7 +4742,7 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-sim .row{grid-template-columns:minmax(0,1fr)}
 }
 @container fz (max-width:600px){
-.fz-wrap{padding:0 16px}
+.fz-wrap{padding:0 16px}.fz-nav.fz-nav--dash .fz-wrap{padding:0 16px}
 .fz-bar .hide-s{display:none}
 .fz-nav .fz-wrap{height:58px}
 .fz-logo img{height:30px}
@@ -5533,6 +5781,13 @@ export default function FreshysSite(props: Props) {
     const [cook, setCookS] = useState(1) // cooking ahead for this many days (1–30)
     const [trt, setTrtS] = useState(false) // also gives treats: they share the 10 % for extras with home-cooked food on top of kibble, or take 10 % of a whole-day dish
     const [dblK, setDblK] = useState("") // the recipe someone chose to cook a bigger batch of, because one batch isn't enough for a day
+    const [kit, setKitS] = useState<{ id: string; s: number } | null>(null) // cooking step by step: the recipe, -1 ingredients, then the steps, then done
+    const [tmr, setTmr] = useState<Tmr[]>([]) // running timers, one per step that says how long it takes
+    const [nowT, setNowT] = useState(0)
+    const [awake, setAwake] = useState(false) // the screen is kept on while cooking
+    const tmrRef = useRef<Tmr[]>([])
+    const audRef = useRef<AudioContext | null>(null)
+    const beepAt = useRef(0)
     const [planId, setPlanIdS] = useState<number | null>(null) // the dish picked in the week's plan
     const [cookOth, setCookOth] = useState(false)
     const [cookIn, setCookIn] = useState<string | null>(null) // the days field while it is being typed in
@@ -5609,24 +5864,125 @@ export default function FreshysSite(props: Props) {
     const [ppv, setPpv] = useState(false)
     const [vpo, setVpo] = useState("")
     const [dEd, setDEd] = useState(false) // the dog's age, neutering and activity, open under its one-line summary
+    const [dash, setDash] = useState(false) // opened from the portfolio as the dashboard: no site menu, bar or footer around it
+    const [app, setApp] = useState(false) // the Freshy's app (?app=1 or inside the native app): a tab bar at the bottom and a Today screen
     const prof: Pet | null = ps ? ps.pets.find((x) => x.id === ps.cur) || ps.pets[0] || null : null
+    /* the portfolio's sample pets follow the language: written again in the other language when it changes */
+    useEffect(() => {
+        if (LIVE || !ps || !ps.dm || ps.dm === lang) return
+        const s = { ...demoStore(new Date(), lang === "en"), cur: ps.cur }
+        writeStore(s)
+        setPs(s)
+    }, [lang, ps ? ps.dm : ""])
+    /* a cat or another pet has no Freshy's recipes to pick from in meals, only its own food */
+    useEffect(() => {
+        if (prof && prof.sp !== 0 && mf.tab === 1) setMf({ ...mf, tab: 0, src: "", q: "" })
+    }, [prof ? prof.id : "", mf.tab])
+    /* timers: kept in this browser so a reload doesn't lose them; they tick every second and ring until turned off (a minute at most) */
+    useEffect(() => {
+        if (isCanvas || typeof window === "undefined") return
+        try {
+            const v = JSON.parse(window.localStorage.getItem("fz-tmr") || "[]")
+            if (Array.isArray(v)) setTmr(v.filter((t: any) => t && typeof t.k === "string" && typeof t.end === "number" && Date.now() - t.end < 3600e3).slice(0, 12))
+        } catch (e) {}
+    }, [])
+    useEffect(() => {
+        tmrRef.current = tmr
+        if (isCanvas || typeof window === "undefined") return
+        try {
+            window.localStorage.setItem("fz-tmr", JSON.stringify(tmr))
+        } catch (e) {}
+    }, [tmr])
+    useEffect(() => {
+        if (!tmr.length) return
+        const iv = window.setInterval(() => {
+            const now = Date.now()
+            setNowT(now)
+            const ts = tmrRef.current
+            const fin = ts.filter((t) => !t.done && t.end <= now)
+            if (fin.length) setTmr(ts.map((t) => (!t.done && t.end <= now ? { ...t, done: true } : t)))
+            if ((fin.length || ts.some((t) => t.done && now - t.end < 60e3)) && now - beepAt.current > 3500) {
+                beepAt.current = now
+                ring()
+            }
+        }, 1000)
+        return () => window.clearInterval(iv)
+    }, [tmr.length])
+    /* the screen stays on while cooking (where the browser allows it), and the phone's back button closes the cooking view */
+    useEffect(() => {
+        if (!kit || typeof navigator === "undefined") return
+        let lock: any = null
+        let live = true
+        const req = async () => {
+            try {
+                const ka = capPl() && capPl().KeepAwake
+                if (ka) {
+                    await ka.keepAwake()
+                    if (live) setAwake(true)
+                    return
+                }
+                if (!("wakeLock" in navigator)) return
+                lock = await (navigator as any).wakeLock.request("screen")
+                if (live) setAwake(true)
+            } catch (e) {
+                if (live) setAwake(false)
+            }
+        }
+        req()
+        const vis = () => {
+            if (document.visibilityState === "visible" && (!lock || lock.released)) req()
+        }
+        const pop = () => setKitS(null)
+        document.addEventListener("visibilitychange", vis)
+        window.addEventListener("popstate", pop)
+        return () => {
+            live = false
+            setAwake(false)
+            document.removeEventListener("visibilitychange", vis)
+            window.removeEventListener("popstate", pop)
+            try {
+                if (lock) lock.release()
+                const ka = capPl() && capPl().KeepAwake
+                if (ka) ka.allowSleep()
+            } catch (e) {}
+        }
+    }, [!!kit])
     useEffect(() => {
         if (isCanvas || typeof window === "undefined") return
         const now = new Date()
         /* "Try the dashboard" from the portfolio (concept only): sample pets with Plus on, unless the visitor already keeps pets here */
+        let dsh = false
+        try {
+            dsh = !LIVE && window.sessionStorage.getItem("fz-dash") === "1"
+        } catch (e) {}
         if (!LIVE && (/^#\/demo\b/.test(window.location.hash) || new URLSearchParams(window.location.search).has("demo"))) {
+            dsh = true
+            try {
+                window.sessionStorage.setItem("fz-dash", "1")
+            } catch (e) {}
             const mine = readStore(now)
             let ln: string | null = null
             try {
                 ln = window.localStorage.getItem("fz-lang")
             } catch (e) {}
-            const en = (ln || language) !== "hr"
+            const ql = new URLSearchParams(window.location.search).get("lang")
+            const en = (ql === "hr" || ql === "en" ? ql : ln || language) !== "hr"
             if (!mine || !mine.pets.length) writeStore(demoStore(now, en))
             else if (plusLeft(mine, now) <= 0) writeStore({ ...mine, pt: ymd(now) })
             try {
-                window.history.replaceState(window.history.state, "", window.location.pathname + "#/pets")
+                // only the demo mark goes: ?lang stays for the language step below
+                const u = new URL(window.location.href)
+                u.searchParams.delete("demo")
+                window.history.replaceState(window.history.state, "", u.pathname + u.search + "#/pets")
             } catch (e) {}
         }
+        if (dsh) setDash(true)
+        let ap = false
+        try {
+            ap = new URLSearchParams(window.location.search).get("app") === "1" || window.sessionStorage.getItem("fz-app") === "1" || !!((window as any).Capacitor && (window as any).Capacitor.isNativePlatform && (window as any).Capacitor.isNativePlatform())
+            if (ap) window.sessionStorage.setItem("fz-app", "1")
+        } catch (e) {}
+        if (ap) setApp(true)
         const s = readStore(now)
         if (s) {
             setPs(s)
@@ -5652,7 +6008,7 @@ export default function FreshysSite(props: Props) {
             live = false
         }
     }, [page.p, breeds])
-    const isCat = page.p === "recipe" && !!page.id && page.id.startsWith("mdr-")
+    const isCat = page.p === "recipe" && !!page.id && !RECIPES.some((r) => r.id === page.id)
     useEffect(() => {
         if (catalog || (page.p !== "recipes" && page.p !== "build" && page.p !== "list" && page.p !== "plan" && !isCat && !(page.p === "dog" && pv === "meal"))) return
         let live = true
@@ -5665,6 +6021,12 @@ export default function FreshysSite(props: Props) {
         }
     }, [page.p, isCat, catalog, catTry, pv])
     useEffect(() => setShown(24), [q, cat, have, noIng, prep, q30, few, shopOk])
+    /* an old link (#/recipe/mdr-<n>) opens the recipe under its new address */
+    useEffect(() => {
+        if (!catalog || page.p !== "recipe" || !page.id || !OLD_ID.test(page.id)) return
+        const r = catalog.find((x) => catIs(x, page.id!))
+        if (r) go({ p: "recipe", id: cId(r) })
+    }, [catalog, page.p, page.id])
     const cIdx = useMemo(() => (catalog ? catalog.map((r) => norm(r.t + " " + r.th + " " + r.i.join(" ") + " " + r.ih.join(" "))) : []), [catalog])
     const cMeta = useMemo(() => {
         const m = new Map<number, RMeta>()
@@ -5674,6 +6036,31 @@ export default function FreshysSite(props: Props) {
     const rootRef = useRef<HTMLDivElement>(null)
     const recRef = useRef<HTMLElement>(null)
     const L = (s: LS) => s[lang]
+    /* tags under an ingredient: what it gives (green, USDA per 100 g) and what it does in the recipe (grey) */
+    const sto = (d?: string) => {
+        if (!d) return null
+        const [g, r] = d.split("|")
+        const gs = g ? g.split(".").filter((k) => !!T.giveC[k]) : []
+        const rl = r && T.roleC[r] ? T.roleC[r] : null
+        if (!gs.length && !rl) return null
+        return (
+            <span className="fz-sd" lang={lang}>
+                {gs.length > 0 && <span className="fz-vh">{L(T.stoGive)} </span>}
+                {gs.map((k, n) => (
+                    <i key={k}>
+                        {L(T.giveC[k])}
+                        {n < gs.length - 1 && <span className="fz-vh">, </span>}
+                    </i>
+                ))}
+                {rl && (
+                    <em>
+                        <span className="fz-vh">{(gs.length ? ". " : "") + L(T.stoRole)} </span>
+                        {L(rl)}
+                    </em>
+                )}
+            </span>
+        )
+    }
 
     useEffect(() => setLangState(language === "hr" ? "hr" : "en"), [language])
     useEffect(() => setPage({ p: startPage }), [startPage])
@@ -5733,6 +6120,76 @@ export default function FreshysSite(props: Props) {
         } catch (e) {}
         // the dog the amounts are for has a profile: keep the choice there too
         if (!local && ps && feedPet && feedPet.mix !== v) commit({ ...ps, pets: ps.pets.map((x) => (x.id === feedPet.id ? { ...x, mix: v } : x)) })
+    }
+    /* the app's native parts, when the page runs inside the Freshy's app (Capacitor); in a browser there are none */
+    const capPl = (): any => (typeof window !== "undefined" && (window as any).Capacitor ? (window as any).Capacitor.Plugins : null)
+    /* a short ring (three beeps) and a vibration; the sound needs a tap first, so the timer's start button wakes it */
+    const ring = () => {
+        try {
+            const C = (window as any).AudioContext || (window as any).webkitAudioContext
+            if (C) {
+                const ctx: AudioContext = audRef.current || new C()
+                audRef.current = ctx
+                if (ctx.state === "suspended") ctx.resume()
+                ;[0, 0.45, 0.9].forEach((d) => {
+                    const o = ctx.createOscillator()
+                    const g = ctx.createGain()
+                    o.frequency.value = 880
+                    o.connect(g)
+                    g.connect(ctx.destination)
+                    const t = ctx.currentTime + d
+                    g.gain.setValueAtTime(0.0001, t)
+                    g.gain.exponentialRampToValueAtTime(0.35, t + 0.02)
+                    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34)
+                    o.start(t)
+                    o.stop(t + 0.38)
+                })
+            }
+        } catch (e) {}
+        try {
+            if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400])
+        } catch (e) {}
+    }
+    /* in the app the phone itself rings at the end, also when it is locked (a notification at that time) */
+    const tmrNative = (t: Tmr, on: boolean) => {
+        const ln = capPl() && capPl().LocalNotifications
+        if (!ln) return
+        let h = 0
+        for (let i = 0; i < t.k.length; i++) h = (h * 31 + t.k.charCodeAt(i)) % 900
+        const nid = 7100 + h
+        try {
+            if (on) ln.schedule({ notifications: [{ id: nid, title: L(T.tmrEnd), body: t.ti, schedule: { at: new Date(t.end), allowWhileIdle: true } }] }).catch(() => {})
+            else ln.cancel({ notifications: [{ id: nid }] }).catch(() => {})
+        } catch (e) {}
+    }
+    const tmrGo = (id: string, st: number, min: number, ti: string) => {
+        try {
+            const C = (window as any).AudioContext || (window as any).webkitAudioContext
+            if (C && !audRef.current) audRef.current = new C()
+            if (audRef.current && audRef.current.state === "suspended") audRef.current.resume()
+        } catch (e) {}
+        const t: Tmr = { k: id + ":" + st, id, st, ti, end: Date.now() + min * 60e3, tot: min * 60 }
+        setNowT(Date.now())
+        setTmr((ts) => [...ts.filter((x) => x.k !== t.k), t])
+        tmrNative(t, true)
+    }
+    const tmrOff = (k: string) => {
+        const t = tmr.find((x) => x.k === k)
+        if (t) tmrNative(t, false)
+        setTmr((ts) => ts.filter((x) => x.k !== k))
+    }
+    const openKit = (id: string, st = -1) => {
+        setKitS({ id, s: st })
+        try {
+            window.localStorage.setItem("fz-kit-last", id)
+            if (!(window.history.state && window.history.state.fzKit)) window.history.pushState({ ...(window.history.state || {}), fzKit: 1 }, "")
+        } catch (e) {}
+    }
+    const closeKit = () => {
+        setKitS(null)
+        try {
+            if (window.history.state && window.history.state.fzKit) window.history.back()
+        } catch (e) {}
     }
     const setTrt = (v: boolean) => {
         setTrtS(v)
@@ -9811,7 +10268,7 @@ export default function FreshysSite(props: Props) {
                   : { ti: L(r.t), u: "ml", per: r.kc.g || 0, k: r.kind === "treat" ? 3 : 1, info: r.kc.g ? "100 ml ≈ " + nf(Math.round(r.kc.g * 100), lang) + " kcal" : L(T.ptFdNoKc) }
         }
         if (src.startsWith("c:")) {
-            const r = allCat ? allCat.find((x) => cId(x) === src.slice(2)) : undefined
+            const r = allCat ? allCat.find((x) => catIs(x, src.slice(2))) : undefined
             if (!r) return null
             const ti = lang === "hr" && r.th ? r.th : r.t
             const kc = r.kc,
@@ -9834,7 +10291,7 @@ export default function FreshysSite(props: Props) {
             return r ? r.img + "?scale-down-to=256" : ""
         }
         if (src.startsWith("c:")) {
-            const r = allCat ? allCat.find((x) => cId(x) === src.slice(2)) : undefined
+            const r = allCat ? allCat.find((x) => catIs(x, src.slice(2))) : undefined
             return r ? cImg(r, 256) : ""
         }
         return ""
@@ -9910,7 +10367,7 @@ export default function FreshysSite(props: Props) {
         if (!ff.n.trim()) return setFmsg(L(T.ptFdNeed))
         const kc = ff.kc.trim() ? numP(ff.kc) : 0
         if (ff.kc.trim() && !(kc >= 20 && kc <= 900)) return setFmsg(L(T.ptFdKcBad))
-        const f: Food = { id: newId(), n: ff.n.trim().slice(0, 60), t: ff.t, kc: Math.round(kc * 10) / 10, u: "g", at: Date.now() }
+        const f: Food = { id: newId(), n: ff.n.trim().slice(0, 60), t: ff.t, kc: Math.round(kc * 10) / 10, u: "g", at: Date.now(), ...(prof ? { sp: prof.sp } : {}) }
         upd({ fd: [...(ps.fd || []), f].slice(-60) })
         setFf(null)
         setFmsg("")
@@ -9988,7 +10445,7 @@ export default function FreshysSite(props: Props) {
         const today = ymd(NOW)
         const mine: [string, MSrc][] = [
             ...(p.sp === 0 ? (["cur"] as string[]) : []),
-            ...(ps && ps.fd ? ps.fd : []).slice().sort((a, b) => b.at - a.at).map((f) => "fd:" + f.id),
+            ...(ps && ps.fd ? ps.fd : []).filter((f) => f.sp === undefined || f.sp === p.sp).slice().sort((a, b) => b.at - a.at).map((f) => "fd:" + f.id),
         ]
             .map((src) => [src, srcOf(src, p)] as [string, MSrc | null])
             .filter((x): x is [string, MSrc] => !!x[1])
@@ -10029,7 +10486,7 @@ export default function FreshysSite(props: Props) {
                     </div>
                 )}
                 <div className="fz-seg fz-px-tabs" role="group" aria-label={L(T.ptMlAdd)}>
-                    {T.ptMlTabs.map((x, i) => (
+                    {T.ptMlTabs.map((x, i) => (p.sp !== 0 && i === 1 ? null :
                         <button key={i} type="button" aria-pressed={mf.tab === i} onClick={() => (i !== mf.tab && setMf({ ...mf, tab: i, src: "", q: "" }), setFf(null), setFmsg(""))}>
                             {L(x)}
                         </button>
@@ -10043,7 +10500,7 @@ export default function FreshysSite(props: Props) {
                                 <div className="fz-px-f2">
                                     <label className="fz-lbl" htmlFor="fz-px-ffn">
                                         {L(T.ptMlName)}
-                                        <input id="fz-px-ffn" className="fz-inp" maxLength={60} autoComplete="off" value={ff.n} placeholder={L(T.ptFdNamePh)} onChange={(e) => setFf({ ...ff, n: e.target.value })} />
+                                        <input id="fz-px-ffn" className="fz-inp" maxLength={60} autoComplete="off" value={ff.n} placeholder={L(prof && prof.sp === 1 ? T.ptFdNamePhC : T.ptFdNamePh)} onChange={(e) => setFf({ ...ff, n: e.target.value })} />
                                     </label>
                                     <label className="fz-lbl" htmlFor="fz-px-ffk">
                                         {L(T.ptFdKc)}
@@ -11989,6 +12446,57 @@ export default function FreshysSite(props: Props) {
         [L(T.how), () => goSec("how"), false],
         [L(T.story), () => goSec("story"), false],
     ]
+    const langSw = (
+            <div className="fz-lang" role="group" aria-label="Language">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
+                </svg>
+                <button type="button" aria-pressed={lang === "hr"} onClick={() => setLang("hr")} lang="hr">
+                    HR
+                </button>
+                <i aria-hidden="true" />
+                <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")} lang="en">
+                    EN
+                </button>
+            </div>
+    )
+    /* the dashboard opened from the portfolio: the Plus logo and the language, nothing of the site around it */
+    const dashNav = (
+        <header className="fz-nav fz-noprint fz-nav--dash">
+            <div className="fz-wrap">
+                <div className="fz-nl">
+                    <button type="button" className="fz-logo is-plus" onClick={() => go({ p: "dog" })} aria-label="Freshy's Plus">
+                        <img src={ART.wmG} alt="Freshy's" width={85} height={34} />
+                        <span className="fz-logo-plus">Plus</span>
+                    </button>
+                </div>
+                <div className="fz-nr">{langSw}</div>
+            </div>
+        </header>
+    )
+    const appNav = (
+        <header className="fz-nav fz-noprint fz-nav--app">
+            <div className="fz-wrap">
+                <div className="fz-nl">
+                    <button type="button" className="fz-logo" onClick={() => go({ p: "home" })} aria-label="Freshy's">
+                        <img src={ART.wmG} alt="Freshy's" width={85} height={34} />
+                    </button>
+                </div>
+                <div className="fz-nr">
+                    {langSw}
+                    <button type="button" className="fz-cart" aria-label={L(T.list) + (lCount ? " (" + lCount + ")" : "")} aria-current={page.p === "list" ? "page" : undefined} onClick={() => go({ p: "list" })}>
+                        <Ico d={I.cart} s={21} />
+                        {lCount > 0 && (
+                            <span className="n" aria-hidden="true">
+                                {lCount}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </header>
+    )
     const nav = (
         <header className="fz-nav fz-noprint">
             <div className="fz-wrap">
@@ -12013,19 +12521,7 @@ export default function FreshysSite(props: Props) {
                             {L(T.plus)}
                         </button>
                     )}
-                    <div className="fz-lang" role="group" aria-label="Language">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
-                        </svg>
-                        <button type="button" aria-pressed={lang === "hr"} onClick={() => setLang("hr")} lang="hr">
-                            HR
-                        </button>
-                        <i aria-hidden="true" />
-                        <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")} lang="en">
-                            EN
-                        </button>
-                    </div>
+                    {langSw}
                     {ACCT && (
                         <button type="button" className="fz-ac-nav" aria-current={page.p === "acct" ? "page" : undefined} onClick={() => go({ p: "acct" })}>
                             {L(acct ? TA.myAcct : TA.login)}
@@ -12144,7 +12640,7 @@ export default function FreshysSite(props: Props) {
         const d = DAYC[id]
         const kpg = kpgOf(d[3], d[4])
         return (
-            <button key={id} type="button" className="fz-dayr" onClick={() => go({ p: "recipe", id: "mdr-" + id })}>
+            <button key={id} type="button" className="fz-dayr" onClick={() => go({ p: "recipe", id: dayId(id) })}>
                 <img src={cImg({ img: d[2] }, 256)} alt="" loading="lazy" decoding="async" />
                 <span>
                     <b>{lang === "hr" ? d[1] : d[0]}</b>
@@ -12162,7 +12658,7 @@ export default function FreshysSite(props: Props) {
     const dcard = (id: number, i: number) => {
         const d = DAYC[id]
         const rm: RMeta = { has: new Set(), no: new Set(), oven: !!d[8], frozen: false, n: d[7], shop: true, min: d[6] || null }
-        const open = () => go({ p: "recipe", id: "mdr-" + id })
+        const open = () => go({ p: "recipe", id: dayId(id) })
         return (
             <article key={"d" + id} className="fz-rc" style={{ ["--r" as any]: ROT[i % ROT.length] + "deg" } as React.CSSProperties}>
                 <button className="im" type="button" tabIndex={-1} aria-hidden="true" onClick={open}>
@@ -12968,6 +13464,102 @@ export default function FreshysSite(props: Props) {
         </div>
     )
 
+    /* ---------- the app: Today and the tab bar ---------- */
+
+    const todayId = planId && DAYC[planId] ? planId : weekDay[0]
+    const cookNow = () => {
+        let id = ""
+        try {
+            id = window.localStorage.getItem("fz-kit-last") || ""
+        } catch (e) {}
+        if (!id || !/^[a-z0-9-]+$/.test(id)) id = dayId(todayId)
+        go({ p: "recipe", id })
+        openKit(id)
+    }
+    const appHome = (() => {
+        const d = DAYC[todayId]
+        const kpg = kpgOf(d[3], d[4])
+        return (
+            <div className="fz-page fz-ah" key="ahome">
+                <div className="fz-wrap">
+                    <h1>{L(T.ahH)}</h1>
+                    <div className="fz-ah-today">
+                        <button type="button" className="im" tabIndex={-1} aria-hidden="true" onClick={() => go({ p: "recipe", id: dayId(todayId) })}>
+                            <img src={cImg({ img: d[2] }, 1024)} alt="" />
+                        </button>
+                        <div className="b">
+                            <span className="k">{L(planId && DAYC[planId] ? T.ahPlan : T.ahPick)}</span>
+                            <b>{lang === "hr" ? d[1] : d[0]}</b>
+                            <span className="m">
+                                {dayGTxt(kpg, shareOf(true))} · {d[6]} min
+                            </span>
+                            <button type="button" className="fz-btn fz-btn--p" onClick={() => go({ p: "recipe", id: dayId(todayId) })}>
+                                {L(T.cook)}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="fz-ah-k">{L(T.ahWeek)}</div>
+                    <div className="fz-ah-row">
+                        {[...weekDay, ...DAY_HOME].filter((id, i, a) => id !== todayId && a.indexOf(id) === i && dayOk(id)).slice(0, 6).map((id) => {
+                            const x = DAYC[id]
+                            return (
+                                <button key={id} type="button" className="fz-ah-mini" onClick={() => go({ p: "recipe", id: dayId(id) })}>
+                                    <img src={cImg({ img: x[2] }, 512)} alt="" loading="lazy" />
+                                    <span>
+                                        {lang === "hr" ? x[1] : x[0]}
+                                        <small>{x[6]} min</small>
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                    <div className="fz-ah-k">{L(T.ahDog)}</div>
+                    <div className="fz-ah-dog">
+                        {kgBox("fz-kg1")}
+                        {dogLine}
+                        {!pup && (
+                            <>
+                                <div className="fz-gap2" />
+                                <span className="fz-lbl">{L(T.feedL)}</span>
+                                {feedR(3)}
+                            </>
+                        )}
+                        {trtSeg(true)}
+                    </div>
+                </div>
+            </div>
+        )
+    })()
+    const tabIc = (d: React.ReactNode) => (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            {d}
+        </svg>
+    )
+    const tabBar = (
+        <nav className="fz-tabs fz-noprint" aria-label="Freshy's">
+            <button type="button" aria-current={page.p === "home" && !kit ? "page" : undefined} onClick={() => (kit && setKitS(null), go({ p: "home" }))}>
+                {tabIc(<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />)}
+                {L(T.tabToday)}
+            </button>
+            <button type="button" aria-current={(page.p === "recipes" || page.p === "recipe") && !kit ? "page" : undefined} onClick={() => (kit && setKitS(null), go({ p: "recipes" }))}>
+                {tabIc(<><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5M9 7h6" /></>)}
+                {L(T.recipes)}
+            </button>
+            <button type="button" className="mid" aria-current={kit ? "page" : undefined} onClick={cookNow}>
+                <span className="c">{tabIc(<><path d="M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" /><path d="M2 10h20M9 6c0-1 1-1 1-2M13 6c0-1 1-1 1-2" /></>)}</span>
+                {L(T.tabCook)}
+            </button>
+            <button type="button" aria-current={page.p === "plan" && !kit ? "page" : undefined} onClick={() => (kit && setKitS(null), go({ p: "plan" }))}>
+                {tabIc(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>)}
+                {L(T.tabPlan)}
+            </button>
+            <button type="button" aria-current={(page.p === "dog" || page.p === "plus") && !kit ? "page" : undefined} onClick={() => (kit && setKitS(null), go({ p: "dog" }))}>
+                {tabIc(<><circle cx="7" cy="9" r="2" /><circle cx="12" cy="6" r="2" /><circle cx="17" cy="9" r="2" /><path d="M8 17c0-3 2-5 4-5s4 2 4 5a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z" /></>)}
+                {L(T.tabPets)}
+            </button>
+        </nav>
+    )
+
     /* ---------- recipe ---------- */
 
     const rIdx = Math.max(0, RECIPES.findIndex((r) => r.id === page.id))
@@ -13145,10 +13737,14 @@ export default function FreshysSite(props: Props) {
         return [nf(ml >= 300 ? Math.round(ml / 50) * 50 : Math.max(10, Math.round(ml / 10) * 10), lang), "ml"]
     }
     /* how long one recipe lasts as the whole day's food (d = days) */
+    /* "about N days" the same way everywhere: half days below 3, whole days above */
+    const aboutDays = (d: number) => {
+        const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
+        return h === 1.5 ? (lang === "en" ? "a day and a half" : "dan i pol") : h === 2.5 ? (lang === "en" ? "two and a half days" : "dva i pol dana") : lang === "en" ? h + (h === 1 ? " day" : " days") : h + " " + plHr(h, ["dan", "dana", "dana"])
+    }
     const lastsTxt = (d: number) => {
         if (d < SHORT) return ""
-        const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
-        const n = h === 1.5 ? (lang === "en" ? "a day and a half" : "dan i pol") : h === 2.5 ? (lang === "en" ? "two and a half days" : "dva i pol dana") : lang === "en" ? h + (h === 1 ? " day" : " days") : h + " " + plHr(h, ["dan", "dana", "dana"])
+        const n = aboutDays(d)
         return (lang === "en" ? "One recipe lasts about " + n + "." : "Jedan recept je dovoljan za oko " + n + ".") + (d > 3 ? (lang === "en" ? " Freeze what you won't use in time." : " Što nećeš potrošiti na vrijeme, zamrzni.") : "")
     }
     const mealTail = (sh: number) => (
@@ -13346,7 +13942,8 @@ export default function FreshysSite(props: Props) {
         // days the recipe keeps in the freezer, from its own storage line (months × 30)
         const fzM = (fzTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fzMax = fzM.length ? fzM[fzM.length - 1] * 30 : 0
-        const head = p.mult === 1 ? (en ? `One recipe is enough for ${daysT(p.n)}.` : `Za ${daysT(p.n)} dovoljan je jedan recept.`) : en ? `For ${daysT(p.n)}, make ${p.mult} times the recipe.` : `Za ${daysT(p.n)} skuhaj ${p.mult} puta veći recept.`
+        // one recipe gives more days than asked for: say how long it lasts (as above the box), not "enough for 1 day"
+        const head = p.mult === 1 && p.days > p.n ? (en ? `One recipe lasts about ${aboutDays(info.d1)}, more than ${daysT(p.n)}.` : `Jedan recept je dovoljan za oko ${aboutDays(info.d1)}, više nego za ${daysT(p.n)}.`) : p.mult === 1 ? (en ? `One recipe is enough for ${daysT(p.n)}.` : `Za ${daysT(p.n)} dovoljan je jedan recept.`) : en ? `For ${daysT(p.n)}, make ${p.mult} times the recipe.` : `Za ${daysT(p.n)} skuhaj ${p.mult} puta veći recept.`
         const keep =
             p.days <= p.fLo
                 ? en
@@ -13431,6 +14028,12 @@ export default function FreshysSite(props: Props) {
             </div>
         )
     }
+    /* opens cooking step by step for this recipe */
+    const kitBtn = (id: string) => (
+        <button type="button" className="fz-btn fz-btn--p fz-kitgo fz-noprint" onClick={() => openKit(id)}>
+            {L(T.kitGo)}
+        </button>
+    )
     /* own recipe: storage as written on the recipe, the day's portion by volume */
     const rStore = (() => {
         let fr = "",
@@ -13607,6 +14210,7 @@ export default function FreshysSite(props: Props) {
                                 </div>
                                 {!vnOn && recLight(rec) && swapBox(rec.id, kpgR(rec))}
                                 {cookBox(rInfo, rStore[0], rStore[1], "r:" + rec.id)}
+                                {kitBtn(rec.id)}
                                 {vetBox}
                                 {kitchenBtn(() => logMeal("r:" + rec.id, rec.kind === "bland" && vnOn ? 0 : rec.kc.pc ? 1 : kpgR(rec) ? (shareOf(recMealOk(rec), recK(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec), recK(rec))) / kpgR(rec) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(recMealOk(rec), recK(rec))) / kpgR(rec)))) : shareOf(recMealOk(rec), recK(rec)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(recMealOk(rec), recK(rec))) / (rec.kc.g || 0.75) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(recMealOk(rec), recK(rec))) / (rec.kc.g || 0.75)))))}
                                 {howBox(shareOf(recMealOk(rec), recK(rec)), rec.kc.pc ? 0 : kpgR(rec), recK(rec), kpgR(rec) ? "100 g ≈ " + nf(Math.round(kpgR(rec) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(rec.tk!, lang) + " kcal" : L(rec.kc.per) + " ≈ " + rec.kc.v + " kcal", true, vnOn)}
@@ -13695,12 +14299,14 @@ export default function FreshysSite(props: Props) {
                                                             </span>
                                                             {ing.w && <span className="nt nt--w">⚠ {L(ing.w)}</span>}
                                                             {ing.s && <span className="nt nt--s">↺ {L(ing.s)}</span>}
+                                                            {sto(OWN_D[rec.id] && OWN_D[rec.id][i])}
                                                         </span>
                                                     </label>
                                                 </li>
                                             )
                                         })}
                                     </ul>
+                                    {OWN_D[rec.id] && <p className="fz-sdn">{L(T.stoNote)}</p>}
                                 </div>
                                 <div>
                                     <h2 className="fz-h3">{L(T.method)}</h2>
@@ -13748,7 +14354,7 @@ export default function FreshysSite(props: Props) {
 
     /* ---------- recipe from the full list ---------- */
 
-    const ci = isCat && catalog ? catalog.findIndex((r) => cId(r) === page.id) : -1
+    const ci = isCat && catalog ? catalog.findIndex((r) => catIs(r, page.id!)) : -1
     const cr = ci >= 0 && catalog ? catalog[ci] : undefined
     const pcWord = (kc: CKc, n: number) => (lang === "en" ? (kc.we ? (n === 1 ? kc.we[0] : kc.we[1]) : n === 1 ? "piece" : "pieces") : plHr(n, PC_HR[kc.w || ""] || ["komad", "komada", "komada"]))
     const kcLine = (kc: CKc) =>
@@ -13946,7 +14552,7 @@ export default function FreshysSite(props: Props) {
             const st = stLines(r.st)
             const enTxt = lang === "en" || origEn
             const ings = enTxt ? r.i : r.ih
-            const warnAt = (i: number) => (r.w ? Object.keys(r.w).filter((k) => r.w![k].includes(i)) : [])
+            const warnAt = (i: number) => (r.w ? Object.keys(r.w).filter((k) => !!T.warnC[k] && r.w![k].includes(i)) : [])
             const [cFr, cFz] = cStore(r)
             const cInfo = cCook(r)
             const cPl = cookPlan(cInfo, cFr, cFz, undefined, "c:" + cId(r))
@@ -13998,6 +14604,7 @@ export default function FreshysSite(props: Props) {
                                         </div>
                                         {cLight(r) && swapBox(String(r.id), kpgC(r))}
                                         {cookBox(cInfo, cFr, cFz, "c:" + cId(r))}
+                                        {kitBtn(cId(r))}
                                         {kitchenBtn(() => logMeal("c:" + cId(r), !r.kc || SUPP.has(r.id) ? 0 : kpgC(r) && r.kc.p !== "pc" ? (shareOf(cMealOk(r), catK(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r), catK(r))) / kpgC(r) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(cMealOk(r), catK(r))) / kpgC(r)))) : r.kc.p === "ml" ? (shareOf(cMealOk(r), catK(r)) > 0.1 ? Math.max(10, Math.round(needDay(shareOf(cMealOk(r), catK(r))) / (r.kc.k / r.kc.a) / 10) * 10) : Math.max(5, fl5(xKc(shareOf(cMealOk(r), catK(r))) / (r.kc.k / r.kc.a)))) : 1))}
                                         {r.kc && howBox(shareOf(cMealOk(r), catK(r)), r.kc.p === "pc" || /\bbroth\b/i.test(r.t) || kpgC(r) < LIGHT_KCAL_ML ? 0 : kpgC(r), catK(r), kpgC(r) ? "100 g ≈ " + nf(Math.round(kpgC(r) * 100), lang) + " kcal · " + L(T.wholeR) + " ≈ " + nf(r.tk!, lang) + " kcal" : kcLine(r.kc), r.kc.s === "u" || !!kpgC(r), SUPP.has(r.id))}
                                     </div>
@@ -14066,12 +14673,14 @@ export default function FreshysSite(props: Props) {
                                                                             ⚠ {L(T.warnC[k])}
                                                                         </span>
                                                                     ))}
+                                                                    {sto(r.d && r.d[i])}
                                                                 </span>
                                                             </label>
                                                         </li>
                                                     )
                                                 })}
                                             </ul>
+                                            {r.d && r.d.some(Boolean) && <p className="fz-sdn">{L(T.stoNote)}</p>}
                                         </div>
                                         <div>
                                             <h2 className="fz-h3">{L(T.method)}</h2>
@@ -14110,6 +14719,202 @@ export default function FreshysSite(props: Props) {
             )
         })()
     )
+
+    /* ---------- cooking step by step ---------- */
+
+    type KitD = { id: string; ti: string; ings: { k: string; t: string; w?: string[] }[]; steps: string[]; st: string[]; amt: string }
+    const kitData = (id: string): KitD | null => {
+        const about = (g: number) => L(T.about) + " " + gTxt(g).join(" ")
+        if (!RECIPES.some((r) => r.id === id)) {
+            const r = catalog ? catalog.find((x) => catIs(x, id)) : undefined
+            if (!r) return null
+            const enTxt = lang === "en" || origEn
+            const [fr, fz] = cStore(r)
+            const pl = cookPlan(cCook(r), fr, fz, undefined, "c:" + id)
+            const km = pl ? pl.mult : 1
+            const kpg = kpgC(r)
+            return {
+                id,
+                ti: cTitle(r),
+                ings: (enTxt ? r.i : r.ih).map((x, i) => ({ k: "c" + r.id + "-" + i, t: scaleLine(x, km, enTxt ? "en" : "hr").replace(/(\d) (?=(?:kg|g|ml|l)\b)/g, "$1\u00a0"), w: r.w ? Object.keys(r.w).filter((k) => !!T.warnC[k] && r.w![k].includes(i)).map((k) => L(T.warnC[k])) : [] })),
+                steps: enTxt ? r.p : r.ph,
+                st: stLines(r.st).map((x) => x[1]),
+                amt: cMealOk(r) && kpg ? about(needDay(shareOf(true, catK(r))) / kpg) : "",
+            }
+        }
+        const rc = RECIPES.find((x) => x.id === id)
+        if (!rc) return null
+        const k = rc.id === rec.id ? bk : 1
+        const kpg = kpgR(rc)
+        return {
+            id,
+            ti: L(rc.t),
+            ings: rc.ing.map((g, i) => ({ k: rc.id + i, t: (g.q != null ? qty(g, k, lang) + " " : "") + ingText(g, k, lang) + (g.opt ? " (" + L(T.optional) + ")" : "") })),
+            steps: rc.steps.map((x) => tok(L(x), k, lang)),
+            st: rc.store.map((x) => L(x)),
+            amt: recMealOk(rc) && kpg ? about(needDay(shareOf(true, recK(rc))) / kpg) : "",
+        }
+    }
+    const kd = kit ? kitData(kit.id) : null
+    const tLeft = (t: Tmr) => (t.done ? 0 : (t.end - (nowT || Date.now())) / 1000)
+    const kitView = (() => {
+        if (!kit || !kd) return null
+        const en = lang === "en"
+        const n = kd.steps.length
+        const s = Math.max(-1, Math.min(kit.s, n))
+        const setS = (v: number) => {
+            setKitS({ ...kit, s: v })
+            const b = typeof document !== "undefined" ? document.querySelector(".fz-kit-body") : null
+            if (b) b.scrollTop = 0
+        }
+        const others = tmr.filter((t) => !(t.id === kit.id && t.st === s))
+        const doneIng = kd.ings.filter((x) => ticks[x.k]).length
+        let body: React.ReactNode
+        let dock: React.ReactNode
+        if (s === -1) {
+            body = (
+                <>
+                    <div className="fz-kit-h">
+                        <h2>{L(T.kitIng)}</h2>
+                        <span>
+                            {doneIng} {en ? "of" : "od"} {kd.ings.length}
+                        </span>
+                    </div>
+                    <ul className="fz-kit-ing">
+                        {kd.ings.map((x) => (
+                            <li key={x.k}>
+                                <label>
+                                    <input type="checkbox" checked={!!ticks[x.k]} onChange={() => setTicks({ ...ticks, [x.k]: !ticks[x.k] })} />
+                                    <span className="bx">
+                                        <Ico d={I.check} s={16} w={3} />
+                                    </span>
+                                    <span className="t">
+                                        {x.t}
+                                        {(x.w || []).map((m, j) => (
+                                            <small key={j} className="w" lang={lang}>
+                                                ⚠ {m}
+                                            </small>
+                                        ))}
+                                    </span>
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )
+            dock = (
+                <div className="fz-kit-dock">
+                    <button type="button" className="fz-btn fz-btn--p" onClick={() => setS(0)}>
+                        {L(T.kitToSteps)}
+                    </button>
+                </div>
+            )
+        } else if (s < n) {
+            const dur = stepDur(kd.steps[s])
+            const t = tmr.find((x) => x.id === kit.id && x.st === s)
+            body = (
+                <>
+                    <div className="fz-kit-n">
+                        {en ? "Step" : "Korak"} {s + 1} {en ? "of" : "od"} {n}
+                    </div>
+                    <p className="fz-kit-st">{kd.steps[s]}</p>
+                    {dur && (
+                        <div className={"fz-kit-tc" + (t ? (t.done ? " end" : " on") : "")} aria-live="polite">
+                            <div className="k">{L(T.tmrK)}</div>
+                            <div className="tm">{clockTxt(t ? tLeft(t) : dur.m * 60)}</div>
+                            <p>{t && t.done ? L(T.tmrEnd) : en ? `The recipe says ${dur.txt}.` : `Recept kaže ${dur.txt}.`}</p>
+                            {!t ? (
+                                <button type="button" className="fz-btn fz-btn--p" onClick={() => tmrGo(kit.id, s, dur.m, (en ? "Step " : "Korak ") + (s + 1) + " · " + kd.ti)}>
+                                    {L(T.tmrGo)}
+                                </button>
+                            ) : (
+                                <button type="button" className={"fz-btn " + (t.done ? "fz-btn--p" : "fz-btn--g")} onClick={() => tmrOff(t.k)}>
+                                    {L(t.done ? T.tmrOff : T.tmrStop)}
+                                </button>
+                            )}
+                            {!t && <p className="fz-kit-tcs">{L(T.tmrBg)}</p>}
+                        </div>
+                    )}
+                </>
+            )
+            dock = (
+                <div className="fz-kit-dock two">
+                    <button type="button" className="fz-btn fz-btn--g" onClick={() => setS(s - 1)}>
+                        {L(T.kitBack)}
+                    </button>
+                    <button type="button" className="fz-btn fz-btn--p" onClick={() => setS(s + 1)}>
+                        {L(s === n - 1 ? T.kitFin : T.kitNext)}
+                    </button>
+                </div>
+            )
+        } else {
+            const facts: [string, string][] = [...(kd.amt ? ([[L(T.kitDaily), kd.amt]] as [string, string][]) : []), ...kd.st.map((x) => { const i = x.indexOf(":"); return (i > 0 ? [x.slice(0, i), x.slice(i + 1).trim()] : [x, ""]) as [string, string] })]
+            body = (
+                <div className="fz-kit-done">
+                    <div className="fz-kit-ok">
+                        <Ico d={I.check} s={46} w={3} />
+                    </div>
+                    <h2>{L(T.kitDoneH)}</h2>
+                    {facts.length > 0 && (
+                        <div className="fz-kit-facts">
+                            {facts.map(([a, b], i) => (
+                                <div key={i}>
+                                    <span>{a}</span>
+                                    <b>{b}</b>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <span className="fz-kit-hand">{L(T.kitNote)}</span>
+                </div>
+            )
+            dock = (
+                <div className="fz-kit-dock">
+                    <button type="button" className="fz-btn fz-btn--p" onClick={closeKit}>
+                        {L(T.kitToRec)}
+                    </button>
+                </div>
+            )
+        }
+        return (
+            <div className="fz-kit" role="dialog" aria-modal="true" aria-label={kd.ti}>
+                <div className="fz-kit-top">
+                    <button type="button" className="fz-kit-x" aria-label={L(T.close)} onClick={closeKit}>
+                        <Ico d={I.x} s={20} w={2.4} />
+                    </button>
+                    {awake && <span className="fz-kit-awake">{L(T.kitAwake)}</span>}
+                </div>
+                <div className="fz-kit-ti">{kd.ti}</div>
+                <div className="fz-kit-prog" aria-hidden="true">
+                    {[-1, ...kd.steps.map((_, i) => i)].map((i) => (
+                        <i key={i} className={i <= s ? "on" : undefined} />
+                    ))}
+                </div>
+                {others.length > 0 && (
+                    <div className="fz-kit-tms">
+                        {others.map((t) => (
+                            <button key={t.k} type="button" className={t.done ? "end" : undefined} onClick={() => (t.id === kit.id ? setS(t.st) : (go({ p: "recipe", id: t.id }), setKitS({ id: t.id, s: t.st })))}>
+                                {t.done ? "⏰" : "⏱"} {clockTxt(tLeft(t))} · {t.ti}
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <div className="fz-kit-body">{body}</div>
+                {dock}
+            </div>
+        )
+    })()
+    /* running timers stay in a corner when the cooking view is closed; a tap goes back to that step */
+    const tmrDock =
+        !kit && tmr.length > 0 ? (
+            <div className="fz-tmrs" aria-live="polite">
+                {tmr.map((t) => (
+                    <button key={t.k} type="button" className={t.done ? "end" : undefined} onClick={() => (go({ p: "recipe", id: t.id }), openKit(t.id, t.st))}>
+                        {t.done ? "⏰ " + L(T.tmrEnd) : "⏱ " + clockTxt(tLeft(t))} · {t.ti}
+                    </button>
+                ))}
+            </div>
+        ) : null
 
     /* ---------- meal builder ---------- */
 
@@ -14377,7 +15182,7 @@ export default function FreshysSite(props: Props) {
     const lRec = (rid: string) => {
         const cur = RECIPES.find((r) => r.id === rid)
         if (cur) return { t: L(cur.t), img: cur.img, pos: cur.pos }
-        const c = catalog ? catalog.find((r) => cId(r) === rid) : undefined
+        const c = catalog ? catalog.find((r) => catIs(r, rid)) : undefined
         return c ? { t: cTitle(c), img: cImg(c, 256), pos: undefined } : null
     }
     lst.items.forEach((it) => {
@@ -14392,7 +15197,7 @@ export default function FreshysSite(props: Props) {
             })
             return
         }
-        const c = catalog ? catalog.find((r) => cId(r) === it.rid) : undefined
+        const c = catalog ? catalog.find((r) => catIs(r, it.rid)) : undefined
         if (!c) {
             if (!catalog) lWait = true
             return
@@ -14515,7 +15320,7 @@ export default function FreshysSite(props: Props) {
                         {ls.map((x) => {
                             const enL = lang === "en" || !r.ih[x.i]
                             const em = iconOf(x.en)
-                            const ws = r.w ? Object.keys(r.w).filter((k) => r.w![k].includes(x.i)) : []
+                            const ws = r.w ? Object.keys(r.w).filter((k) => !!T.warnC[k] && r.w![k].includes(x.i)) : []
                             return (
                                 <li key={x.i}>
                                     {em ? <Em n={em} /> : <span className="dot" aria-hidden="true" />}
@@ -15239,10 +16044,10 @@ export default function FreshysSite(props: Props) {
     )
 
     return (
-        <div ref={rootRef} className="fz" lang={lang} style={{ ...style }}>
+        <div ref={rootRef} className={"fz" + (app ? " is-app" : "")} lang={lang} style={{ ...style }}>
             <style>{CSS}</style>
             <div className="fz-in">
-                {!LIVE && (
+                {!LIVE && !dash && (
                 <div className="fz-bar fz-noprint">
                         <div className="fz-wrap">
                             <span>
@@ -15255,9 +16060,12 @@ export default function FreshysSite(props: Props) {
                         </div>
                     </div>
                 )}
-                {nav}
-                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "plan" ? planPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? (ACCT ? acctPage : home) : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
-                {footer}
+                {dash ? dashNav : app ? appNav : nav}
+                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "plan" ? planPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? (ACCT ? acctPage : home) : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : app ? appHome : home}</main>
+                {!dash && !app && footer}
+                {app && tabBar}
+                {kitView}
+                {tmrDock}
             </div>
         </div>
     )
