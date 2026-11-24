@@ -649,7 +649,7 @@ const T = {
     weekH: X("This week's recipes", "Recepti ovog tjedna"),
     weekSub: X("Cook them at home, or order the complete version.", "Skuhaj ih kod kuće ili naruči cijeli obrok."),
     allR: X("All recipes", "Svi recepti"),
-    cook: X("Cook", "Skuhaj"),
+    cook: X("Make it", "Napravi"),
     twoH: X("Cook it yourself, or we cook it.", "Skuhaj ga ti ili ga skuhamo mi."),
     twoSub: X("The same dishes, two ways. At home they are toppers. From our kitchen they are complete meals.", "Ista jela, na dva načina. Kod kuće su dodatak. Iz naše kuhinje su cijeli obroci."),
     cookT: X("Cook it at home", "Skuhaj kod kuće"),
