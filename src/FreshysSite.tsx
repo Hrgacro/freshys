@@ -2229,6 +2229,57 @@ const saveFile = (name: string, data: BlobPart, type: string) => {
     a.remove()
     setTimeout(() => URL.revokeObjectURL(u), 5000)
 }
+/* ---------- the portfolio's "Try the dashboard": Rex and Mici with a few weeks of notes, dated from today (concept site only) ---------- */
+const demoStore = (now: Date, en: boolean): PStore => {
+    const d = (k: number) => ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() + k))
+    const at = (k: number, h = 9) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + k, h).getTime()
+    const tx = (e: string, h: string) => (en ? e : h)
+    let n = 0
+    const E = (pet: string, t: string, k: number, x: object) => ({ id: "dm" + ++n, pet, t, d: d(k), at: at(k) + n, ...x })
+    const rex: Pet = { ...PD0, id: "rex", sp: 0, name: "Rex", by: now.getFullYear() - 5, bm: 3, bk: 1, b1: 286, b2: 343, size: 2, kg: 37.2, body: 2, kc100: "350", gday: "300", goal: 35, gb: 2, made: d(-57), tr: ["playful", "greedy", "brave"], fav: tx("his ball and the sofa", "lopticu i kauč"), since: now.getFullYear() - 5 + "-05", bday: 14, q: tx("One more walk?", "Još jedna šetnja?") }
+    const mici: Pet = { ...PD0, id: "mici", sp: 1, name: "Mici", sex: 1, by: now.getFullYear() - 7, bm: 5, kg: 4.6, body: 1, made: d(-173) }
+    const log = [
+        E("rex", "start", -57, { kg: 40.5, body: 2 }), E("rex", "w", -50, { kg: 40.0 }), E("rex", "w", -43, { kg: 39.6 }), E("rex", "w", -36, { kg: 39.2 }), E("rex", "w", -29, { kg: 38.9 }), E("rex", "w", -22, { kg: 38.5 }),
+        E("rex", "par", -51, { ti: tx("Tick and flea tablet", "Tableta protiv krpelja i buha"), nx: d(33) }),
+        E("rex", "vac", -32, { ti: tx("rabies", "bjesnoća"), nx: d(333) }),
+        E("rex", "ill", -19, { ti: tx("Diarrhoea", "Proljev"), tx: tx("Ate something in the yard. Fine again the next day.", "Pojeo nešto u dvorištu. Sutradan sve normalno."), st: 2 }),
+        E("rex", "vet", -15, { kg: 38.0, ti: tx("weight check", "kontrola težine"), tx: tx("Same food, check again in a month.", "Nastaviti isto, kontrola za mjesec dana.") }),
+        E("rex", "w", -8, { kg: 37.6 }), E("rex", "b", -8, { body: 2, tx: tx("His waist is starting to show.", "Struk se počinje vidjeti.") }),
+        E("rex", "inj", -3, { ti: tx("Cut on the front left paw", "Posjekotina na šapi, prednja lijeva"), tx: tx("Stepped on glass in the park. Rinsing and bandaging.", "Stao je na staklo u parku. Ispiremo i previjamo."), st: 1, nx: d(4) }),
+        E("rex", "w", -1, { kg: 37.2 }),
+        E("mici", "start", -173, { kg: 4.7, body: 1 }), E("mici", "w", -112, { kg: 4.6 }), E("mici", "w", -51, { kg: 4.6 }), E("mici", "w", -7, { kg: 4.6 }),
+        E("mici", "ill", -18, { ti: tx("Threw up a hairball", "Povraćala loptice dlake"), st: 2 }), E("mici", "vac", -40, { nx: d(325) }),
+    ]
+    const ck = [-7, -6, -5, -4, -3, -2].map((k) => ({ pet: "rex", d: d(k), a: 0, e: k >= -3 ? 2 : 1, p: 0, at: at(k, 8) }))
+    const M = (k: number, tm: string, kind: number, ti: string, src: string, u: string, q: number, kc: number) => ({ id: "dm" + ++n, pet: "rex", d: d(k), tm, at: at(k) + n, k: kind, ti, g: u === "g" ? q : 0, kc, u, q, src })
+    const CUR = (k: number, tm: string, g: number) => M(k, tm, 0, "", "cur", "g", g, Math.round(g * 3.5))
+    const W = (k: number, km: number, min: number) => ({ id: "dm" + ++n, pet: "rex", d: d(k), at: at(k) + n, km, min })
+    const raw = {
+        v: 1, cur: "rex", pets: [rex, mici], log, ck, rem: 3, pt: d(0), pg: 0,
+        fd: [
+            { id: "f1", n: tx("Dry food for adult dogs", "Suha hrana za odrasle pse"), t: 0, kc: 360, u: "g", at: at(-60) },
+            { id: "f2", n: tx("Wet food, chicken", "Mokra hrana, piletina"), t: 1, kc: 95, u: "g", at: at(-60) + 1 },
+        ],
+        ml: [
+            CUR(0, "07:30", 160), M(0, "12:10", 3, tx("Fruit rings", "Voćni kolutići"), "r:fruit-rings", "pc", 1, 48),
+            CUR(-1, "07:40", 160), M(-1, "18:30", 1, tx("Turkey and apple", "Puretina i jabuka"), "r:turkey-apple", "ml", 250, 228), M(-1, "15:00", 2, tx("A piece of carrot", "Komadić mrkve"), "", "g", 30, 0),
+            CUR(-2, "07:35", 160), M(-2, "18:20", 2, tx("Wet food, chicken", "Mokra hrana, piletina"), "fd:f2", "g", 400, 380),
+            CUR(-3, "07:30", 160), M(-3, "18:40", 2, tx("Dry food for adult dogs", "Suha hrana za odrasle pse"), "fd:f1", "g", 120, 432),
+            CUR(-5, "07:30", 160), CUR(-5, "18:30", 150), CUR(-6, "08:00", 160), CUR(-6, "19:00", 160),
+        ],
+        wk: [W(0, 2.4, 35), W(-1, 3.1, 45), W(-1, 1.2, 15), W(-4, 2.8, 40), W(-6, 4.5, 60), W(-8, 2, 30), W(-9, 0, 25), W(-12, 3, 0), W(-15, 2.2, 30), W(-17, 1.5, 20), W(-20, 2.6, 35)],
+        md: [
+            { id: "md1", pet: "rex", ti: tx("Antibiotic", "Antibiotik"), rx: tx("As the vet prescribed, with food", "Kako je propisao veterinar, uz hranu"), d0: d(-3), d1: d(4), tms: ["08:00", "20:00"], at: at(-3) },
+            { id: "md2", pet: "rex", ti: tx("Ear drops", "Kapi za uši"), rx: tx("In the left ear, in the evening", "U lijevo uho, navečer"), d0: d(-10), d1: "", tms: ["21:00"], at: at(-10) },
+        ],
+        dz: [{ med: "md1", d: d(0), tm: "08:00", at: at(0, 8) }, { med: "md1", d: d(-1), tm: "08:00", at: at(-1, 8) }, { med: "md1", d: d(-1), tm: "20:00", at: at(-1, 20) }],
+        dy: [
+            { id: "dy1", pet: "rex", ti: tx("The day Rex came home", "Dan kad je Rex došao kući"), d: now.getFullYear() - 5 + "-05-" + String(Math.min(28, now.getDate())).padStart(2, "0"), y: 1, at: at(-60) },
+            { id: "dy2", pet: "rex", ti: tx("Dog show in Đakovo", "Izložba pasa u Đakovu"), d: d(19), y: 0, at: at(-60) + 1 },
+        ],
+    }
+    return storeClean(raw) as PStore
+}
 const readStore = (now: Date): PStore | null => {
     try {
         const s = storeClean(JSON.parse(window.localStorage.getItem(PETS_KEY) || "null"))
@@ -2996,6 +3047,8 @@ const scaleLine = (s: string, k: number, lang: Lang): string => {
     rest = rest.replace(/\(([^)]*)\)/g, (all, inner: string) =>
         "(" + inner.replace(/(\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,](\d+))?(\s?(?:mg|g|ml|kg|l)\b)/g, (x: string, a: string, b: string | undefined, u: string) => {
             const v = parseFloat(a.replace(/[.,](?=\d{3}\b)/g, "") + (b ? "." + b : "")) * k
+            const un = u.trim()
+            if ((un === "g" || un === "ml") && v >= 1000) return trimNum(nf(Math.round(v / 100) / 10, lang, 1)) + (u.startsWith(" ") ? " " : "") + (un === "g" ? "kg" : "l")
             return nf(Math.round(v), lang) + u
         }) + ")"
     )
@@ -3151,6 +3204,16 @@ const DAY_SWAP: Record<string, number[]> = {
 }
 /* Recipes a day in words people use: ¼, ⅓, ½, ⅔, ¾, then 1, 1½, 2… */
 const FRACS: [number, string][] = [[0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, "1"]]
+/* a recipe counts as enough for a day only when it covers the day: at most 3 % short (rounding), never 10 % */
+const SHORT = 0.97
+/* how many recipes to make when one isn't enough: up to the next quarter, never down ("1¼", not "1") */
+const upFrac = (f: number) => {
+    const q = Math.ceil(f * 4 - 1e-6) / 4
+    const w = Math.floor(q), r = q - w
+    return (w || "") + (r === 0.25 ? "¼" : r === 0.5 ? "½" : r === 0.75 ? "¾" : "")
+}
+/* whole recipes for one day when one isn't enough, the same count "Za koliko dana kuhaš?" uses */
+const timesDay = (f: number) => Math.max(2, Math.ceil(f - (1 / SHORT - 1)))
 const fracTxt = (f: number) => {
     if (f > 1.12) { const h = Math.round(f * 2) / 2; return (Math.floor(h) || "") + (h % 1 ? "½" : "") }
     let best = FRACS[0]
@@ -3179,7 +3242,7 @@ const fl5 = (v: number) => Math.floor(v / 5) * 5
 
 /* All other recipes from mydogrecipe.com (used with permission), amounts converted to metric.
    Loaded only when the recipes page or one of these recipes is opened. */
-const CAT_URL = "https://framerusercontent.com/assets/z9XCcHe2cNTUqWF0m7JZtSOSlJU.json"
+const CAT_URL = "https://framerusercontent.com/assets/Rd5VKFRzvKCCiW94Gyl6AleXeY.json"
 const IMG_BASE = "https://framerusercontent.com/images/"
 type CKc = { p: "ml" | "pc" | "batch"; a: number; k: number; w?: string; we?: [string, string]; s?: "u" }
 type CRec = {
@@ -3704,9 +3767,12 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 @media (hover:hover){.fz-links button:hover{color:var(--ink)}}
 .fz-links button[aria-current="page"]{color:var(--ink);font-weight:600}
 .fz-nr{display:flex;align-items:center;gap:12px;flex:none}
-.fz-lang{display:flex;padding:3px;border-radius:999px;background:var(--bg2)}
-.fz-lang button{padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.2}
-.fz-lang button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.fz-lang{display:flex;align-items:center;gap:2px;color:var(--ink2)}
+.fz-lang svg{margin-right:4px;flex:none}
+.fz-lang i{width:1px;height:14px;background:var(--line);margin:0 2px}
+.fz-lang button{padding:6px 5px;border-radius:8px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.2}
+@media (hover:hover){.fz-lang button:hover{color:var(--ink)}}
+.fz-lang button[aria-pressed="true"]{color:var(--ink)}
 .fz-burger{display:none;width:40px;height:40px;border-radius:12px;align-items:center;justify-content:center}
 @media (hover:hover){.fz-burger:hover{background:var(--bg2)}}
 .fz-drop{border-top:1px solid var(--line);padding:8px 0 16px}
@@ -4240,8 +4306,8 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-soon .fz-lead+.fz-lead{margin-top:14px}
 .fz-soon .fz-ctas{margin-top:30px}
 .fz-soon__art{position:relative;justify-self:center;padding:18px 26px 0;transform:rotate(-3deg)}
-.fz-nw{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:99px;background:var(--or);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.02em;line-height:1.4;vertical-align:5px;transform:rotate(6deg)}
-.fz-nw--s{background:var(--sky0);color:var(--skyInk);transform:rotate(-4deg)}
+.fz-nw{display:inline-block;margin-left:7px;padding:2px 7px;border-radius:99px;background:var(--or);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.03em;line-height:1.35;vertical-align:2px}
+.fz-nw--s{background:var(--sky0);color:var(--skyInk)}
 .fz-cart{position:relative;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:none}
 .fz-cart[aria-current="page"]{background:var(--bg2)}@media (hover:hover){.fz-cart:hover{background:var(--bg2)}}
 .fz-cart .n{position:absolute;right:0;top:0;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--or);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
@@ -4998,9 +5064,10 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 @container fz (max-width:600px){.fz-pluspill{padding:5px 11px!important;font-size:14px}}
 .fz-logo.is-plus{display:inline-flex;align-items:center;gap:8px}
 .fz-logo-plus{display:inline-block;padding:4px 8px 3px;border-radius:999px;background:var(--g);color:#fff;font-family:inherit;font-size:11.5px;font-weight:700;line-height:1;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-.fz-nav .fz-nl{gap:26px}.fz-nav .fz-links{gap:20px}
-@container fz (max-width:980px){.fz-links button:nth-last-child(-n+3){display:none}}
-@container fz (max-width:1200px){.fz-links button:nth-last-child(-n+2){display:none}}
+.fz-nav .fz-nl{gap:52px}.fz-nav .fz-links{gap:36px}.fz-nav .fz-nr{gap:20px}
+@container fz (max-width:1200px){.fz-nav .fz-nl{gap:40px}.fz-nav .fz-links{gap:28px}}
+@container fz (max-width:1060px){.fz-nav .fz-nl{gap:28px}.fz-nav .fz-links{gap:20px}.fz-nav .fz-nr{gap:12px}}
+@container fz (max-width:1010px){.fz-nav .fz-links button:nth-child(4){display:none}}
 /* inline text links in sentences: a taller hit area (24 px or more) without moving the text */
 .fz-pt-ft .fz-link,.fz-pt-src .fz-link{padding:4px 0}
 .fz-box .t .fz-link{padding:3px 0}
@@ -5519,6 +5586,20 @@ export default function FreshysSite(props: Props) {
     useEffect(() => {
         if (isCanvas || typeof window === "undefined") return
         const now = new Date()
+        /* "Try the dashboard" from the portfolio (concept only): sample pets with Plus on, unless the visitor already keeps pets here */
+        if (!LIVE && (/^#\/demo\b/.test(window.location.hash) || new URLSearchParams(window.location.search).has("demo"))) {
+            const mine = readStore(now)
+            let ln: string | null = null
+            try {
+                ln = window.localStorage.getItem("fz-lang")
+            } catch (e) {}
+            const en = (ln || language) !== "hr"
+            if (!mine || !mine.pets.length) writeStore(demoStore(now, en))
+            else if (plusLeft(mine, now) <= 0) writeStore({ ...mine, pt: ymd(now) })
+            try {
+                window.history.replaceState(window.history.state, "", window.location.pathname + "#/pets")
+            } catch (e) {}
+        }
         const s = readStore(now)
         if (s) {
             setPs(s)
@@ -11883,7 +11964,7 @@ export default function FreshysSite(props: Props) {
                         {isPlus && <span className="fz-logo-plus">Plus</span>}
                     </button>
                     <nav className="fz-links" aria-label="Freshy's">
-                        {navLinks.map(([t, f, on, nw, soon]) => (
+                        {navLinks.slice(0, 4).map(([t, f, on, nw, soon]) => (
                             <button key={t} type="button" onClick={f} aria-current={on ? "page" : undefined}>
                                 {t}
                                 {nw && <span className="fz-nw">{L(T.newB)}</span>}
@@ -11899,11 +11980,16 @@ export default function FreshysSite(props: Props) {
                         </button>
                     )}
                     <div className="fz-lang" role="group" aria-label="Language">
-                        <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>
-                            EN
-                        </button>
-                        <button type="button" aria-pressed={lang === "hr"} onClick={() => setLang("hr")}>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
+                        </svg>
+                        <button type="button" aria-pressed={lang === "hr"} onClick={() => setLang("hr")} lang="hr">
                             HR
+                        </button>
+                        <i aria-hidden="true" />
+                        <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")} lang="en">
+                            EN
                         </button>
                     </div>
                     {ACCT && (
@@ -11999,7 +12085,7 @@ export default function FreshysSite(props: Props) {
     }
     /* how long one batch lasts, in a few words (d = days) */
     const daysShort = (d: number) => {
-        if (d < 0.9) return lang === "en" ? fracTxt(1 / d) + " batches a day" : fracTxt(1 / d) + " recepta za dan"
+        if (d < SHORT) return lang === "en" ? upFrac(1 / d) + " batches a day" : upFrac(1 / d) + " recepta za dan"
         const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
         if (lang === "en") return "one batch lasts " + (h % 1 ? Math.floor(h) + "½" : h) + (h === 1 ? " day" : " days")
         return "jedan recept za " + (h === 1.5 ? "dan i pol" : h % 1 ? Math.floor(h) + " i pol dana" : h + " " + plHr(h, ["dan", "dana", "dana"]))
@@ -13001,7 +13087,7 @@ export default function FreshysSite(props: Props) {
     }
     /* how long one recipe lasts as the whole day's food (d = days) */
     const lastsTxt = (d: number) => {
-        if (d < 0.9) return ""
+        if (d < SHORT) return ""
         const h = d < 3 ? Math.round(d * 2) / 2 : Math.round(d)
         const n = h === 1.5 ? (lang === "en" ? "a day and a half" : "dan i pol") : h === 2.5 ? (lang === "en" ? "two and a half days" : "dva i pol dana") : lang === "en" ? h + (h === 1 ? " day" : " days") : h + " " + plHr(h, ["dan", "dana", "dana"])
         return (lang === "en" ? "One recipe lasts about " + n + "." : "Jedan recept je dovoljan za oko " + n + ".") + (d > 3 ? (lang === "en" ? " Freeze what you won't use in time." : " Što nećeš potrošiti na vrijeme, zamrzni.") : "")
@@ -13044,7 +13130,7 @@ export default function FreshysSite(props: Props) {
                 {bigAbout(v, u + " " + L(T.aDay))}
                 {sh === 1 && <p className="t">{twiceTxt(ml, wt)}</p>}
                 {l && <p className="t">{l}</p>}
-                {dd > 0 && dd < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(1 / dd) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(1 / dd) + " recepta."}</p>}
+                {dd > 0 && dd < SHORT && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + timesDay(1 / dd) + " times the recipe." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + timesDay(1 / dd) + " puta veći recept."}</p>}
                 {mealTail(sh)}
             </>
         )
@@ -13082,8 +13168,8 @@ export default function FreshysSite(props: Props) {
         return (
             <>
                 {bigAbout(<Num v={n} lang={lang} />, word(n) + " " + L(T.aDay))}
-                {yMax > 0 && yMax / n >= 0.9 && <p className="t">{lastsTxt(yMax / n)}</p>}
-                {yMax > 0 && yMax / n < 0.9 && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + fracTxt(n / yMax) + " recipes." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + fracTxt(n / yMax) + " recepta."}</p>}
+                {yMax > 0 && yMax / n >= SHORT && <p className="t">{lastsTxt(yMax / n)}</p>}
+                {yMax > 0 && yMax / n < SHORT && <p className="t">{lang === "en" ? "One recipe isn't enough for a day: make " + timesDay(n / yMax) + " times the recipe." : "Jedan recept nije dovoljan za jedan dan: skuhaj " + timesDay(n / yMax) + " puta veći recept."}</p>}
                 {mealTail(sh)}
             </>
         )
@@ -13174,7 +13260,7 @@ export default function FreshysSite(props: Props) {
         const ds = (frTxt.match(/\d+/g) || []).map((v) => parseInt(v, 10))
         const fLo = ds[0] || 3
         const fHi = ds[ds.length - 1] || 3
-        const mult = Math.max(1, Math.ceil(n / info.d1 - 0.1))
+        const mult = Math.max(1, Math.ceil(n / info.d1 - (1 / SHORT - 1)))
         const days = Math.max(n, info.ml || info.n ? Math.floor(mult * info.d1 + 0.1) : Math.round(mult * info.d1))
         return { n, mult, days, fLo, fHi }
     }
