@@ -776,6 +776,7 @@ mealNote: X("This recipe hasn't been checked as a complete diet. If your dog eat
     myDog: X("My pets", "Moji ljubimci"),
     pfH: X("My pets", "Moji ljubimci"),
     pfLead: X("A few questions about your pet. Then this page keeps track of weight and health, and for a dog the scale and every recipe show amounts just for them.", "Nekoliko pitanja o tvom ljubimcu. Nakon toga ova stranica prati težinu i zdravlje, a za psa vaga i svi recepti pokazuju količine baš za njega."),
+    pfLeadDog: X("A few questions about your dog. Then this page keeps track of weight and health, and the scale and every recipe show amounts just for them.", "Nekoliko pitanja o tvom psu. Nakon toga ova stranica prati težinu i zdravlje, a vaga i svi recepti pokazuju količine baš za njega."),
     pfSaved: X("Saved only in this browser. Nothing is sent anywhere.", "Spremljeno samo u ovom pregledniku. Nigdje se ne šalje."),
     pfStep: X("of", "od"),
     pfBack: X("Back", "Natrag"),
@@ -5424,6 +5425,8 @@ interface Props {
 export default function FreshysSite(props: Props) {
     const { style, language = "en", startPage = "home", backLink = "/", backLabel = "Tonči Hrgović · Portfolio", site = "concept" } = props
     const LIVE = site === "live"
+    /* accounts (Firebase) only on freshysfoods.com: the portfolio copy never signs anyone up */
+    const ACCT = LIVE
     const isCanvas = RenderTarget.current() === RenderTarget.canvas
     const [lang, setLangState] = useState<Lang>(language === "hr" ? "hr" : "en")
     const [page, setPage] = useState<Page>({ p: startPage })
@@ -5572,6 +5575,15 @@ export default function FreshysSite(props: Props) {
         try {
             const s = window.localStorage.getItem("fz-lang")
             if (s === "en" || s === "hr") setLangState(s)
+            /* ?lang=en from a link (the portfolio): that language, remembered like the switch, and the parameter leaves the address */
+            const ql = new URLSearchParams(window.location.search).get("lang")
+            if (ql === "en" || ql === "hr") {
+                setLangState(ql)
+                const u = new URL(window.location.href)
+                u.searchParams.delete("lang")
+                window.history.replaceState(window.history.state, "", u.pathname + u.search + u.hash)
+                window.localStorage.setItem("fz-lang", ql)
+            }
             const fd = window.localStorage.getItem("fz-feed")
             if (fd === "1" || fd === "2") setFeedS(+fd)
             const ck = parseInt(window.localStorage.getItem("fz-cook") || "0", 10)
@@ -6277,7 +6289,7 @@ export default function FreshysSite(props: Props) {
         </>
     )
     const pfSteps = (v: Pet) => [
-        ...(newPet ? ["sp"] : []),
+        ...(newPet && catsOk ? ["sp"] : []),
         "name",
         "pic",
         "tr",
@@ -6587,14 +6599,15 @@ export default function FreshysSite(props: Props) {
                                 <b>{yourPet(v)}</b>
                             </div>
                         </div>
-                        {row(
-                            T.ptSpK,
-                            <>
-                                {seg(v.sp === 2 ? T.ptSpSeg : T.ptSpSeg.slice(0, 2), v.sp, (i) => setE({ sp: i }), T.ptSpK)}
-                                {v.sp === 2 && <input className="fz-inp" style={{ marginTop: 10 }} value={v.kind} maxLength={30} placeholder={L(T.ptKindPh)} aria-label={L(T.ptKind)} onChange={(e) => setE({ kind: e.target.value })} />}
-                            </>,
-                            "sp"
-                        )}
+                        {(catsOk || v.sp !== 0) &&
+                            row(
+                                T.ptSpK,
+                                <>
+                                    {seg(v.sp === 2 ? T.ptSpSeg : T.ptSpSeg.slice(0, 2), v.sp, (i) => setE({ sp: i }), T.ptSpK)}
+                                    {v.sp === 2 && <input className="fz-inp" style={{ marginTop: 10 }} value={v.kind} maxLength={30} placeholder={L(T.ptKindPh)} aria-label={L(T.ptKind)} onChange={(e) => setE({ kind: e.target.value })} />}
+                                </>,
+                                "sp"
+                            )}
                         {row(T.pfName, fNameIn(v, setE, "fz-pe-n"), "n")}
                         {row(T.ptPhotos, fPic(v, setE, true), "pic")}
                         {row(T.ptTrK, fTr(v, setE, "fz-pe-"), "tr")}
@@ -6662,6 +6675,8 @@ export default function FreshysSite(props: Props) {
     /* Freshy's Plus: days of the free trial left; free users go to the Plus page for the extras */
     const plusN = plusLeft(ps, NOW)
     const isPlus = !LIVE && plusN > 0
+    /* cats only in Plus: the food site is for dogs, so without Plus a new pet is a dog (a cat added earlier stays) */
+    const catsOk = isPlus
     /* live site (freshysfoods.com): no Freshy's Plus until the apps; only the free part of My pets */
     const goPlus = () => { if (!LIVE) go({ p: "plus" }) }
     const vetOk = isPlus || !LIVE
@@ -7373,6 +7388,7 @@ export default function FreshysSite(props: Props) {
     }
     /* under the title of My pets: confirm the e-mail, saved in the account, or the offer to save pets that are only on this device */
     const acctBar = () => {
+        if (!ACCT) return null
         if (acct)
             return (
                 <>
@@ -7496,7 +7512,7 @@ export default function FreshysSite(props: Props) {
             </div>
         </section>
     )
-    const needAuth = !acct && !guest && !(ps && ps.pets.length)
+    const needAuth = ACCT && !acct && !guest && !(ps && ps.pets.length)
 
     /* Privacy policy: what the account keeps, where and why (Firebase: Authentication and Firestore in Frankfurt; Vercel serves the site) */
     const privPage = (
@@ -11763,7 +11779,7 @@ export default function FreshysSite(props: Props) {
                         )}
                     </div>
                 )}
-                {(pmode === "wiz" || !curP) && <p className="fz-lead">{L(T.pfLead)}</p>}
+                {(pmode === "wiz" || !curP) && <p className="fz-lead">{L(catsOk ? T.pfLead : T.pfLeadDog)}</p>}
                 {pmode === "wiz" || !curP ? (
                     pfWizard()
                 ) : shell ? (
@@ -11890,9 +11906,11 @@ export default function FreshysSite(props: Props) {
                             HR
                         </button>
                     </div>
-                    <button type="button" className="fz-ac-nav" aria-current={page.p === "acct" ? "page" : undefined} onClick={() => go({ p: "acct" })}>
-                        {L(acct ? TA.myAcct : TA.login)}
-                    </button>
+                    {ACCT && (
+                        <button type="button" className="fz-ac-nav" aria-current={page.p === "acct" ? "page" : undefined} onClick={() => go({ p: "acct" })}>
+                            {L(acct ? TA.myAcct : TA.login)}
+                        </button>
+                    )}
                     <button type="button" className="fz-cart" aria-label={L(T.list) + (lCount ? " (" + lCount + ")" : "")} aria-current={page.p === "list" ? "page" : undefined} onClick={() => go({ p: "list" })}>
                         <Ico d={I.cart} s={21} />
                         {lCount > 0 && (
@@ -11928,9 +11946,11 @@ export default function FreshysSite(props: Props) {
                             {L(T.list)}
                             {lCount > 0 ? " (" + lCount + ")" : ""}
                         </button>
-                        <button type="button" onClick={() => go({ p: "acct" })} aria-current={page.p === "acct" ? "page" : undefined}>
-                            {L(acct ? TA.myAcct : TA.login)}
-                        </button>
+                        {ACCT && (
+                            <button type="button" onClick={() => go({ p: "acct" })} aria-current={page.p === "acct" ? "page" : undefined}>
+                                {L(acct ? TA.myAcct : TA.login)}
+                            </button>
+                        )}
                         <button type="button" className="fz-btn fz-btn--p" onClick={() => (SHOP ? orderPouch() : go({ p: "plan" }))}>
                             {L(SHOP ? T.cta1 : T.planCta)}
                         </button>
@@ -15074,7 +15094,7 @@ export default function FreshysSite(props: Props) {
                     </div>
                 )}
                 {nav}
-                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "plan" ? planPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? acctPage : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
+                <main>{page.p === "recipes" ? recipesPage : page.p === "recipe" ? (isCat ? catPage : recipePage) : page.p === "order" ? (SHOP ? orderPage : soonPage) : page.p === "build" ? buildPage : page.p === "list" ? listPage : page.p === "plan" ? planPage : page.p === "dog" ? (needAuth ? acctPage : dogPage) : page.p === "acct" ? (ACCT ? acctPage : home) : page.p === "privacy" ? privPage : page.p === "plus" ? (LIVE ? home : plusPage) : home}</main>
                 {footer}
             </div>
         </div>
