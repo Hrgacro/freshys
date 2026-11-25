@@ -1,0 +1,58 @@
+# Android aplikacija Freshy's za Google Play (Capacitor). Složi se sama kad se promijeni mapa aplikacija/, ili ručno:
+# Actions → Aplikacija Android → Run workflow. Bez tajni složi probnu aplikaciju (.apk) za instalaciju na vlastiti mobitel;
+# s ključem za potpis i paket za Google Play (.aab).
+name: Aplikacija Android
+on:
+  workflow_dispatch:
+    inputs:
+      verzija:
+        description: 'Verzija koju vide korisnici (npr. 1.0)'
+        default: '1.0'
+  push:
+    paths: ['aplikacija/**', '.github/workflows/aplikacija-android.yml']
+  pull_request:
+    paths: ['aplikacija/**', '.github/workflows/aplikacija-android.yml']
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aplikacija
+    env:
+      FRESHYS_VERSION: ${{ inputs.verzija || '1.0' }}
+      FRESHYS_BUILD: ${{ github.run_number }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      FRESHYS_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      FRESHYS_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      FRESHYS_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npx cap sync android
+      - name: Ključ za potpis (ako je postavljen)
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/freshys.jks"
+            echo "FRESHYS_KEYSTORE=$RUNNER_TEMP/freshys.jks" >> "$GITHUB_ENV"
+          fi
+      - name: Probna aplikacija (.apk)
+        run: cd android && chmod +x gradlew && ./gradlew --no-daemon assembleDebug
+      - name: Paket za Google Play (.aab)
+        if: env.FRESHYS_KEYSTORE != ''
+        run: cd android && ./gradlew --no-daemon bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: freshys-android
+          if-no-files-found: error
+          path: |
+            aplikacija/android/app/build/outputs/apk/debug/*.apk
+            aplikacija/android/app/build/outputs/bundle/release/*.aab

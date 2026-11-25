@@ -810,6 +810,7 @@ const T = {
     tmrGo: X("Start timer", "Pokreni timer"),
     tmrStop: X("Stop", "Zaustavi"),
     tmrEnd: X("Time's up", "Vrijeme je isteklo"),
+    tmrChan: X("Kitchen timer", "Minutnica"),
     tmrOff: X("Turn off", "Isključi"),
     tmrBg: X("Timers keep running while you do something else, and ring when the time is up.", "Timeri teku i dok radiš nešto drugo, a zazvone kad vrijeme istekne."),
     notDay: X("One batch isn't enough for a whole day.", "Jedan recept nije dovoljan za cijeli dan."),
@@ -2330,6 +2331,15 @@ const icsTimed = (doses: { id: string; d0: string; d1: string; tm: string; t: st
     return out.join("\r\n") + "\r\n"
 }
 const saveFile = (name: string, data: BlobPart, type: string) => {
+    /* in the Freshy's app (Capacitor) a web page cannot download files: the file goes to the phone's share menu instead
+       (save to Files, send by e-mail, open in the calendar) */
+    const P = typeof window !== "undefined" && (window as any).Capacitor ? (window as any).Capacitor.Plugins : null
+    if (P && P.Filesystem && P.Share && typeof data === "string") {
+        P.Filesystem.writeFile({ path: name, data, directory: "CACHE", encoding: "utf8" })
+            .then((r: any) => P.Share.share({ title: name, files: [r.uri] }))
+            .catch(() => {})
+        return
+    }
     const u = URL.createObjectURL(new Blob([data], { type }))
     const a = document.createElement("a")
     a.href = u
@@ -2704,7 +2714,7 @@ const TA = {
 /* privacy policy: who answers for the data (filled in by the owner before the account goes live) */
 const PRIV_WHO = "Tonči Hrgović"
 const PRIV_MAIL = "freshys.osijek@gmail.com"
-const PRIV_DATE = X("23 November 2026", "23. 11. 2026.")
+const PRIV_DATE = X("25 November 2026", "25. 11. 2026.")
 
 /* photos: IndexedDB, one blob per photo */
 let phDb: Promise<IDBDatabase> | null = null
@@ -4263,6 +4273,8 @@ position:relative;width:100%;overflow-x:clip;background:var(--bg);color:var(--in
 .fz-cook-p .fz-dbl{margin-top:12px}
 .fz-kitgo{width:100%;justify-content:center;margin-top:16px;height:52px;font-size:17px}
 .fz.is-app{--fz-tabh:86px}
+/* inside the Freshy's app (Capacitor) a web page cannot print */
+.fz.is-native .fz-prbtn{display:none!important}
 .fz.is-app main{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
 .fz.is-app .fz-nav{padding-top:env(safe-area-inset-top)}
 .fz-tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:75;max-width:560px;margin:0 auto;height:72px;border-radius:36px;background:rgba(255,254,250,.9);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 10px 30px -12px rgba(40,30,20,.35),inset 0 0 0 1px var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
@@ -6150,18 +6162,77 @@ export default function FreshysSite(props: Props) {
             if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400])
         } catch (e) {}
     }
-    /* in the app the phone itself rings at the end, also when it is locked (a notification at that time) */
+    /* in the app the phone itself rings at the end, also when it is locked (a notification at that time).
+       The first timer asks for notifications once. On Android the plugin would open the "Alarms & reminders" settings by itself on
+       every schedule while exact alarms are not allowed (Android 14+ default), so it is always told whether it may be exact; without
+       that permission the ring can come a few minutes late, and while the app is open the screen rings on time anyway. */
+    const lnPrep = useRef<Promise<{ ch: string; exact: boolean }> | null>(null)
     const tmrNative = (t: Tmr, on: boolean) => {
         const ln = capPl() && capPl().LocalNotifications
         if (!ln) return
         let h = 0
         for (let i = 0; i < t.k.length; i++) h = (h * 31 + t.k.charCodeAt(i)) % 900
         const nid = 7100 + h
-        try {
-            if (on) ln.schedule({ notifications: [{ id: nid, title: L(T.tmrEnd), body: t.ti, schedule: { at: new Date(t.end), allowWhileIdle: true } }] }).catch(() => {})
-            else ln.cancel({ notifications: [{ id: nid }] }).catch(() => {})
-        } catch (e) {}
+        if (!on) {
+            try {
+                ln.cancel({ notifications: [{ id: nid }] }).catch(() => {})
+            } catch (e) {}
+            return
+        }
+        const cap = (window as any).Capacitor
+        const ios = !!(cap && cap.getPlatform && cap.getPlatform() === "ios")
+        if (!lnPrep.current)
+            lnPrep.current = (async () => {
+                let ch = "",
+                    exact = ios
+                try {
+                    const st = await ln.checkPermissions()
+                    if (!st || st.display !== "granted") await ln.requestPermissions()
+                } catch (e) {}
+                if (!ios) {
+                    try {
+                        await ln.createChannel({ id: "freshys-minutnica", name: L(T.tmrChan), description: "", importance: 5, visibility: 1, vibration: true })
+                        ch = "freshys-minutnica"
+                    } catch (e) {}
+                    try {
+                        exact = ((await ln.checkExactNotificationSetting()) || {}).exact_alarm === "granted"
+                    } catch (e) {}
+                }
+                return { ch, exact }
+            })()
+        lnPrep.current
+            .then(({ ch, exact }) =>
+                ln.schedule({
+                    notifications: [
+                        Object.assign(
+                            { id: nid, title: L(T.tmrEnd), body: t.ti, isExactNotification: exact, schedule: { at: new Date(t.end), allowWhileIdle: true } },
+                            ch ? { channelId: ch } : {}
+                        ),
+                    ],
+                })
+            )
+            .catch(() => {})
     }
+    /* Android back button in the app: back through the pages, and from the first page the app goes to the background
+       (the App plugin without a listener swallows it, so the app could not be left) */
+    useEffect(() => {
+        const app = capPl() && capPl().App
+        if (!app || !app.addListener) return
+        let h: any = null
+        try {
+            const r = app.addListener("backButton", (ev: any) => {
+                if (ev && ev.canGoBack) window.history.back()
+                else if (app.minimizeApp) app.minimizeApp().catch(() => {})
+            })
+            if (r && r.then) r.then((x: any) => (h = x)).catch(() => {})
+            else h = r
+        } catch (e) {}
+        return () => {
+            try {
+                if (h && h.remove) h.remove()
+            } catch (e) {}
+        }
+    }, [])
     const tmrGo = (id: string, st: number, min: number, ti: string) => {
         try {
             const C = (window as any).AudioContext || (window as any).webkitAudioContext
@@ -8118,6 +8189,10 @@ export default function FreshysSite(props: Props) {
                         <p>
                             Možeš vidjeti, ispraviti i izbrisati svoje podatke, preuzeti kopiju (Moj račun, Preuzmi kopiju svojih podataka) i uložiti prigovor. Ako misliš da podatke obrađujemo protivno propisima, možeš se obratiti Agenciji za zaštitu osobnih podataka (azop.hr).
                         </p>
+                        <h2>Aplikacija</h2>
+                        <p>
+                            U aplikaciji Freshy's (Google Play i App Store) vrijedi isto. Minutnicu za kuhanje zakazuje sam mobitel i ništa se ne šalje. Aplikacija ne traži lokaciju ni kontakte. Kameru otvara samo kad sam snimiš sliku ljubimca, a slika ostaje kao i svaka druga koju dodaš.
+                        </p>
                         <h2>Kolačići</h2>
                         <p>Ne koristimo kolačiće. Prijava i ljubimci pamte se u spremištu preglednika (localStorage i IndexedDB) na tvom uređaju.</p>
                     </>
@@ -8145,6 +8220,10 @@ export default function FreshysSite(props: Props) {
                         <h2>Your rights</h2>
                         <p>
                             You can see, correct and delete your data, download a copy (My account, Download a copy of your data) and object. If you think we process data against the rules, you can contact the Croatian data protection authority (azop.hr).
+                        </p>
+                        <h2>The app</h2>
+                        <p>
+                            The same applies in the Freshy's app (Google Play and App Store). The phone schedules the cooking timer itself and nothing is sent. The app doesn't ask for your location or contacts. It only opens the camera when you take a photo of your pet yourself, and the photo is kept like any other you add.
                         </p>
                         <h2>Cookies</h2>
                         <p>We don't use cookies. Your log-in and pets are kept in the browser's storage (localStorage and IndexedDB) on your device.</p>
@@ -9917,7 +9996,7 @@ export default function FreshysSite(props: Props) {
                                 <input id="fz-pt-vm" className="fz-inp" type="email" inputMode="email" autoComplete="off" maxLength={120} value={p.vm} placeholder={L(T.ptVetMailPh)} onChange={(e) => saveProf({ ...p, vm: e.target.value.trim() })} />
                             </label>
                             <div className="fz-pt-sendb">
-                                <button type="button" className="fz-btn fz-btn--p fz-btn--sm" onClick={() => typeof window !== "undefined" && window.print()}>
+                                <button type="button" className="fz-btn fz-btn--p fz-btn--sm fz-prbtn" onClick={() => typeof window !== "undefined" && window.print()}>
                                     {ptIco("print", 17)}
                                     {L(T.ptPrint)}
                                 </button>
@@ -14181,7 +14260,7 @@ export default function FreshysSite(props: Props) {
                         {rec.tex && rec.tex !== "frozen" && <span className="fz-tag fz-tag--x">{L(T.tex[rec.tex])}</span>}
                         {methodChip(RMETA[rec.id])}
                         {listBtn(rec.id, bk)}
-                        <button type="button" className="fz-ch pr2 fz-noprint" onClick={() => typeof window !== "undefined" && window.print()}>
+                        <button type="button" className="fz-ch pr2 fz-noprint fz-prbtn" onClick={() => typeof window !== "undefined" && window.print()}>
                             <Ico d={I.print} s={16} />
                             {L(T.print)}
                         </button>
@@ -14577,7 +14656,7 @@ export default function FreshysSite(props: Props) {
                                 {cKind(r)}
                                 {methodChip(cMeta.get(r.id))}
                                 {listBtn(cId(r), km)}
-                                <button type="button" className="fz-ch pr2 fz-noprint" onClick={() => typeof window !== "undefined" && window.print()}>
+                                <button type="button" className="fz-ch pr2 fz-noprint fz-prbtn" onClick={() => typeof window !== "undefined" && window.print()}>
                                     <Ico d={I.print} s={16} />
                                     {L(T.print)}
                                 </button>
@@ -15571,7 +15650,7 @@ export default function FreshysSite(props: Props) {
                                         <Ico d={copied ? I.check : I.copy} s={18} />
                                         {L(copied ? T.lCopied : T.lCopy)}
                                     </button>
-                                    <button type="button" className="fz-btn fz-btn--g fz-btn--sm" onClick={() => typeof window !== "undefined" && window.print()}>
+                                    <button type="button" className="fz-btn fz-btn--g fz-btn--sm fz-prbtn" onClick={() => typeof window !== "undefined" && window.print()}>
                                         <Ico d={I.print} s={18} />
                                         {L(T.print)}
                                     </button>
@@ -16044,7 +16123,7 @@ export default function FreshysSite(props: Props) {
     )
 
     return (
-        <div ref={rootRef} className={"fz" + (app ? " is-app" : "")} lang={lang} style={{ ...style }}>
+        <div ref={rootRef} className={"fz" + (app ? " is-app" : "") + (app && typeof window !== "undefined" && (window as any).Capacitor && (window as any).Capacitor.isNativePlatform && (window as any).Capacitor.isNativePlatform() ? " is-native" : "")} lang={lang} style={{ ...style }}>
             <style>{CSS}</style>
             <div className="fz-in">
                 {!LIVE && !dash && (

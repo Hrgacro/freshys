@@ -1,0 +1,26 @@
+{
+  "appId": "com.freshysfoods.app",
+  "appName": "Freshy's",
+  "webDir": "www",
+  "backgroundColor": "#FBF7EF",
+  "server": {
+    "url": "https://www.freshysfoods.com/?app=1",
+    "allowNavigation": [
+      "www.freshysfoods.com",
+      "freshysfoods.com"
+    ],
+    "errorPath": "index.html"
+  },
+  "ios": {
+    "contentInset": "never"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_freshys",
+      "iconColor": "#2F5D3A"
+    }
+  }
+}
